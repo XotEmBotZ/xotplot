@@ -8,3 +8,22 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Meteorological & Scientific Data Files
+*.grib
+*.grib2
+*.gb*
+*.nc
+*.nc4
+*.netcdf
+*.hdf
+*.hdf5
+*.h5
+*.tif
+*.tiff
+*.dat
+*.bin
+*.tar
+*.gz
+*.zip
+*.bz2
