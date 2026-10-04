@@ -27,8 +27,6 @@ from PyQt6.QtWidgets import (
 )
 
 import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-import cartopy.io.shapereader as shpreader
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
@@ -46,7 +44,8 @@ from xotplot.constants import (
     DEFAULT_STATE_COLOR,
     REGION_CATEGORIES,
 )
-from xotplot.gui.cartopy_features import get_cached_feature, is_feature_cached, load_shapefile_geometries
+from xotplot.engine import build_crs, render_region_plot
+from xotplot.gui.cartopy_features import is_feature_cached
 from xotplot.gui.preferences_dialog import CartopyPreferencesDialog
 from xotplot.spec import (
     CustomShapefileSpec,
@@ -632,28 +631,7 @@ class ProjectionRegionView(QWidget):
             self.apply_projection()
 
     def get_selected_crs(self) -> Any:
-        c_lon = self.spin_central_lon.value()
-        c_lat = self.spin_central_lat.value()
-        sp1 = self.spin_sp1.value()
-        sp2 = self.spin_sp2.value()
-
-        if self._current_crs_id == "LambertConformal":
-            return ccrs.LambertConformal(
-                central_longitude=c_lon,
-                central_latitude=c_lat,
-                standard_parallels=(sp1, sp2),
-            )
-        elif self._current_crs_id == "PlateCarree":
-            return ccrs.PlateCarree(central_longitude=c_lon)
-        elif self._current_crs_id == "Mercator":
-            return ccrs.Mercator(central_longitude=c_lon, latitude_true_scale=c_lat)
-        elif self._current_crs_id == "NorthPolarStereo":
-            return ccrs.NorthPolarStereo(central_longitude=c_lon, true_scale_latitude=c_lat if c_lat != 0 else 70.0)
-        elif self._current_crs_id == "Orthographic":
-            return ccrs.Orthographic(central_longitude=c_lon, central_latitude=c_lat)
-        elif self._current_crs_id == "Robinson":
-            return ccrs.Robinson(central_longitude=c_lon)
-        return ccrs.PlateCarree()
+        return build_crs(self.to_spec().projection)
 
     def _on_scale_changed(self) -> None:
         self._sync_feature_checkboxes_with_cache()
@@ -701,211 +679,24 @@ class ProjectionRegionView(QWidget):
         self.apply_projection()
 
     def apply_projection(self) -> None:
-        """Render the map projection canvas with granular borders, features, and custom shapefiles."""
-        self.figure.clear()
-        crs_proj = self.get_selected_crs()
-        ax = self.figure.add_subplot(111, projection=crs_proj)
-
-        bg_color = "#ffffff"
-        fg_color = "#0f172a"
-
-        self.figure.patch.set_facecolor(bg_color)
-        ax.set_facecolor(bg_color)
-
-        # Region Extent
-        w = self.spin_west.value()
-        e = self.spin_east.value()
-        s = self.spin_south.value()
-        n = self.spin_north.value()
-
-        if self._current_crs_id not in ("Orthographic",):
-            try:
-                ax.set_extent([w, e, s, n], crs=ccrs.PlateCarree())
-            except Exception:
-                pass
-
-        # ---------------------------------------------------------------------
-        # Cartopy Features (Line-only, No Land/Sea fills, Skipped if not downloaded)
-        # Supports dedicated custom shapefile override for each individual feature!
-        # ---------------------------------------------------------------------
-        from cartopy.feature import ShapelyFeature
-
-        scale_map = {"110m (Coarse)": "110m", "50m (Medium)": "50m", "10m (High-Res)": "10m"}
-        chosen_scale = scale_map.get(self.combo_scale.currentText(), "50m")
-
-        # 1. Coastlines (custom shapefile override or Natural Earth)
-        if self.chk_coast.isChecked():
-            if self._custom_shp_coast and Path(self._custom_shp_coast).exists():
-                geoms = load_shapefile_geometries(self._custom_shp_coast)
-                if geoms:
-                    feat = ShapelyFeature(
-                        geoms, crs=ccrs.PlateCarree(),
-                        edgecolor=self._coast_color, facecolor="none",
-                        linewidth=self.spin_coast_width.value(), zorder=3,
-                    )
-                    ax.add_feature(feat)
-            else:
-                coast_feat = get_cached_feature(
-                    "physical", "coastline", chosen_scale,
-                    edgecolor=self._coast_color,
-                    linewidth=self.spin_coast_width.value(),
-                    zorder=3,
-                )
-                if coast_feat is not None:
-                    ax.add_feature(coast_feat)
-
-        # 2. Country Borders (custom shapefile override or Natural Earth)
-        if self.chk_borders.isChecked():
-            style_str = self.combo_border_style.currentText()
-            ls = "--" if "Dashed" in style_str else (":" if "Dotted" in style_str else "-")
-            if self._custom_shp_borders and Path(self._custom_shp_borders).exists():
-                geoms = load_shapefile_geometries(self._custom_shp_borders)
-                if geoms:
-                    feat = ShapelyFeature(
-                        geoms, crs=ccrs.PlateCarree(),
-                        edgecolor=self._border_color, facecolor="none",
-                        linestyle=ls, linewidth=0.8, zorder=3,
-                    )
-                    ax.add_feature(feat)
-            else:
-                borders_feat = get_cached_feature(
-                    "cultural", "admin_0_countries", chosen_scale,
-                    edgecolor=self._border_color,
-                    linestyle=ls,
-                    linewidth=0.8,
-                    zorder=3,
-                )
-                if borders_feat is not None:
-                    ax.add_feature(borders_feat)
-
-        # 3. States / Provinces (custom shapefile override or Natural Earth)
-        if self.chk_states.isChecked():
-            if self._custom_shp_states and Path(self._custom_shp_states).exists():
-                geoms = load_shapefile_geometries(self._custom_shp_states)
-                if geoms:
-                    feat = ShapelyFeature(
-                        geoms, crs=ccrs.PlateCarree(),
-                        edgecolor=self._state_color, facecolor="none",
-                        linestyle=":", linewidth=self.spin_state_width.value(), zorder=2,
-                    )
-                    ax.add_feature(feat)
-            else:
-                states_feat = get_cached_feature(
-                    "cultural", "admin_1_states_provinces_lines", chosen_scale,
-                    edgecolor=self._state_color,
-                    linestyle=":",
-                    linewidth=self.spin_state_width.value(),
-                    zorder=2,
-                )
-                if states_feat is not None:
-                    ax.add_feature(states_feat)
-
-        # 4. Rivers (custom shapefile override or Natural Earth)
-        if self.chk_rivers.isChecked():
-            if self._custom_shp_rivers and Path(self._custom_shp_rivers).exists():
-                geoms = load_shapefile_geometries(self._custom_shp_rivers)
-                if geoms:
-                    feat = ShapelyFeature(
-                        geoms, crs=ccrs.PlateCarree(),
-                        edgecolor=self._river_color, facecolor="none",
-                        linewidth=self.spin_river_width.value(), zorder=2,
-                    )
-                    ax.add_feature(feat)
-            else:
-                rivers_feat = get_cached_feature(
-                    "physical", "rivers_lake_centerlines", chosen_scale,
-                    edgecolor=self._river_color,
-                    linewidth=self.spin_river_width.value(),
-                    zorder=2,
-                )
-                if rivers_feat is not None:
-                    ax.add_feature(rivers_feat)
-
-        # 5. Lakes (custom shapefile override or Natural Earth)
-        if self.chk_lakes.isChecked():
-            if self._custom_shp_lakes and Path(self._custom_shp_lakes).exists():
-                geoms = load_shapefile_geometries(self._custom_shp_lakes)
-                if geoms:
-                    feat = ShapelyFeature(
-                        geoms, crs=ccrs.PlateCarree(),
-                        edgecolor=self._lake_color, facecolor="none",
-                        linewidth=self.spin_lake_width.value(), zorder=2,
-                    )
-                    ax.add_feature(feat)
-            else:
-                lakes_feat = get_cached_feature(
-                    "physical", "lakes", chosen_scale,
-                    edgecolor=self._lake_color,
-                    linewidth=self.spin_lake_width.value(),
-                    zorder=2,
-                )
-                if lakes_feat is not None:
-                    ax.add_feature(lakes_feat)
-
-        # ---------------------------------------------------------------------
-        # Additional Custom Shapefiles Stack Overlay
-        # ---------------------------------------------------------------------
-        for shp in self._custom_shapefiles:
-            shp_path = shp.get("path")
-            if shp_path and Path(shp_path).exists():
-                geoms = load_shapefile_geometries(shp_path)
-                if geoms:
-                    custom_feature = ShapelyFeature(
-                        geoms,
-                        crs=ccrs.PlateCarree(),
-                        edgecolor=self._shp_color,
-                        facecolor="none",
-                        linewidth=self.spin_shp_width.value(),
-                        zorder=4,
-                    )
-                    ax.add_feature(custom_feature)
-
-        # ---------------------------------------------------------------------
-        # Graticules
-        # ---------------------------------------------------------------------
-        if self.chk_gridlines.isChecked():
-            style_map = {"Dashed (--)": "--", "Solid (-)": "-", "Dotted (:)": ":"}
-            chosen_style = style_map.get(self.combo_linestyle.currentText(), "--")
-            lon_step = self.spin_lon_step.value()
-            lat_step = self.spin_lat_step.value()
-            alpha_val = self.slider_grid_alpha.value() / 100.0
-
-            try:
-                gl = ax.gridlines(
-                    crs=ccrs.PlateCarree(),
-                    draw_labels=self.chk_labels.isChecked(),
-                    linewidth=0.75,
-                    color=self._grid_color,
-                    alpha=alpha_val,
-                    linestyle=chosen_style,
-                    xlocs=np.arange(-180, 181, lon_step),
-                    ylocs=np.arange(-90, 91, lat_step),
-                )
-                if self.chk_labels.isChecked():
-                    gl.top_labels = False
-                    gl.right_labels = False
-                    gl.xlabel_style = {"size": 8, "color": fg_color}
-                    gl.ylabel_style = {"size": 8, "color": fg_color}
-            except Exception:
-                pass
-
-        title = f"{self._current_crs_id} Projection [{self.combo_preset.currentText()}]"
-        ax.set_title(title, fontsize=10, color=fg_color, pad=10)
-        self.lbl_info.setText(
-            f"CRS: {self._current_crs_id} | Extent: [{w:.1f}°, {e:.1f}°, {s:.1f}°, {n:.1f}°] | "
-            f"Scale: {chosen_scale} | Custom Shp: {len(self._custom_shapefiles)}"
-        )
-
-        self.figure.tight_layout()
+        """Render the map projection canvas by passing validated Pydantic spec to the engine."""
+        spec = self.to_spec()
+        render_region_plot(spec, figure=self.figure)
         self.canvas.draw_idle()
+
+        w, e, s, n = spec.extent.as_tuple()
+        self.lbl_info.setText(
+            f"CRS: {spec.projection.crs_id} | Extent: [{w:.1f}°, {e:.1f}°, {s:.1f}°, {n:.1f}°] | "
+            f"Scale: {spec.features.scale} | Custom Shp: {len(spec.custom_shapefiles)}"
+        )
 
         # Emit change signal
         self.projection_changed.emit({
-            "crs_id": self._current_crs_id,
-            "central_longitude": self.spin_central_lon.value(),
-            "central_latitude": self.spin_central_lat.value(),
+            "crs_id": spec.projection.crs_id,
+            "central_longitude": spec.projection.central_longitude,
+            "central_latitude": spec.projection.central_latitude,
             "extent": (w, e, s, n),
-            "custom_shapefiles": [s["path"] for s in self._custom_shapefiles],
+            "custom_shapefiles": [str(s.path) for s in spec.custom_shapefiles],
         })
 
     def to_spec(self) -> RegionViewSpec:
