@@ -85,6 +85,19 @@ def _engine_worker_main(conn: Connection) -> None:
         height = msg.get("height", 6.0)
         dpi = msg.get("dpi", 100)
 
+        # Inject active dataset if this is a field or slice_histogram render job
+        if job_type in ("field", "slice_histogram") and "ds" not in params:
+            try:
+                target_ds_id = params.get("dataset_id")
+                params["ds"] = registry.get(target_ds_id)
+            except Exception as exc:
+                conn.send({
+                    "job_id": job_id,
+                    "success": False,
+                    "error": f"Failed to retrieve dataset from registry: {exc}",
+                })
+                continue
+
         try:
             image_data = execute_render_job(
                 job_type=job_type,
@@ -127,6 +140,7 @@ class EngineProcessPool:
         self._queue: List[dict] = []
         self._lock = threading.RLock()
         self._running = True
+        self._loaded_datasets: List[dict] = []
 
         for _ in range(self._num_workers):
             self._workers.append(self._spawn_worker())
@@ -155,6 +169,18 @@ class EngineProcessPool:
         slot.current_job_id = None
         slot.current_channel = None
         slot.is_busy = False
+
+        # Replay dataset ingestion on the new worker so it retains in-memory datasets
+        for ds_req in self._loaded_datasets:
+            try:
+                slot.conn.send({
+                    "command": "io_open",
+                    "job_id": str(uuid.uuid4()),
+                    "request": ds_req,
+                })
+                slot.conn.recv()
+            except Exception:
+                pass
 
     def cancel_channel(self, channel: str) -> None:
         """Cancel and drop all pending and active jobs on a given channel immediately."""
@@ -277,10 +303,11 @@ class EngineProcessPool:
         """
         from xotplot.spec import DatasetMetadata, OpenDatasetRequest
 
+        assigned_id = dataset_id or str(uuid.uuid4())
         req = OpenDatasetRequest(
             file_path=file_path,
             format_override=format_override,  # type: ignore[arg-type]
-            dataset_id=dataset_id,
+            dataset_id=assigned_id,
         )
         job_id = str(uuid.uuid4())
         msg = {
@@ -293,12 +320,17 @@ class EngineProcessPool:
         with self._lock:
             meta = None
             for slot in self._workers:
+                slot.is_busy = True
+                slot.current_channel = "sync"
                 slot.conn.send(msg)
                 resp = slot.conn.recv()
+                slot.is_busy = False
+                slot.current_channel = None
                 if not resp.get("success"):
                     raise RuntimeError(resp.get("error", "Failed to open dataset in engine worker"))
                 if meta is None:
                     meta = DatasetMetadata.model_validate(resp["metadata"])
+            self._loaded_datasets.append(req.model_dump())
             return meta
 
     @property
@@ -357,7 +389,10 @@ try:
             while self._running:
                 conns: list[Connection] = []
                 with self._pool._lock:
-                    conns = [s.conn for s in self._pool._workers if not s.conn.closed]
+                    conns = [
+                        s.conn for s in self._pool._workers
+                        if not s.conn.closed and s.current_channel != "sync"
+                    ]
 
                 if not conns:
                     threading.Event().wait(0.05)
@@ -371,7 +406,7 @@ try:
                 for ready_conn in ready:
                     with self._pool._lock:
                         slot = next((s for s in self._pool._workers if s.conn is ready_conn), None)
-                        if not slot:
+                        if not slot or slot.current_channel == "sync":
                             continue
 
                         try:
@@ -388,7 +423,7 @@ try:
                         self._pool.dispatch_next(slot)
                         active = self._pool.busy_count
 
-                    # Emit Qt signals outside the lock
+                    # Emit Qt signals outside lock
                     if is_success:
                         self.job_completed.emit(job_id, img_data)
                     else:

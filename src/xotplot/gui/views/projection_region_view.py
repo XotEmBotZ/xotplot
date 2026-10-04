@@ -747,6 +747,10 @@ class ProjectionRegionView(QWidget):
         if job_id == self._current_job_id:
             self.canvas_widget.set_image_bytes(image_data)
 
+    def get_spec(self) -> RegionViewSpec:
+        """Alias for to_spec."""
+        return self.to_spec()
+
     def to_spec(self) -> RegionViewSpec:
         """Export current view state to a validated RegionViewSpec Pydantic model."""
         scale_map = {"110m (Coarse)": "110m", "50m (Medium)": "50m", "10m (High-Res)": "10m"}

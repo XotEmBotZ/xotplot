@@ -32,7 +32,13 @@ from xotplot.engine.plotting.cartopy_features import (
     get_cached_feature,
     load_shapefile_geometries,
 )
-from xotplot.spec import FeatureLayerSpec, ProjectionSpec, RegionViewSpec
+from xotplot.spec import (
+    DataPlotSpec,
+    DataSliceSpec,
+    FeatureLayerSpec,
+    ProjectionSpec,
+    RegionViewSpec,
+)
 
 
 def build_crs(proj_spec: ProjectionSpec) -> Any:
@@ -175,6 +181,322 @@ def render_region_plot(
 
     title = f"{spec.projection.crs_id} Projection [{spec.preset_name}]"
     ax.set_title(title, fontsize=10, color=fg_color, pad=10)
+    figure.tight_layout()
+
+    return figure
+
+
+def compute_bounding_coordinates(
+    proj_spec: Optional[ProjectionSpec],
+    extent_spec: Optional[Any],
+    buffer_ratio: float = 0.05,
+) -> Optional[tuple[float, float, float, float]]:
+    """Determine the required geographical bounding box (lat_min, lat_max, lon_min, lon_max)
+
+    for any arbitrary user projection and region extent, adding exactly a +5% buffer.
+    Prevents missing corner pixels or blank regions while maximizing slicing efficiency.
+    """
+    if extent_spec is None:
+        return None
+
+    w, e, s, n = extent_spec.west, extent_spec.east, extent_spec.south, extent_spec.north
+    # If the user selected a global or near-global domain, skip spatial slicing
+    if (abs(e - w) >= 359.0) or (w <= -179.0 and e >= 179.0):
+        return None
+
+    if proj_spec is None or proj_spec.crs_id in ("PlateCarree", "Mercator", "EquidistantConic"):
+        # For standard cylindrical/equirectangular projections, direct geographic buffer (+5%)
+        dw = (e - w) * buffer_ratio if e >= w else (360.0 + e - w) * buffer_ratio
+        dn = (n - s) * buffer_ratio
+        return (
+            max(-90.0, s - dn),
+            min(90.0, n + dn),
+            max(-180.0, w - dw),
+            min(180.0, e + dw),
+        )
+
+    # For non-cylindrical projections (e.g. LambertConformal, PolarStereo, Orthographic, Robinson):
+    # Sample the boundary of the arbitrary user box in PlateCarree, project to target CRS,
+    # expand the projected viewport by +5%, and inverse-transform back to determine the true bounding envelope.
+    crs = build_crs(proj_spec)
+    pc = ccrs.PlateCarree()
+    num_pts = 40
+
+    if e >= w:
+        border_lons = np.concatenate([
+            np.linspace(w, e, num_pts),
+            np.full(num_pts, e),
+            np.linspace(e, w, num_pts),
+            np.full(num_pts, w),
+        ])
+    else:
+        lons_seg = np.linspace(w, e + 360.0, num_pts)
+        lons_seg = (lons_seg + 180.0) % 360.0 - 180.0
+        border_lons = np.concatenate([
+            lons_seg,
+            np.full(num_pts, e),
+            lons_seg[::-1],
+            np.full(num_pts, w),
+        ])
+
+    border_lats = np.concatenate([
+        np.full(num_pts, s),
+        np.linspace(s, n, num_pts),
+        np.full(num_pts, n),
+        np.linspace(n, s, num_pts),
+    ])
+
+    proj_pts = crs.transform_points(pc, border_lons, border_lats)
+    valid = np.isfinite(proj_pts[:, 0]) & np.isfinite(proj_pts[:, 1])
+    if not np.any(valid):
+        dw = (e - w) * buffer_ratio if e >= w else (360.0 + e - w) * buffer_ratio
+        dn = (n - s) * buffer_ratio
+        return (max(-90.0, s - dn), min(90.0, n + dn), max(-180.0, w - dw), min(180.0, e + dw))
+
+    x_min, x_max = float(np.min(proj_pts[valid, 0])), float(np.max(proj_pts[valid, 0]))
+    y_min, y_max = float(np.min(proj_pts[valid, 1])), float(np.max(proj_pts[valid, 1]))
+
+    # Expand projected viewport by exactly +5%
+    dx = (x_max - x_min) * buffer_ratio
+    dy = (y_max - y_min) * buffer_ratio
+    x_min -= dx
+    x_max += dx
+    y_min -= dy
+    y_max += dy
+
+    # Inverse sample projected viewport into geographical coordinates
+    xs = np.linspace(x_min, x_max, 30)
+    ys = np.linspace(y_min, y_max, 30)
+    XX, YY = np.meshgrid(xs, ys)
+
+    inv_pts = pc.transform_points(crs, XX.flatten(), YY.flatten())
+    valid_inv = np.isfinite(inv_pts[:, 0]) & np.isfinite(inv_pts[:, 1])
+    if not np.any(valid_inv):
+        return None
+
+    geo_lons = inv_pts[valid_inv, 0]
+    geo_lats = inv_pts[valid_inv, 1]
+
+    lat_min = max(-90.0, float(np.min(geo_lats)))
+    lat_max = min(90.0, float(np.max(geo_lats)))
+    lon_min = max(-180.0, float(np.min(geo_lons)))
+    lon_max = min(180.0, float(np.max(geo_lons)))
+
+    return (lat_min, lat_max, lon_min, lon_max)
+
+
+def subset_slice_by_extent(
+    da: Any,
+    extent_spec: Any,
+    proj_spec: Optional[ProjectionSpec] = None,
+    buffer_ratio: float = 0.05,
+) -> Any:
+    """Subset an xarray.DataArray to the coordinates needed for any arbitrary user projection and region +5%."""
+    bbox = compute_bounding_coordinates(proj_spec, extent_spec, buffer_ratio=buffer_ratio)
+    if bbox is None:
+        return da
+
+    lat_min, lat_max, lon_min, lon_max = bbox
+
+    if "lat" in da.coords:
+        da = da.sel(lat=slice(lat_min, lat_max))
+
+    if "lon" in da.coords:
+        if lon_min <= lon_max:
+            da = da.sel(lon=slice(lon_min, lon_max))
+        else:
+            mask = (da.lon >= lon_min) | (da.lon <= lon_max)
+            da = da.sel(lon=mask)
+    return da
+
+
+def render_gridded_field(
+    plot_spec: DataPlotSpec,
+    ds: Any,
+    figure: Optional[Figure] = None,
+) -> Figure:
+    """Render a 2D meteorological data slice on top of Cartopy projection and features.
+
+    Strictly adheres to FAIL-FAST and light theme (#ffffff canvas).
+    """
+    if figure is None:
+        figure = Figure(figsize=(8.0, 6.0), dpi=100)
+    else:
+        figure.clear()
+
+    reg_spec = plot_spec.region_view
+    crs_proj = build_crs(reg_spec.projection)
+    ax = figure.add_subplot(111, projection=crs_proj)
+
+    bg_color = DEFAULT_PLOT_BG_COLOR
+    fg_color = DEFAULT_PLOT_FG_COLOR
+    figure.patch.set_facecolor(bg_color)
+    ax.set_facecolor(bg_color)
+
+    # Set extent
+    w, e, s, n = reg_spec.extent.as_tuple()
+    if reg_spec.projection.crs_id not in ("Orthographic",):
+        try:
+            ax.set_extent([w, e, s, n], crs=ccrs.PlateCarree())
+        except Exception:
+            pass
+
+    # Extract 2D slice from xarray Dataset
+    slice_cfg = plot_spec.slice_spec
+    var_name = slice_cfg.variable
+    if var_name not in ds:
+        raise KeyError(f"Variable '{var_name}' not found in active dataset")
+
+    da = ds[var_name]
+
+    # Handle level dimension
+    if "level" in da.dims:
+        if slice_cfg.level_value is not None:
+            da = da.sel(level=slice_cfg.level_value, method="nearest")
+        else:
+            da = da.isel(level=0)
+
+    # Handle soilLayer or other vertical dims if present
+    for extra_dim in ("soilLayer", "heightAboveGround"):
+        if extra_dim in da.dims:
+            da = da.isel({extra_dim: 0})
+
+    # Handle time / step
+    if "time" in da.dims:
+        da = da.isel(time=slice_cfg.time_index)
+
+    # Spatial regional subsetting: pass only the requested region to Matplotlib
+    da = subset_slice_by_extent(da, reg_spec.extent, proj_spec=reg_spec.projection, buffer_ratio=0.05)
+
+    # Extract 2D numpy arrays
+    lats = da["lat"].values
+    lons = da["lon"].values
+    data_2d = np.asarray(da.values)
+
+    # Clean non-finite values and guarantee increasing vmin < vmax
+    valid_mask = np.isfinite(data_2d)
+    valid_data = data_2d[valid_mask]
+    default_min = float(np.nanmin(data_2d)) if len(valid_data) > 0 else 0.0
+    default_max = float(np.nanmax(data_2d)) if len(valid_data) > 0 else 1.0
+
+    user_vmin = plot_spec.vmin
+    user_vmax = plot_spec.vmax
+    if user_vmin is not None and user_vmax is not None and user_vmin >= user_vmax:
+        user_vmin, user_vmax = user_vmax, user_vmin
+
+    vmin = user_vmin if user_vmin is not None else default_min
+    vmax = user_vmax if user_vmax is not None else default_max
+    if vmin >= vmax:
+        vmax = vmin + 1.0
+
+    # Draw meteorological field based on plot_type
+    transform = ccrs.PlateCarree()
+    mesh = None
+
+    if plot_spec.plot_type == "pcolormesh":
+        mesh = ax.pcolormesh(
+            lons,
+            lats,
+            data_2d,
+            transform=transform,
+            cmap=plot_spec.colormap,
+            vmin=vmin,
+            vmax=vmax,
+            shading="auto",
+            zorder=1,
+        )
+    elif plot_spec.plot_type == "contour":
+        levels = np.linspace(vmin, vmax, plot_spec.num_levels)
+        cs = ax.contour(
+            lons,
+            lats,
+            data_2d,
+            levels=levels,
+            transform=transform,
+            cmap=plot_spec.colormap,
+            linewidths=1.0,
+            zorder=1,
+        )
+        ax.clabel(cs, inline=True, fontsize=7, fmt="%1.1f")
+    else:  # "contourf" default
+        levels = np.linspace(vmin, vmax, plot_spec.num_levels)
+        mesh = ax.contourf(
+            lons,
+            lats,
+            data_2d,
+            levels=levels,
+            transform=transform,
+            cmap=plot_spec.colormap,
+            vmin=vmin,
+            vmax=vmax,
+            extend="both",
+            zorder=1,
+        )
+
+    # Render Cartopy geographic boundaries on top of data field (zorder >= 2)
+    scale = reg_spec.features.scale
+    _render_feature_layer(ax, "physical", "coastline", scale, reg_spec.features.coastlines, zorder=3)
+    _render_feature_layer(ax, "cultural", "admin_0_countries", scale, reg_spec.features.borders, zorder=3)
+    _render_feature_layer(ax, "cultural", "admin_1_states_provinces_lines", scale, reg_spec.features.states, zorder=2)
+    _render_feature_layer(ax, "physical", "rivers_lake_centerlines", scale, reg_spec.features.rivers, zorder=2)
+    _render_feature_layer(ax, "physical", "lakes", scale, reg_spec.features.lakes, zorder=2)
+
+    # Render custom shapefiles
+    for shp in reg_spec.custom_shapefiles:
+        if shp.enabled and shp.path.exists():
+            geoms = load_shapefile_geometries(shp.path)
+            if geoms:
+                custom_feat = ShapelyFeature(
+                    geoms,
+                    crs=ccrs.PlateCarree(),
+                    edgecolor=shp.color,
+                    facecolor="none",
+                    linewidth=shp.linewidth,
+                    zorder=4,
+                )
+                ax.add_feature(custom_feat)
+
+    # Render Graticules
+    if reg_spec.graticules.enabled:
+        try:
+            gl = ax.gridlines(
+                crs=ccrs.PlateCarree(),
+                draw_labels=reg_spec.graticules.draw_labels,
+                linewidth=0.75,
+                color=reg_spec.graticules.color,
+                alpha=reg_spec.graticules.alpha,
+                linestyle=reg_spec.graticules.linestyle,
+                xlocs=np.arange(-180, 181, reg_spec.graticules.lon_step),
+                ylocs=np.arange(-90, 91, reg_spec.graticules.lat_step),
+            )
+            if reg_spec.graticules.draw_labels:
+                gl.top_labels = False
+                gl.right_labels = False
+                gl.xlabel_style = {"size": 8, "color": fg_color}
+                gl.ylabel_style = {"size": 8, "color": fg_color}
+        except Exception:
+            pass
+
+    # Colorbar
+    if plot_spec.show_colorbar and mesh is not None:
+        cbar = figure.colorbar(
+            mesh,
+            ax=ax,
+            orientation="horizontal",
+            pad=0.06,
+            fraction=0.046,
+            aspect=30,
+        )
+        cbar.ax.tick_params(labelsize=8, colors=fg_color)
+        lbl = plot_spec.colorbar_label or da.attrs.get("long_name") or var_name
+        unit = da.attrs.get("units")
+        if unit:
+            lbl = f"{lbl} [{unit}]"
+        cbar.set_label(lbl, fontsize=8, color=fg_color)
+
+    lvl_info = f" ({slice_cfg.level_value} hPa)" if slice_cfg.level_value is not None else ""
+    title = f"{var_name}{lvl_info} - {reg_spec.projection.crs_id} [{reg_spec.preset_name}]"
+    ax.set_title(title, fontsize=10, color=fg_color, pad=8)
     figure.tight_layout()
 
     return figure
@@ -363,6 +685,223 @@ def render_variable_profile(
     ax.legend(loc="upper right", framealpha=0.3)
 
     figure.tight_layout()
+def render_variable_slice_and_histogram(
+    var_name: str,
+    level_val: Optional[float],
+    ds: Any,
+    figure: Optional[Figure] = None,
+    plot_type: str = "contourf",
+    colormap: str = "coolwarm",
+    vmin: Optional[float] = None,
+    vmax: Optional[float] = None,
+    num_levels: int = 15,
+    region_spec: Optional[RegionViewSpec] = None,
+) -> Figure:
+    """Render two subplots stacked vertically:
+
+    - Top: Exact final meteorological Cartopy projection & region plot with geographical boundaries.
+    - Bottom: Empirical distribution histogram of the valid grid slice values.
+    """
+    if figure is None:
+        figure = Figure(figsize=(7.0, 7.5), dpi=100)
+    else:
+        figure.clear()
+
+    bg_color = DEFAULT_PLOT_BG_COLOR
+    fg_color = DEFAULT_PLOT_FG_COLOR
+    figure.patch.set_facecolor(bg_color)
+
+    if var_name not in ds:
+        ax = figure.add_subplot(111)
+        ax.set_facecolor(bg_color)
+        ax.text(0.5, 0.5, f"Variable '{var_name}' not found", ha="center", va="center", color=fg_color)
+        return figure
+
+    reg_spec = region_spec or RegionViewSpec()
+    crs_proj = build_crs(reg_spec.projection)
+
+    # GridSpec: top (Cartopy projection map, ratio 1.5), bottom (histogram, ratio 0.8)
+    gs = figure.add_gridspec(2, 1, height_ratios=[1.5, 0.8], hspace=0.35)
+    ax_top = figure.add_subplot(gs[0], projection=crs_proj)
+    ax_bot = figure.add_subplot(gs[1])
+
+    ax_top.set_facecolor(bg_color)
+    ax_bot.set_facecolor(bg_color)
+
+    # Set geographic extent on top projection plot
+    w, e, s, n = reg_spec.extent.as_tuple()
+    if reg_spec.projection.crs_id not in ("Orthographic",):
+        try:
+            ax_top.set_extent([w, e, s, n], crs=ccrs.PlateCarree())
+        except Exception:
+            pass
+
+    # Extract 2D slice
+    da = ds[var_name]
+    if "level" in da.dims:
+        if level_val is not None:
+            da = da.sel(level=level_val, method="nearest")
+        else:
+            da = da.isel(level=0)
+
+    for extra_dim in ("soilLayer", "heightAboveGround"):
+        if extra_dim in da.dims:
+            da = da.isel({extra_dim: 0})
+
+    if "time" in da.dims:
+        da = da.isel(time=0)
+
+    # Spatial regional subsetting: pass only the requested region to Matplotlib
+    da = subset_slice_by_extent(da, reg_spec.extent, proj_spec=reg_spec.projection, buffer_ratio=0.05)
+
+    lats = da["lat"].values
+    lons = da["lon"].values
+    data_2d = np.asarray(da.values)
+
+    valid_mask = np.isfinite(data_2d)
+    valid_data = data_2d[valid_mask]
+
+    default_min = float(np.nanmin(data_2d)) if len(valid_data) > 0 else 0.0
+    default_max = float(np.nanmax(data_2d)) if len(valid_data) > 0 else 1.0
+
+    user_vmin = vmin
+    user_vmax = vmax
+    if user_vmin is not None and user_vmax is not None and user_vmin >= user_vmax:
+        user_vmin, user_vmax = user_vmax, user_vmin
+
+    calc_vmin = user_vmin if user_vmin is not None else default_min
+    calc_vmax = user_vmax if user_vmax is not None else default_max
+    if calc_vmin >= calc_vmax:
+        calc_vmax = calc_vmin + 1.0
+
+    unit = da.attrs.get("units", "")
+    long_name = da.attrs.get("long_name") or var_name
+
+    # 1. Top Subplot: Cartopy Map Plot (contourf / pcolormesh / contour)
+    transform = ccrs.PlateCarree()
+    mesh = None
+
+    if plot_type == "pcolormesh":
+        mesh = ax_top.pcolormesh(
+            lons,
+            lats,
+            data_2d,
+            transform=transform,
+            cmap=colormap,
+            vmin=calc_vmin,
+            vmax=calc_vmax,
+            shading="auto",
+            zorder=1,
+        )
+    elif plot_type == "contour":
+        levels = np.linspace(calc_vmin, calc_vmax, num_levels)
+        cs = ax_top.contour(
+            lons,
+            lats,
+            data_2d,
+            levels=levels,
+            transform=transform,
+            cmap=colormap,
+            linewidths=1.0,
+            zorder=1,
+        )
+        ax_top.clabel(cs, inline=True, fontsize=7, fmt="%1.1f")
+    else:  # "contourf" default
+        levels = np.linspace(calc_vmin, calc_vmax, num_levels)
+        mesh = ax_top.contourf(
+            lons,
+            lats,
+            data_2d,
+            levels=levels,
+            transform=transform,
+            cmap=colormap,
+            vmin=calc_vmin,
+            vmax=calc_vmax,
+            extend="both",
+            zorder=1,
+        )
+
+    # Cartopy Boundaries over data (coastlines, borders, states, rivers, lakes)
+    scale = reg_spec.features.scale
+    _render_feature_layer(ax_top, "physical", "coastline", scale, reg_spec.features.coastlines, zorder=3)
+    _render_feature_layer(ax_top, "cultural", "admin_0_countries", scale, reg_spec.features.borders, zorder=3)
+    _render_feature_layer(ax_top, "cultural", "admin_1_states_provinces_lines", scale, reg_spec.features.states, zorder=2)
+    _render_feature_layer(ax_top, "physical", "rivers_lake_centerlines", scale, reg_spec.features.rivers, zorder=2)
+    _render_feature_layer(ax_top, "physical", "lakes", scale, reg_spec.features.lakes, zorder=2)
+
+    # Custom Shapefiles
+    for shp in reg_spec.custom_shapefiles:
+        if shp.enabled and shp.path.exists():
+            geoms = load_shapefile_geometries(shp.path)
+            if geoms:
+                custom_feat = ShapelyFeature(
+                    geoms,
+                    crs=ccrs.PlateCarree(),
+                    edgecolor=shp.color,
+                    facecolor="none",
+                    linewidth=shp.linewidth,
+                    zorder=4,
+                )
+                ax_top.add_feature(custom_feat)
+
+    # Graticules
+    if reg_spec.graticules.enabled:
+        try:
+            gl = ax_top.gridlines(
+                crs=ccrs.PlateCarree(),
+                draw_labels=reg_spec.graticules.draw_labels,
+                linewidth=0.6,
+                color=reg_spec.graticules.color,
+                alpha=reg_spec.graticules.alpha,
+                linestyle=reg_spec.graticules.linestyle,
+                xlocs=np.arange(-180, 181, reg_spec.graticules.lon_step),
+                ylocs=np.arange(-90, 91, reg_spec.graticules.lat_step),
+            )
+            if reg_spec.graticules.draw_labels:
+                gl.top_labels = False
+                gl.right_labels = False
+                gl.xlabel_style = {"size": 7, "color": fg_color}
+                gl.ylabel_style = {"size": 7, "color": fg_color}
+        except Exception:
+            pass
+
+    # Top Colorbar
+    if mesh is not None:
+        cbar = figure.colorbar(mesh, ax=ax_top, orientation="horizontal", pad=0.08, fraction=0.046, aspect=30)
+        cbar.ax.tick_params(labelsize=7, colors=fg_color)
+        lbl = f"{var_name} [{unit}]" if unit else var_name
+        cbar.set_label(lbl, fontsize=8, color=fg_color)
+
+    lvl_str = f" @ {level_val:.0f} hPa" if level_val is not None else ""
+    ax_top.set_title(f"{long_name}{lvl_str} — {reg_spec.projection.crs_id} [{reg_spec.preset_name}]", fontsize=9, color=fg_color, pad=4)
+
+    # 2. Bottom Subplot: Histogram & Distribution Statistics
+    if len(valid_data) > 0:
+        counts, bins, _ = ax_bot.hist(
+            valid_data,
+            bins=40,
+            density=True,
+            color="#0284c7",
+            alpha=0.75,
+            edgecolor="#0369a1",
+        )
+        mean_val = float(np.mean(valid_data))
+        std_val = float(np.std(valid_data))
+        p05 = float(np.percentile(valid_data, 5))
+        p95 = float(np.percentile(valid_data, 95))
+
+        ax_bot.axvline(mean_val, color="#e11d48", linestyle="--", linewidth=1.5, label=f"Mean: {mean_val:.2f}")
+        ax_bot.axvline(p05, color="#64748b", linestyle=":", linewidth=1.0, label=f"5th/95th: [{p05:.1f}, {p95:.1f}]")
+        ax_bot.axvline(p95, color="#64748b", linestyle=":", linewidth=1.0)
+
+        ax_bot.legend(loc="upper right", fontsize=7, framealpha=0.4)
+
+    ax_bot.set_title(f"Distribution & Frequency Histogram ({len(valid_data):,} grid pts)", fontsize=9, color=fg_color, pad=4)
+    ax_bot.set_xlabel(f"Value [{unit}]" if unit else "Value", fontsize=8, color=fg_color)
+    ax_bot.set_ylabel("Probability Density", fontsize=8, color=fg_color)
+    ax_bot.tick_params(labelsize=7, colors=fg_color)
+    ax_bot.grid(True, linestyle=":", alpha=0.5, color="#94a3b8")
+
     return figure
 
 
@@ -644,6 +1183,37 @@ def execute_render_job(
     if job_type == "region":
         spec = RegionViewSpec.model_validate(params)
         render_region_plot(spec, figure=fig)
+    elif job_type == "field":
+        plot_spec = DataPlotSpec.model_validate(params.get("spec", params))
+        ds = params.get("ds")
+        if ds is None:
+            raise ValueError("Dataset 'ds' parameter is required for 'field' render job")
+        render_gridded_field(plot_spec, ds=ds, figure=fig)
+    elif job_type == "slice_histogram":
+        var_name = params.get("var_name", "t2m")
+        level_val = params.get("level_val")
+        ds = params.get("ds")
+        if ds is None:
+            raise ValueError("Dataset 'ds' parameter is required for 'slice_histogram' render job")
+        plot_type = params.get("plot_type", "contourf")
+        colormap = params.get("colormap", "coolwarm")
+        vmin = params.get("vmin")
+        vmax = params.get("vmax")
+        num_levels = params.get("num_levels", 15)
+        raw_reg = params.get("region_spec")
+        region_spec = RegionViewSpec.model_validate(raw_reg) if raw_reg is not None else None
+        render_variable_slice_and_histogram(
+            var_name=var_name,
+            level_val=level_val,
+            ds=ds,
+            figure=fig,
+            plot_type=plot_type,
+            colormap=colormap,
+            vmin=vmin,
+            vmax=vmax,
+            num_levels=num_levels,
+            region_spec=region_spec,
+        )
     elif job_type == "synoptic":
         render_synoptic_field(figure=fig)
     elif job_type == "composite":

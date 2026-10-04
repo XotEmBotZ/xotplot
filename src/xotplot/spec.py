@@ -221,3 +221,34 @@ class DatasetMetadata(BaseModel):
     coordinates: Dict[str, CoordinateInfo]
     global_attrs: Dict[str, Any] = Field(default_factory=dict)
 
+
+# =============================================================================
+# Meteorological Field Slicing & Plotting Schemas
+# =============================================================================
+PlotFieldType = Literal["contourf", "pcolormesh", "contour"]
+
+
+class DataSliceSpec(BaseModel):
+    """Specification for slicing a 2D horizontal field from an in-memory dataset."""
+
+    variable: str
+    level_type: Optional[str] = None
+    level_value: Optional[float] = None
+    time_index: int = 0
+
+
+class DataPlotSpec(BaseModel):
+    """Complete specification for rendering a 2D meteorological field onto a map."""
+
+    dataset_id: Optional[str] = None
+    slice_spec: DataSliceSpec
+    plot_type: PlotFieldType = "contourf"
+    colormap: str = "coolwarm"
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
+    num_levels: Annotated[int, Field(ge=5, le=100)] = 15
+    show_colorbar: bool = True
+    colorbar_label: Optional[str] = None
+    region_view: RegionViewSpec = Field(default_factory=RegionViewSpec)
+
+

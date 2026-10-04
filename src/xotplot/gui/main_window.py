@@ -1,5 +1,6 @@
 """Main window for xotplot meteorological workbench linking all reference views."""
 
+from typing import Any
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import (
@@ -58,6 +59,12 @@ class MainWindow(QMainWindow):
 
         # Connect signals
         self._nav_list.currentRowChanged.connect(self._on_view_changed)
+        self._view_variables.set_region_spec_provider(self._view_projection.get_spec)
+        self._view_projection.projection_changed.connect(lambda _: self._view_variables._update_profile_plot())
+        self._view_variables.plot_requested.connect(self._on_plot_field_requested)
+        self._engine_bridge.job_completed.connect(self._on_engine_job_completed)
+        self._engine_bridge.job_failed.connect(self._on_engine_job_failed)
+        self._current_field_job_id: str | None = None
 
         # Apply initial theme
         self._apply_theme(self._dark_mode)
@@ -68,7 +75,7 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("&File")
         open_action = QAction("&Open Data...", self)
         open_action.setShortcut(QKeySequence("Ctrl+O"))
-        open_action.triggered.connect(lambda: self._status_bar.showMessage("Open Data triggered", 2000))
+        open_action.triggered.connect(self._open_dataset_dialog)
         file_menu.addAction(open_action)
 
         export_action = QAction("&Export Figure...", self)
@@ -116,7 +123,7 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
 
         btn_open = QPushButton("Open Data")
-        btn_open.clicked.connect(lambda: self._status_bar.showMessage("Open Data clicked", 2000))
+        btn_open.clicked.connect(self._open_dataset_dialog)
         toolbar.addWidget(btn_open)
 
         btn_preview = QPushButton("Preview")
@@ -170,16 +177,16 @@ class MainWindow(QMainWindow):
         ds_card_layout = QVBoxLayout(ds_card)
         ds_card_layout.setContentsMargins(6, 6, 6, 6)
         ds_card_layout.setSpacing(2)
-        lbl_ds_title = QLabel("LOADED DATASET: GFS (NETCDF4)")
-        lbl_ds_title.setStyleSheet("font-size: 9px; font-weight: bold; color: #10b981;")
-        lbl_ds_name = QLabel("gfs.t00z.pgrb2.0p25.f024")
-        lbl_ds_name.setStyleSheet("font-family: monospace; font-size: 10px;")
-        lbl_ds_meta = QLabel("721x1440 pts | 148.2 MB")
-        lbl_ds_meta.setStyleSheet("font-size: 9px; color: #87929a;")
+        self._lbl_ds_title = QLabel("LOADED DATASET: NONE")
+        self._lbl_ds_title.setStyleSheet("font-size: 9px; font-weight: bold; color: #10b981;")
+        self._lbl_ds_name = QLabel("No dataset opened")
+        self._lbl_ds_name.setStyleSheet("font-family: monospace; font-size: 10px;")
+        self._lbl_ds_meta = QLabel("Use File -> Open Data...")
+        self._lbl_ds_meta.setStyleSheet("font-size: 9px; color: #87929a;")
 
-        ds_card_layout.addWidget(lbl_ds_title)
-        ds_card_layout.addWidget(lbl_ds_name)
-        ds_card_layout.addWidget(lbl_ds_meta)
+        ds_card_layout.addWidget(self._lbl_ds_title)
+        ds_card_layout.addWidget(self._lbl_ds_name)
+        ds_card_layout.addWidget(self._lbl_ds_meta)
         aside_layout.addWidget(ds_card)
 
         splitter.addWidget(left_aside)
@@ -271,3 +278,82 @@ class MainWindow(QMainWindow):
         dialog = CartopyPreferencesDialog(self)
         dialog.features_updated.connect(self._view_projection.apply_projection)
         dialog.exec()
+
+    def _open_dataset_dialog(self) -> None:
+        """Open file dialog to select and ingest meteorological dataset."""
+        from PyQt6.QtWidgets import QFileDialog
+
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open Meteorological Dataset",
+            "",
+            "All Supported (*.grib2 *.grib *.grb2 *.nc *.nc4 *.zarr);;GRIB2 (*.grib2 *.grb2);;NetCDF4 (*.nc *.nc4);;All Files (*)",
+        )
+        if file_path:
+            self.load_dataset(file_path)
+
+    def load_dataset(self, file_path: str) -> None:
+        """Load and ingest a dataset across Engine workers and propagate metadata to views."""
+        from pathlib import Path
+        p = Path(file_path).expanduser().resolve()
+        if not p.exists():
+            self._status_bar.showMessage(f"File not found: {p}", 3000)
+            return
+
+        self._status_bar.showMessage(f"Ingesting dataset: {p.name}...", 3000)
+
+        try:
+            pool = self._engine_bridge._pool
+            meta = pool.open_dataset_sync(str(p))
+
+            # Update dataset aside card
+            self._lbl_ds_title.setText(f"LOADED DATASET: {meta.detected_format.upper()}")
+            self._lbl_ds_name.setText(p.name[:28])
+            self._lbl_ds_meta.setText(f"{len(meta.variables)} vars | {len(meta.coordinates)} coords")
+
+            # Update child views
+            self._view_variables.load_dataset_metadata(meta)
+            self._view_spatial.set_header_info(f"{meta.detected_format.upper()}: {p.name}")
+
+            # Switch view to Variables & Dimensions to let user explore
+            self._nav_list.setCurrentRow(1)
+            self._status_bar.showMessage(f"Successfully loaded {p.name} ({len(meta.variables)} variables)", 4000)
+        except Exception as exc:
+            self._status_bar.showMessage(f"Failed to load dataset: {exc}", 5000)
+
+    def _on_plot_field_requested(self, plot_spec: Any) -> None:
+        """Render the requested data slice from VariablesInspectorView onto the Spatial Viewport asynchronously."""
+        vname = plot_spec.slice_spec.variable
+        lvl = plot_spec.slice_spec.level_value
+        lvl_str = f" @ {lvl} hPa" if lvl is not None else ""
+        self._status_bar.showMessage(f"Rendering field '{vname}{lvl_str}' in background...", 3000)
+
+        # Attach the region view spec from the Projection & Region view for consistent projection/extent
+        if hasattr(self._view_projection, "get_spec"):
+            plot_spec.region_view = self._view_projection.get_spec()
+
+        header_str = f"Field: {vname}{lvl_str} | Style: {plot_spec.plot_type} ({plot_spec.colormap})"
+        self._view_spatial.set_header_info(header_str)
+
+        # Switch view to Spatial Viewport immediately so the user sees the canvas with loading indicator
+        self._nav_list.setCurrentRow(0)
+
+        job_id = self._engine_bridge.submit(
+            job_type="field",
+            params={"spec": plot_spec.model_dump()},
+            channel="field",
+            cancel_previous=True,
+        )
+        self._current_field_job_id = job_id
+
+    def _on_engine_job_completed(self, job_id: str, image_data: bytes) -> None:
+        """Handle completed asynchronous render jobs."""
+        if job_id == self._current_field_job_id:
+            self._view_spatial.display_image(image_data)
+            self._status_bar.showMessage("Field rendered successfully", 3000)
+
+    def _on_engine_job_failed(self, job_id: str, error_msg: str) -> None:
+        """Handle failed asynchronous render jobs."""
+        self._status_bar.showMessage(f"Render job failed: {error_msg}", 5000)
+
+

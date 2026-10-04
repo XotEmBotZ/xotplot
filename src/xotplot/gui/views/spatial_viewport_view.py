@@ -21,13 +21,12 @@ from PyQt6.QtWidgets import (
 )
 
 from xotplot.constants import ALL_REGIONS
-from xotplot.gui.mpl_canvas import MplCanvasWidget
+from xotplot.gui.engine_canvas import EngineCanvasWidget
 from xotplot.gui.theme import get_theme_qss
 
 
-
 class SpatialViewportView(QWidget):
-    """Spatial viewport view hosting MplCanvasWidget, scrubber, mini-toolbar, and CLI/YAML dock."""
+    """Spatial viewport view hosting EngineCanvasWidget, scrubber, mini-toolbar, and CLI/YAML dock."""
 
     cursor_moved = pyqtSignal(float, float)
     lead_time_changed = pyqtSignal(int)
@@ -89,7 +88,7 @@ class SpatialViewportView(QWidget):
         upper_layout.addWidget(self._toolbar_frame)
 
         # Canvas Widget
-        self.canvas_widget = MplCanvasWidget(upper_widget)
+        self.canvas_widget = EngineCanvasWidget(upper_widget)
         upper_layout.addWidget(self.canvas_widget, stretch=1)
 
         # Forecast Lead-time scrubber slider (0 to 120h, step 3)
@@ -161,8 +160,7 @@ class SpatialViewportView(QWidget):
         self._btn_probe.toggled.connect(self._on_probe_toggled)
         self._btn_export.clicked.connect(self._on_export_fig)
 
-        # Initial plot & text generation
-        self.canvas_widget.plot_synoptic_field()
+        # Initial text generation
         self._update_inspector_texts(24)
 
     def _on_canvas_cursor_moved(self, lon: float, lat: float) -> None:
@@ -221,8 +219,15 @@ class SpatialViewportView(QWidget):
         )
         self.yaml_text_edit.setPlainText(yaml_cfg)
 
+    def display_image(self, png_bytes: bytes) -> None:
+        """Display rendered PNG image bytes on the EngineCanvasWidget."""
+        self.canvas_widget.set_image_bytes(png_bytes)
+
+    def set_header_info(self, text: str) -> None:
+        """Update top toolbar header label."""
+        self._header_info.setText(text)
+
     def _on_reset_extent(self) -> None:
-        self.canvas_widget.plot_synoptic_field()
         self.extent_reset_requested.emit()
 
     def _on_probe_toggled(self, checked: bool) -> None:
@@ -236,7 +241,7 @@ class SpatialViewportView(QWidget):
             "PNG Image (*.png);;PDF Document (*.pdf);;SVG Vector (*.svg)",
         )
         if file_path:
-            self.canvas_widget.figure.savefig(file_path, dpi=300, bbox_inches="tight")
+            self.canvas_widget.save_figure(file_path)
 
     def set_theme(self, dark_mode: bool) -> None:
         """Update canvas and UI theme styling."""
