@@ -26,8 +26,8 @@ class TestEngineIsolation(unittest.TestCase):
     def test_engine_does_not_import_gui(self) -> None:
         """The engine package must not depend on GUI widgets or PyQt6."""
         import xotplot.engine
-        import xotplot.engine.cartopy_features
-        import xotplot.engine.renderer
+        import xotplot.engine.plotting.cartopy_features
+        import xotplot.engine.plotting.renderer
 
         for mod_name in list(sys.modules.keys()):
             if mod_name.startswith("xotplot.gui") and not mod_name.startswith("xotplot.gui.cartopy_features"):

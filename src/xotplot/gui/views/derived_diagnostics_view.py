@@ -49,6 +49,12 @@ class DerivedDiagnosticsView(QWidget):
             "inputs": ["UGRD", "VGRD", "HGT"],
             "unit": "m/s",
         },
+        "Wind Speed (Velocity)": {
+            "formula": "sqrt(UGRD**2 + VGRD**2)",
+            "desc": "Total horizontal wind velocity magnitude from orthogonal vector components.",
+            "inputs": ["UGRD", "VGRD"],
+            "unit": "m/s",
+        },
         "Frontogenesis (Petterssen 2D)": {
             "formula": "-0.5 * |∇θ| * ((∂u/∂x - ∂v/∂y)*cos(2ψ) + (∂v/∂x + ∂u/∂y)*sin(2ψ))",
             "desc": "Kinematic 2D frontogenesis function tracking baroclinic tightening.",

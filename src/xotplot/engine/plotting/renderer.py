@@ -27,6 +27,10 @@ import numpy as np
 from xotplot.constants import (
     DEFAULT_PLOT_BG_COLOR,
     DEFAULT_PLOT_FG_COLOR,
+    DEFAULT_WIND_BARBS_COLOR,
+    DEFAULT_WIND_BARBS_LENGTH,
+    DEFAULT_WIND_BARBS_PIVOT,
+    DEFAULT_WIND_BARBS_STEP,
 )
 from xotplot.engine.plotting.cartopy_features import (
     get_cached_feature,
@@ -38,6 +42,7 @@ from xotplot.spec import (
     FeatureLayerSpec,
     ProjectionSpec,
     RegionViewSpec,
+    WindBarbsSpec,
 )
 
 
@@ -310,6 +315,44 @@ def subset_slice_by_extent(
     return da
 
 
+def is_wind_variable(var_name: str) -> bool:
+    """Return True if var_name is a wind velocity or vector component."""
+    cv = var_name.lower()
+    return (
+        any(w in cv for w in ["u10", "v10", "ugrd", "vgrd", "u_isobaric", "v_isobaric", "wspd", "wind", "10u", "10v"])
+        or cv in ("u", "v")
+    )
+
+
+def find_wind_components(ds: Any, current_var: str = "") -> tuple[Optional[str], Optional[str]]:
+    """Identify complementary u and v wind component variables in dataset strictly for wind variables."""
+    if current_var and not is_wind_variable(current_var):
+        return (None, None)
+
+    cv_lower = current_var.lower()
+    if any(u in cv_lower for u in ["u10", "u_isobaric", "ugrd", "u_wind", "10u"]) or cv_lower == "u":
+        # Find corresponding v
+        target_v = cv_lower.replace("u", "v")
+        for v in ds.data_vars:
+            if str(v).lower() == target_v:
+                return (current_var, str(v))
+    elif any(v in cv_lower for v in ["v10", "v_isobaric", "vgrd", "v_wind", "10v"]) or cv_lower == "v":
+        # Find corresponding u
+        target_u = cv_lower.replace("v", "u")
+        for u in ds.data_vars:
+            if str(u).lower() == target_u:
+                return (str(u), current_var)
+    elif "wspd" in cv_lower:
+        # If speed variable selected, look for corresponding isobaric or 10m u, v
+        if "isobaric" in cv_lower and "u_isobaric" in ds and "v_isobaric" in ds:
+            return ("u_isobaric", "v_isobaric")
+        if "10" in cv_lower and "u10" in ds and "v10" in ds:
+            return ("u10", "v10")
+
+    return (None, None)
+
+
+
 def render_gridded_field(
     plot_spec: DataPlotSpec,
     ds: Any,
@@ -389,49 +432,51 @@ def render_gridded_field(
     if vmin >= vmax:
         vmax = vmin + 1.0
 
-    # Draw meteorological field based on plot_type
+    # Draw meteorological field based on plot_type (suppressed when rendering pure wind vector variable)
     transform = ccrs.PlateCarree()
     mesh = None
+    is_wind = is_wind_variable(var_name)
 
-    if plot_spec.plot_type == "pcolormesh":
-        mesh = ax.pcolormesh(
-            lons,
-            lats,
-            data_2d,
-            transform=transform,
-            cmap=plot_spec.colormap,
-            vmin=vmin,
-            vmax=vmax,
-            shading="auto",
-            zorder=1,
-        )
-    elif plot_spec.plot_type == "contour":
-        levels = np.linspace(vmin, vmax, plot_spec.num_levels)
-        cs = ax.contour(
-            lons,
-            lats,
-            data_2d,
-            levels=levels,
-            transform=transform,
-            cmap=plot_spec.colormap,
-            linewidths=1.0,
-            zorder=1,
-        )
-        ax.clabel(cs, inline=True, fontsize=7, fmt="%1.1f")
-    else:  # "contourf" default
-        levels = np.linspace(vmin, vmax, plot_spec.num_levels)
-        mesh = ax.contourf(
-            lons,
-            lats,
-            data_2d,
-            levels=levels,
-            transform=transform,
-            cmap=plot_spec.colormap,
-            vmin=vmin,
-            vmax=vmax,
-            extend="both",
-            zorder=1,
-        )
+    if not is_wind:
+        if plot_spec.plot_type == "pcolormesh":
+            mesh = ax.pcolormesh(
+                lons,
+                lats,
+                data_2d,
+                transform=transform,
+                cmap=plot_spec.colormap,
+                vmin=vmin,
+                vmax=vmax,
+                shading="auto",
+                zorder=1,
+            )
+        elif plot_spec.plot_type == "contour":
+            levels = np.linspace(vmin, vmax, plot_spec.num_levels)
+            cs = ax.contour(
+                lons,
+                lats,
+                data_2d,
+                levels=levels,
+                transform=transform,
+                cmap=plot_spec.colormap,
+                linewidths=1.0,
+                zorder=1,
+            )
+            ax.clabel(cs, inline=True, fontsize=7, fmt="%1.1f")
+        else:  # "contourf" default
+            levels = np.linspace(vmin, vmax, plot_spec.num_levels)
+            mesh = ax.contourf(
+                lons,
+                lats,
+                data_2d,
+                levels=levels,
+                transform=transform,
+                cmap=plot_spec.colormap,
+                vmin=vmin,
+                vmax=vmax,
+                extend="both",
+                zorder=1,
+            )
 
     # Render Cartopy geographic boundaries on top of data field (zorder >= 2)
     scale = reg_spec.features.scale
@@ -476,6 +521,69 @@ def render_gridded_field(
                 gl.ylabel_style = {"size": 8, "color": fg_color}
         except Exception:
             pass
+
+    # Render Wind Barbs overlay if configured or if wind variable requested
+    barbs_spec = plot_spec.wind_barbs
+    if barbs_spec and barbs_spec.enabled:
+        u_var = barbs_spec.u_var
+        v_var = barbs_spec.v_var
+        if not u_var or not v_var:
+            u_var, v_var = find_wind_components(ds, current_var=var_name)
+
+        if u_var and v_var and u_var in ds and v_var in ds:
+            try:
+                u_da = ds[u_var]
+                v_da = ds[v_var]
+                if "level" in u_da.dims:
+                    if slice_cfg.level_value is not None:
+                        u_da = u_da.sel(level=slice_cfg.level_value, method="nearest")
+                        v_da = v_da.sel(level=slice_cfg.level_value, method="nearest")
+                    else:
+                        u_da = u_da.isel(level=0)
+                        v_da = v_da.isel(level=0)
+
+                for extra_dim in ("soilLayer", "heightAboveGround"):
+                    if extra_dim in u_da.dims:
+                        u_da = u_da.isel({extra_dim: 0})
+                        v_da = v_da.isel({extra_dim: 0})
+
+                if "time" in u_da.dims:
+                    u_da = u_da.isel(time=slice_cfg.time_index)
+                    v_da = v_da.isel(time=slice_cfg.time_index)
+
+                u_da = subset_slice_by_extent(u_da, reg_spec.extent, proj_spec=reg_spec.projection, buffer_ratio=0.05)
+                v_da = subset_slice_by_extent(v_da, reg_spec.extent, proj_spec=reg_spec.projection, buffer_ratio=0.05)
+
+                b_step = max(1, barbs_spec.step)
+                u_vals = np.asarray(u_da.values)
+                v_vals = np.asarray(v_da.values)
+                b_lats = np.asarray(u_da["lat"].values)
+                b_lons = np.asarray(u_da["lon"].values)
+
+                if b_lats.ndim == 1 and b_lons.ndim == 1:
+                    b_LON, b_LAT = np.meshgrid(b_lons, b_lats)
+                else:
+                    b_LON, b_LAT = b_lons, b_lats
+
+                sub_lon = b_LON[::b_step, ::b_step]
+                sub_lat = b_LAT[::b_step, ::b_step]
+                sub_u = u_vals[::b_step, ::b_step]
+                sub_v = v_vals[::b_step, ::b_step]
+
+                ax.barbs(
+                    sub_lon,
+                    sub_lat,
+                    sub_u,
+                    sub_v,
+                    length=barbs_spec.length,
+                    color=barbs_spec.color,
+                    pivot=barbs_spec.pivot,
+                    linewidth=barbs_spec.linewidth,
+                    transform=transform,
+                    zorder=5,
+                )
+            except Exception:
+                pass
 
     # Colorbar
     if plot_spec.show_colorbar and mesh is not None:
@@ -696,14 +804,16 @@ def render_variable_slice_and_histogram(
     vmax: Optional[float] = None,
     num_levels: int = 15,
     region_spec: Optional[RegionViewSpec] = None,
+    barbs_enabled: bool = False,
+    barbs_step: int = DEFAULT_WIND_BARBS_STEP,
+    barbs_length: float = DEFAULT_WIND_BARBS_LENGTH,
+    barbs_color: str = DEFAULT_WIND_BARBS_COLOR,
+    barbs_pivot: str = DEFAULT_WIND_BARBS_PIVOT,
+    show_histogram: bool = True,
 ) -> Figure:
-    """Render two subplots stacked vertically:
-
-    - Top: Exact final meteorological Cartopy projection & region plot with geographical boundaries.
-    - Bottom: Empirical distribution histogram of the valid grid slice values.
-    """
+    """Render meteorological Cartopy projection map, optionally stacked with empirical distribution histogram."""
     if figure is None:
-        figure = Figure(figsize=(7.0, 7.5), dpi=100)
+        figure = Figure(figsize=(7.0, 7.5 if show_histogram else 6.0), dpi=100)
     else:
         figure.clear()
 
@@ -720,13 +830,17 @@ def render_variable_slice_and_histogram(
     reg_spec = region_spec or RegionViewSpec()
     crs_proj = build_crs(reg_spec.projection)
 
-    # GridSpec: top (Cartopy projection map, ratio 1.5), bottom (histogram, ratio 0.8)
-    gs = figure.add_gridspec(2, 1, height_ratios=[1.5, 0.8], hspace=0.35)
-    ax_top = figure.add_subplot(gs[0], projection=crs_proj)
-    ax_bot = figure.add_subplot(gs[1])
+    if show_histogram:
+        # GridSpec: top (Cartopy projection map, ratio 1.5), bottom (histogram, ratio 0.8)
+        gs = figure.add_gridspec(2, 1, height_ratios=[1.5, 0.8], hspace=0.35)
+        ax_top = figure.add_subplot(gs[0], projection=crs_proj)
+        ax_bot = figure.add_subplot(gs[1])
+        ax_bot.set_facecolor(bg_color)
+    else:
+        ax_top = figure.add_subplot(111, projection=crs_proj)
+        ax_bot = None
 
     ax_top.set_facecolor(bg_color)
-    ax_bot.set_facecolor(bg_color)
 
     # Set geographic extent on top projection plot
     w, e, s, n = reg_spec.extent.as_tuple()
@@ -780,46 +894,48 @@ def render_variable_slice_and_histogram(
     # 1. Top Subplot: Cartopy Map Plot (contourf / pcolormesh / contour)
     transform = ccrs.PlateCarree()
     mesh = None
+    is_wind = is_wind_variable(var_name)
 
-    if plot_type == "pcolormesh":
-        mesh = ax_top.pcolormesh(
-            lons,
-            lats,
-            data_2d,
-            transform=transform,
-            cmap=colormap,
-            vmin=calc_vmin,
-            vmax=calc_vmax,
-            shading="auto",
-            zorder=1,
-        )
-    elif plot_type == "contour":
-        levels = np.linspace(calc_vmin, calc_vmax, num_levels)
-        cs = ax_top.contour(
-            lons,
-            lats,
-            data_2d,
-            levels=levels,
-            transform=transform,
-            cmap=colormap,
-            linewidths=1.0,
-            zorder=1,
-        )
-        ax_top.clabel(cs, inline=True, fontsize=7, fmt="%1.1f")
-    else:  # "contourf" default
-        levels = np.linspace(calc_vmin, calc_vmax, num_levels)
-        mesh = ax_top.contourf(
-            lons,
-            lats,
-            data_2d,
-            levels=levels,
-            transform=transform,
-            cmap=colormap,
-            vmin=calc_vmin,
-            vmax=calc_vmax,
-            extend="both",
-            zorder=1,
-        )
+    if not is_wind:
+        if plot_type == "pcolormesh":
+            mesh = ax_top.pcolormesh(
+                lons,
+                lats,
+                data_2d,
+                transform=transform,
+                cmap=colormap,
+                vmin=calc_vmin,
+                vmax=calc_vmax,
+                shading="auto",
+                zorder=1,
+            )
+        elif plot_type == "contour":
+            levels = np.linspace(calc_vmin, calc_vmax, num_levels)
+            cs = ax_top.contour(
+                lons,
+                lats,
+                data_2d,
+                levels=levels,
+                transform=transform,
+                cmap=colormap,
+                linewidths=1.0,
+                zorder=1,
+            )
+            ax_top.clabel(cs, inline=True, fontsize=7, fmt="%1.1f")
+        else:  # "contourf" default
+            levels = np.linspace(calc_vmin, calc_vmax, num_levels)
+            mesh = ax_top.contourf(
+                lons,
+                lats,
+                data_2d,
+                levels=levels,
+                transform=transform,
+                cmap=colormap,
+                vmin=calc_vmin,
+                vmax=calc_vmax,
+                extend="both",
+                zorder=1,
+            )
 
     # Cartopy Boundaries over data (coastlines, borders, states, rivers, lakes)
     scale = reg_spec.features.scale
@@ -865,6 +981,63 @@ def render_variable_slice_and_histogram(
         except Exception:
             pass
 
+    # Render Wind Barbs overlay if wind variable or if wind components found
+    if barbs_enabled:
+        u_var, v_var = find_wind_components(ds, current_var=var_name)
+        if u_var and v_var and u_var in ds and v_var in ds:
+            try:
+                u_da = ds[u_var]
+                v_da = ds[v_var]
+                if "level" in u_da.dims:
+                    if level_val is not None:
+                        u_da = u_da.sel(level=level_val, method="nearest")
+                        v_da = v_da.sel(level=level_val, method="nearest")
+                    else:
+                        u_da = u_da.isel(level=0)
+                        v_da = v_da.isel(level=0)
+
+                for extra_dim in ("soilLayer", "heightAboveGround"):
+                    if extra_dim in u_da.dims:
+                        u_da = u_da.isel({extra_dim: 0})
+                        v_da = v_da.isel({extra_dim: 0})
+
+                if "time" in u_da.dims:
+                    u_da = u_da.isel(time=0)
+                    v_da = v_da.isel(time=0)
+
+                u_da = subset_slice_by_extent(u_da, reg_spec.extent, proj_spec=reg_spec.projection, buffer_ratio=0.05)
+                v_da = subset_slice_by_extent(v_da, reg_spec.extent, proj_spec=reg_spec.projection, buffer_ratio=0.05)
+
+                b_step = max(1, barbs_step)
+                u_vals = np.asarray(u_da.values)
+                v_vals = np.asarray(v_da.values)
+                b_lats = np.asarray(u_da["lat"].values)
+                b_lons = np.asarray(u_da["lon"].values)
+
+                if b_lats.ndim == 1 and b_lons.ndim == 1:
+                    b_LON, b_LAT = np.meshgrid(b_lons, b_lats)
+                else:
+                    b_LON, b_LAT = b_lons, b_lats
+
+                sub_lon = b_LON[::b_step, ::b_step]
+                sub_lat = b_LAT[::b_step, ::b_step]
+                sub_u = u_vals[::b_step, ::b_step]
+                sub_v = v_vals[::b_step, ::b_step]
+
+                ax_top.barbs(
+                    sub_lon,
+                    sub_lat,
+                    sub_u,
+                    sub_v,
+                    length=barbs_length,
+                    color=barbs_color,
+                    pivot=barbs_pivot,
+                    transform=transform,
+                    zorder=5,
+                )
+            except Exception:
+                pass
+
     # Top Colorbar
     if mesh is not None:
         cbar = figure.colorbar(mesh, ax=ax_top, orientation="horizontal", pad=0.08, fraction=0.046, aspect=30)
@@ -875,33 +1048,35 @@ def render_variable_slice_and_histogram(
     lvl_str = f" @ {level_val:.0f} hPa" if level_val is not None else ""
     ax_top.set_title(f"{long_name}{lvl_str} — {reg_spec.projection.crs_id} [{reg_spec.preset_name}]", fontsize=9, color=fg_color, pad=4)
 
-    # 2. Bottom Subplot: Histogram & Distribution Statistics
-    if len(valid_data) > 0:
-        counts, bins, _ = ax_bot.hist(
-            valid_data,
-            bins=40,
-            density=True,
-            color="#0284c7",
-            alpha=0.75,
-            edgecolor="#0369a1",
-        )
-        mean_val = float(np.mean(valid_data))
-        std_val = float(np.std(valid_data))
-        p05 = float(np.percentile(valid_data, 5))
-        p95 = float(np.percentile(valid_data, 95))
+    # 2. Bottom Subplot: Histogram & Distribution Statistics (if show_histogram requested)
+    if ax_bot is not None:
+        if len(valid_data) > 0:
+            counts, bins, _ = ax_bot.hist(
+                valid_data,
+                bins=40,
+                density=True,
+                color="#0284c7",
+                alpha=0.75,
+                edgecolor="#0369a1",
+            )
+            mean_val = float(np.mean(valid_data))
+            std_val = float(np.std(valid_data))
+            p05 = float(np.percentile(valid_data, 5))
+            p95 = float(np.percentile(valid_data, 95))
 
-        ax_bot.axvline(mean_val, color="#e11d48", linestyle="--", linewidth=1.5, label=f"Mean: {mean_val:.2f}")
-        ax_bot.axvline(p05, color="#64748b", linestyle=":", linewidth=1.0, label=f"5th/95th: [{p05:.1f}, {p95:.1f}]")
-        ax_bot.axvline(p95, color="#64748b", linestyle=":", linewidth=1.0)
+            ax_bot.axvline(mean_val, color="#e11d48", linestyle="--", linewidth=1.5, label=f"Mean: {mean_val:.2f}")
+            ax_bot.axvline(p05, color="#64748b", linestyle=":", linewidth=1.0, label=f"5th/95th: [{p05:.1f}, {p95:.1f}]")
+            ax_bot.axvline(p95, color="#64748b", linestyle=":", linewidth=1.0)
 
-        ax_bot.legend(loc="upper right", fontsize=7, framealpha=0.4)
+            ax_bot.legend(loc="upper right", fontsize=7, framealpha=0.4)
 
-    ax_bot.set_title(f"Distribution & Frequency Histogram ({len(valid_data):,} grid pts)", fontsize=9, color=fg_color, pad=4)
-    ax_bot.set_xlabel(f"Value [{unit}]" if unit else "Value", fontsize=8, color=fg_color)
-    ax_bot.set_ylabel("Probability Density", fontsize=8, color=fg_color)
-    ax_bot.tick_params(labelsize=7, colors=fg_color)
-    ax_bot.grid(True, linestyle=":", alpha=0.5, color="#94a3b8")
+        ax_bot.set_title(f"Distribution & Frequency Histogram ({len(valid_data):,} grid pts)", fontsize=9, color=fg_color, pad=4)
+        ax_bot.set_xlabel(f"Value [{unit}]" if unit else "Value", fontsize=8, color=fg_color)
+        ax_bot.set_ylabel("Probability Density", fontsize=8, color=fg_color)
+        ax_bot.tick_params(labelsize=7, colors=fg_color)
+        ax_bot.grid(True, linestyle=":", alpha=0.5, color="#94a3b8")
 
+    figure.tight_layout()
     return figure
 
 
@@ -995,6 +1170,11 @@ def render_diagnostic_plot(
         field = 500 * np.exp(-((X + 90) ** 2 + (Y - 30) ** 2) / 350.0)
         cmap = "Blues"
         title = "Integrated Vapor Transport (IVT) [kg m⁻¹ s⁻¹]"
+    elif "Speed" in preset_name or "Velocity" in preset_name:
+        # Synthetic horizontal wind velocity field (m/s)
+        field = 15.0 + 30.0 * np.exp(-((Y - 38) ** 2) / 45.0) * (0.8 + 0.3 * np.cos(np.radians(X * 3)))
+        cmap = "plasma"
+        title = "Horizontal Wind Speed (Velocity) [m/s]"
     else:
         field = 10 * np.sin(np.radians(X * 2)) * np.cos(np.radians(Y * 2))
         cmap = "viridis"
@@ -1202,6 +1382,12 @@ def execute_render_job(
         num_levels = params.get("num_levels", 15)
         raw_reg = params.get("region_spec")
         region_spec = RegionViewSpec.model_validate(raw_reg) if raw_reg is not None else None
+        barbs_enabled = params.get("barbs_enabled", True)
+        barbs_step = params.get("barbs_step", 5)
+        barbs_length = params.get("barbs_length", 6.0)
+        barbs_color = params.get("barbs_color", "#0f172a")
+        barbs_pivot = params.get("barbs_pivot", "middle")
+        show_histogram = params.get("show_histogram", True)
         render_variable_slice_and_histogram(
             var_name=var_name,
             level_val=level_val,
@@ -1213,6 +1399,12 @@ def execute_render_job(
             vmax=vmax,
             num_levels=num_levels,
             region_spec=region_spec,
+            barbs_enabled=barbs_enabled,
+            barbs_step=barbs_step,
+            barbs_length=barbs_length,
+            barbs_color=barbs_color,
+            barbs_pivot=barbs_pivot,
+            show_histogram=show_histogram,
         )
     elif job_type == "synoptic":
         render_synoptic_field(figure=fig)

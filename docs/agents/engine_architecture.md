@@ -17,13 +17,12 @@ This document records the stateless rendering engine architecture, multi-core pr
   - Natural Earth feature caching, discovery, downloading, and geometry loading (`load_shapefile_geometries`).
 - [`src/xotplot/engine/renderer.py`](file:///home/xotem/projects/xotplot/src/xotplot/engine/renderer.py):
   - Headless rendering routines:
-    - `build_crs(proj_spec)`
     - `render_region_plot(spec, figure)`
+    - `render_gridded_field(plot_spec, ds, figure)` (with optional meteorological wind barbs overlay)
+    - `render_variable_slice_and_histogram(var_name, level_val, ds, figure, ...)` (with regional wind barbs overlay)
     - `render_synoptic_field(figure)`
     - `render_layer_composite(layers, figure)`
-    - `render_variable_profile(var, time_step, figure)`
-    - `render_variable_cross_section(var, time_step, lat_min, lat_max, figure)`
-    - `render_diagnostic_plot(var_name, unit_str, preset_name, figure)`
+    - `render_diagnostic_plot(var_name, unit_str, preset_name, figure)` (includes Horizontal Wind Speed preset)
     - `render_colormap_transfer_plot(...)`
   - Serialization: `figure_to_png_bytes(figure, dpi)` without redundant double-render.
   - Dispatcher: `execute_render_job(job_type, params, width, height, dpi) -> bytes`.

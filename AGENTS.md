@@ -11,4 +11,6 @@ All default styling colors, assumptions, parameters, and constants must be place
 
 All plot related code must be in engine module, gui/tui/cli will just communicate with this engine module to get the things done. Engine must be a different process itself and must not interfear with execution of the GUI/TUI/CLI so that all stays resposnsive irrespective of what engine is doing.
 
+We need debounce on all imputs which can be quickly changed, and all thing needs to be submited to the engine, GUI mustn't freeze because the computation is heavy
+
 NEVER COMMIT UNLESS I EXPECITLY STATE TO.

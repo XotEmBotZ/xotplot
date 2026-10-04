@@ -227,3 +227,23 @@ KNOWN_LON_NAMES: tuple[str, ...] = ("longitude", "lon", "nav_lon", "x", "lon_0")
 KNOWN_TIME_NAMES: tuple[str, ...] = ("valid_time", "time", "forecast_time", "step")
 KNOWN_LEVEL_NAMES: tuple[str, ...] = ("isobaricInhPa", "level", "pressure", "plev", "isobaric")
 
+# =============================================================================
+# Wind Field & Barbs Constants
+# =============================================================================
+DEFAULT_WIND_BARBS_ENABLED: bool = False
+DEFAULT_WIND_BARBS_STEP: int = 5
+DEFAULT_WIND_BARBS_LENGTH: float = 6.0
+DEFAULT_WIND_BARBS_COLOR: str = "#0f172a"
+DEFAULT_WIND_BARBS_PIVOT: str = "middle"
+DEFAULT_WIND_CMAP: str = "viridis"
+WIND_BARB_COLORS: list[str] = [
+    "#0f172a",  # Slate / Black (Default)
+    "#0284c7",  # Ocean Blue
+    "#dc2626",  # Crimson Red
+    "#16a34a",  # Forest Green
+    "#9333ea",  # Purple
+    "#ffffff",  # White
+]
+
+
+

@@ -19,6 +19,11 @@ from xotplot.constants import (
     DEFAULT_RIVER_COLOR,
     DEFAULT_SHP_COLOR,
     DEFAULT_STATE_COLOR,
+    DEFAULT_WIND_BARBS_COLOR,
+    DEFAULT_WIND_BARBS_ENABLED,
+    DEFAULT_WIND_BARBS_LENGTH,
+    DEFAULT_WIND_BARBS_PIVOT,
+    DEFAULT_WIND_BARBS_STEP,
 )
 
 CrsId = Literal[
@@ -228,6 +233,19 @@ class DatasetMetadata(BaseModel):
 PlotFieldType = Literal["contourf", "pcolormesh", "contour"]
 
 
+class WindBarbsSpec(BaseModel):
+    """Specification for overlaying wind barbs on meteorological maps."""
+
+    enabled: bool = DEFAULT_WIND_BARBS_ENABLED
+    u_var: Optional[str] = None
+    v_var: Optional[str] = None
+    step: Annotated[int, Field(ge=1, le=50)] = DEFAULT_WIND_BARBS_STEP
+    length: Annotated[float, Field(gt=0.0)] = DEFAULT_WIND_BARBS_LENGTH
+    color: str = DEFAULT_WIND_BARBS_COLOR
+    pivot: Literal["tip", "middle"] = "middle"
+    linewidth: Annotated[float, Field(gt=0.0)] = 0.8
+
+
 class DataSliceSpec(BaseModel):
     """Specification for slicing a 2D horizontal field from an in-memory dataset."""
 
@@ -250,5 +268,7 @@ class DataPlotSpec(BaseModel):
     show_colorbar: bool = True
     colorbar_label: Optional[str] = None
     region_view: RegionViewSpec = Field(default_factory=RegionViewSpec)
+    wind_barbs: Optional[WindBarbsSpec] = None
+
 
 

@@ -6,6 +6,7 @@ from typing import Optional
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QComboBox,
     QDoubleSpinBox,
     QFrame,
@@ -16,7 +17,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
-    QRadioButton,
     QSlider,
     QSpinBox,
     QSplitter,
@@ -28,11 +28,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from xotplot.engine import (
-    get_qt_engine_bridge,
-    render_variable_cross_section,
-    render_variable_profile,
-)
+from xotplot.constants import WIND_BARB_COLORS
+from xotplot.engine import get_qt_engine_bridge
+from xotplot.engine.plotting.renderer import is_wind_variable
 from xotplot.gui.engine_canvas import EngineCanvasWidget
 from xotplot.gui.theme import get_theme_qss
 from xotplot.spec import DataPlotSpec, DataSliceSpec, DatasetMetadata, RegionViewSpec
@@ -42,7 +40,6 @@ class VariablesInspectorView(QWidget):
     """View providing hierarchical variable tree, statistical summaries, colormap controls, and plot requests."""
 
     variable_selected = pyqtSignal(str)
-    slice_mode_changed = pyqtSignal(str)
     coordinate_changed = pyqtSignal(dict)
     plot_requested = pyqtSignal(object)  # Emits DataPlotSpec
 
@@ -53,7 +50,6 @@ class VariablesInspectorView(QWidget):
         self._current_var = "t2m"
         self._current_level: Optional[float] = None
         self._current_level_type: Optional[str] = "surface"
-        self._current_slice_mode = "Direct Slice"
         self._current_hist_job_id: Optional[str] = None
         self._region_spec_provider: Optional[Any] = None
 
@@ -66,6 +62,12 @@ class VariablesInspectorView(QWidget):
         self._bounds_debounce_timer.setSingleShot(True)
         self._bounds_debounce_timer.setInterval(400)
         self._bounds_debounce_timer.timeout.connect(self._update_profile_plot)
+
+        # Debounce timer for adjusting wind barb parameters (density, length)
+        self._wind_debounce_timer = QTimer(self)
+        self._wind_debounce_timer.setSingleShot(True)
+        self._wind_debounce_timer.setInterval(300)
+        self._wind_debounce_timer.timeout.connect(self._update_profile_plot)
 
         self._init_ui()
 
@@ -106,14 +108,14 @@ class VariablesInspectorView(QWidget):
         left_layout.addWidget(tree_group, stretch=2)
 
         # 2. Mandatory Colormap & Plot Styling Controls (Option 3)
-        plot_ctrl_group = QGroupBox("Plot Styling & Rendering Controls", left_widget)
-        plot_ctrl_grid = QGridLayout(plot_ctrl_group)
+        self.plot_ctrl_group = QGroupBox("Plot Styling & Rendering Controls", left_widget)
+        plot_ctrl_grid = QGridLayout(self.plot_ctrl_group)
         plot_ctrl_grid.setContentsMargins(8, 8, 8, 8)
         plot_ctrl_grid.setSpacing(6)
 
         # Colormap picker
         plot_ctrl_grid.addWidget(QLabel("Colormap:"), 0, 0)
-        self.combo_cmap = QComboBox(plot_ctrl_group)
+        self.combo_cmap = QComboBox(self.plot_ctrl_group)
         self.combo_cmap.addItems([
             "coolwarm", "viridis", "plasma", "magma", "turbo",
             "Blues", "YlGnBu", "Spectral_r", "Greys_r", "cividis"
@@ -122,13 +124,13 @@ class VariablesInspectorView(QWidget):
 
         # Plot Style (contourf, pcolormesh, contour)
         plot_ctrl_grid.addWidget(QLabel("Plot Style:"), 0, 2)
-        self.combo_style = QComboBox(plot_ctrl_group)
+        self.combo_style = QComboBox(self.plot_ctrl_group)
         self.combo_style.addItems(["contourf", "pcolormesh", "contour"])
         plot_ctrl_grid.addWidget(self.combo_style, 0, 3)
 
         # Min / Max numerical bounds
         plot_ctrl_grid.addWidget(QLabel("Min Value:"), 1, 0)
-        self.spin_vmin = QDoubleSpinBox(plot_ctrl_group)
+        self.spin_vmin = QDoubleSpinBox(self.plot_ctrl_group)
         self.spin_vmin.setRange(-1e9, 1e9)
         self.spin_vmin.setDecimals(2)
         self.spin_vmin.setSpecialValueText("Auto")
@@ -136,7 +138,7 @@ class VariablesInspectorView(QWidget):
         plot_ctrl_grid.addWidget(self.spin_vmin, 1, 1)
 
         plot_ctrl_grid.addWidget(QLabel("Max Value:"), 1, 2)
-        self.spin_vmax = QDoubleSpinBox(plot_ctrl_group)
+        self.spin_vmax = QDoubleSpinBox(self.plot_ctrl_group)
         self.spin_vmax.setRange(-1e9, 1e9)
         self.spin_vmax.setDecimals(2)
         self.spin_vmax.setSpecialValueText("Auto")
@@ -145,36 +147,59 @@ class VariablesInspectorView(QWidget):
 
         # Contour levels count & buttons
         plot_ctrl_grid.addWidget(QLabel("Contour Levels:"), 2, 0)
-        self.spin_levels = QSpinBox(plot_ctrl_group)
+        self.spin_levels = QSpinBox(self.plot_ctrl_group)
         self.spin_levels.setRange(5, 60)
         self.spin_levels.setValue(15)
         plot_ctrl_grid.addWidget(self.spin_levels, 2, 1)
 
-        self.btn_reset_bounds = QPushButton("Reset Min/Max (Auto)", plot_ctrl_group)
+        self.btn_reset_bounds = QPushButton("Reset Min/Max (Auto)", self.plot_ctrl_group)
         self.btn_reset_bounds.setObjectName("primaryAction")
         self.btn_reset_bounds.setToolTip("Reset numerical bounds to Auto (data min/max)")
         plot_ctrl_grid.addWidget(self.btn_reset_bounds, 2, 2, 1, 2)
 
-        left_layout.addWidget(plot_ctrl_group)
+        left_layout.addWidget(self.plot_ctrl_group)
 
-        # 3. Dimension Reduction & Slicing Dock
-        reduction_group = QGroupBox("Dimension Reduction & Profile Slicing", left_widget)
-        reduction_layout = QHBoxLayout(reduction_group)
-        reduction_layout.setContentsMargins(8, 8, 8, 8)
-        reduction_layout.setSpacing(10)
+        # Dedicated Wind Barbs Configuration Panel (visible only for wind variables)
+        self.wind_barbs_group = QGroupBox("Wind Barbs Configuration", left_widget)
+        barbs_layout = QGridLayout(self.wind_barbs_group)
+        barbs_layout.setContentsMargins(8, 8, 8, 8)
+        barbs_layout.setSpacing(6)
 
-        self.rb_direct = QRadioButton("Direct Slice", reduction_group)
-        self.rb_direct.setChecked(True)
-        self.rb_zonal = QRadioButton("Zonal Mean (d/dλ)", reduction_group)
-        self.rb_time = QRadioButton("Time Mean (d/dt)", reduction_group)
-        self.rb_vert = QRadioButton("Vertical Integral (∫dp)", reduction_group)
+        # Barb density (subsampling grid step)
+        barbs_layout.addWidget(QLabel("Density (Grid Step):"), 0, 0)
+        self.spin_barbs_step = QSpinBox(self.wind_barbs_group)
+        self.spin_barbs_step.setRange(1, 40)
+        self.spin_barbs_step.setValue(5)
+        self.spin_barbs_step.setToolTip("Grid subsampling step interval (1 = dense, 10+ = sparse)")
+        barbs_layout.addWidget(self.spin_barbs_step, 0, 1)
 
-        reduction_layout.addWidget(self.rb_direct)
-        reduction_layout.addWidget(self.rb_zonal)
-        reduction_layout.addWidget(self.rb_time)
-        reduction_layout.addWidget(self.rb_vert)
+        # Barb length
+        barbs_layout.addWidget(QLabel("Barb Length:"), 0, 2)
+        self.spin_barbs_length = QDoubleSpinBox(self.wind_barbs_group)
+        self.spin_barbs_length.setRange(2.0, 20.0)
+        self.spin_barbs_length.setSingleStep(0.5)
+        self.spin_barbs_length.setValue(6.0)
+        self.spin_barbs_length.setToolTip("Length scale of wind barbs in points")
+        barbs_layout.addWidget(self.spin_barbs_length, 0, 3)
 
-        left_layout.addWidget(reduction_group)
+        # Barb vector pivot point
+        barbs_layout.addWidget(QLabel("Pivot Point:"), 1, 0)
+        self.combo_barbs_pivot = QComboBox(self.wind_barbs_group)
+        self.combo_barbs_pivot.addItems(["middle", "tip"])
+        self.combo_barbs_pivot.setToolTip("Grid point anchor point: 'middle' or 'tip'")
+        barbs_layout.addWidget(self.combo_barbs_pivot, 1, 1)
+
+        # Barb color
+        barbs_layout.addWidget(QLabel("Barb Color:"), 1, 2)
+        self.combo_barbs_color = QComboBox(self.wind_barbs_group)
+        for col in WIND_BARB_COLORS:
+            self.combo_barbs_color.addItem(col)
+        self.combo_barbs_color.setToolTip("Stroke color of wind barbs")
+        barbs_layout.addWidget(self.combo_barbs_color, 1, 3)
+
+        # Initially hidden until a wind variable is selected
+        self.wind_barbs_group.setVisible(False)
+        left_layout.addWidget(self.wind_barbs_group)
         self._splitter.addWidget(left_widget)
 
         # Right Container: Diagnostic Canvas (Profile / Cross-Section)
@@ -188,6 +213,11 @@ class VariablesInspectorView(QWidget):
         self.plot_title_lbl.setStyleSheet("font-weight: bold; font-size: 12px;")
         top_bar.addWidget(self.plot_title_lbl)
         top_bar.addStretch()
+
+        self.btn_toggle_histogram = QPushButton("Map Only", right_widget)
+        self.btn_toggle_histogram.setCheckable(True)
+        self.btn_toggle_histogram.setToolTip("Toggle to hide histogram and maximize map viewing space")
+        top_bar.addWidget(self.btn_toggle_histogram)
 
         self.btn_refresh_plot = QPushButton("Recompute Plots", right_widget)
         top_bar.addWidget(self.btn_refresh_plot)
@@ -214,10 +244,11 @@ class VariablesInspectorView(QWidget):
         self.spin_levels.valueChanged.connect(lambda _: self._update_profile_plot())
         self.btn_reset_bounds.clicked.connect(self._on_reset_bounds_clicked)
         self.btn_refresh_plot.clicked.connect(self._update_profile_plot)
-        self.rb_direct.toggled.connect(self._on_slice_mode_toggled)
-        self.rb_zonal.toggled.connect(self._on_slice_mode_toggled)
-        self.rb_time.toggled.connect(self._on_slice_mode_toggled)
-        self.rb_vert.toggled.connect(self._on_slice_mode_toggled)
+        self.btn_toggle_histogram.toggled.connect(lambda _: self._update_profile_plot())
+        self.spin_barbs_step.valueChanged.connect(self._on_wind_control_changed)
+        self.spin_barbs_length.valueChanged.connect(self._on_wind_control_changed)
+        self.combo_barbs_pivot.currentTextChanged.connect(lambda _: self._update_profile_plot())
+        self.combo_barbs_color.currentTextChanged.connect(lambda _: self._update_profile_plot())
 
     def set_region_spec_provider(self, provider: Any) -> None:
         """Set a callable that returns the current RegionViewSpec from ProjectionRegionView."""
@@ -327,13 +358,23 @@ class VariablesInspectorView(QWidget):
         self._current_level_type = data["level_type"]
 
         lvl_txt = f" ({self._current_level:.0f} hPa)" if self._current_level is not None else ""
-        self.plot_title_lbl.setText(f"Diagnostic Plot: {self._current_var.upper()}{lvl_txt} ({self._current_slice_mode})")
+        self.plot_title_lbl.setText(f"Field & Distribution: {self._current_var.upper()}{lvl_txt}")
+
+        # Check if selected variable is a meteorological wind variable
+        is_wind_var = is_wind_variable(self._current_var)
+        self.plot_ctrl_group.setVisible(not is_wind_var)
+        self.wind_barbs_group.setVisible(is_wind_var)
+
         self.variable_selected.emit(self._current_var)
         self._update_profile_plot()
 
     def _on_bounds_spin_changed(self) -> None:
         """Debounce numerical bounds adjustments to avoid recalculating while typing."""
         self._bounds_debounce_timer.start()
+
+    def _on_wind_control_changed(self) -> None:
+        """Debounce wind barb parameter adjustments (step/length spinboxes) to prevent repeated renders."""
+        self._wind_debounce_timer.start()
 
     def _on_reset_bounds_clicked(self) -> None:
         """Reset both min and max to Auto (-1e9 and 1e9), triggering immediate redraw."""
@@ -344,47 +385,6 @@ class VariablesInspectorView(QWidget):
         self.spin_vmax.setValue(1e9)
         self.spin_vmin.blockSignals(False)
         self.spin_vmax.blockSignals(False)
-        self._update_profile_plot()
-
-    def _on_plot_to_viewport_clicked(self) -> None:
-        """Emit DataPlotSpec to MainWindow to render the selected field on the map viewport."""
-        vmin = self.spin_vmin.value() if self.spin_vmin.value() > -1e9 else None
-        vmax = self.spin_vmax.value() if self.spin_vmax.value() < 1e9 else None
-
-        slice_spec = DataSliceSpec(
-            variable=self._current_var,
-            level_type=self._current_level_type,
-            level_value=self._current_level,
-            time_index=0,
-        )
-
-        plot_spec = DataPlotSpec(
-            dataset_id=self._metadata.dataset_id if self._metadata else None,
-            slice_spec=slice_spec,
-            plot_type=self.combo_style.currentText(),  # type: ignore[arg-type]
-            colormap=self.combo_cmap.currentText(),
-            vmin=vmin,
-            vmax=vmax,
-            num_levels=self.spin_levels.value(),
-            show_colorbar=True,
-            region_view=RegionViewSpec(),
-        )
-
-        self.plot_requested.emit(plot_spec)
-
-    def _on_slice_mode_toggled(self) -> None:
-        if self.rb_direct.isChecked():
-            self._current_slice_mode = "Direct Slice"
-        elif self.rb_zonal.isChecked():
-            self._current_slice_mode = "Zonal Mean"
-        elif self.rb_time.isChecked():
-            self._current_slice_mode = "Time Mean"
-        elif self.rb_vert.isChecked():
-            self._current_slice_mode = "Vertical Integral"
-
-        lvl_txt = f" ({self._current_level:.0f} hPa)" if self._current_level is not None else ""
-        self.plot_title_lbl.setText(f"Field & Distribution: {self._current_var.upper()}{lvl_txt} ({self._current_slice_mode})")
-        self.slice_mode_changed.emit(self._current_slice_mode)
         self._update_profile_plot()
 
     def _update_profile_plot(self) -> None:
@@ -401,6 +401,8 @@ class VariablesInspectorView(QWidget):
             except Exception:
                 reg_spec_dict = None
 
+        is_wind_var = is_wind_variable(self._current_var)
+
         self._current_hist_job_id = self._engine_bridge.submit(
             job_type="slice_histogram",
             params={
@@ -413,11 +415,17 @@ class VariablesInspectorView(QWidget):
                 "vmax": vmax,
                 "num_levels": self.spin_levels.value(),
                 "region_spec": reg_spec_dict,
+                "barbs_enabled": is_wind_var,
+                "barbs_step": self.spin_barbs_step.value(),
+                "barbs_length": self.spin_barbs_length.value(),
+                "barbs_pivot": self.combo_barbs_pivot.currentText(),
+                "barbs_color": self.combo_barbs_color.currentText(),
+                "show_histogram": not self.btn_toggle_histogram.isChecked(),
             },
             channel="inspector_hist",
             cancel_previous=True,
             width=6.5,
-            height=6.0,
+            height=6.0 if not self.btn_toggle_histogram.isChecked() else 5.5,
         )
 
     def _on_engine_job_completed(self, job_id: str, image_data: bytes) -> None:

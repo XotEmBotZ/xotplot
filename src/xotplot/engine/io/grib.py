@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Dict, List
 import warnings
 import cfgrib
+import numpy as np
 import xarray as xr
 
 from xotplot.constants import (
@@ -95,3 +96,4 @@ def load_grib2_dataset(file_path: str | Path) -> xr.Dataset:
     unified = canonicalize_coordinates(unified)
 
     return unified
+
