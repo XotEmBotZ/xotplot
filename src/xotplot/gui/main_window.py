@@ -189,8 +189,6 @@ class MainWindow(QMainWindow):
 
         # Instantiate all 8 reference views
         self._view_spatial = SpatialViewportView()
-        self._view_spatial.cursor_moved.connect(self._on_cursor_coords)
-
         self._view_variables = VariablesInspectorView()
         self._view_projection = ProjectionRegionView()
         self._view_layers = LayerStackView()
@@ -223,17 +221,8 @@ class MainWindow(QMainWindow):
         self._status_bar = QStatusBar(self)
         self.setStatusBar(self._status_bar)
 
-        self._lbl_cursor = QLabel("CURSOR: LAT 43.72° N | LON 79.34° W")
-        self._lbl_val = QLabel("VALUE: 998.42 hPa [MSLP]")
-        self._lbl_proj = QLabel("PROJECTION: LambertConformal")
-        self._lbl_fps = QLabel("FPS: 59.8 | MEM: 1842 MB")
         self._lbl_idle = QLabel(STATUS_IDLE_TEXT)
         self._lbl_idle.setStyleSheet(f"color: {STATUS_IDLE_COLOR}; font-weight: bold;")
-
-        self._status_bar.addWidget(self._lbl_cursor)
-        self._status_bar.addWidget(self._lbl_val)
-        self._status_bar.addWidget(self._lbl_proj)
-        self._status_bar.addPermanentWidget(self._lbl_fps)
         self._status_bar.addPermanentWidget(self._lbl_idle)
 
         self._engine_bridge = get_qt_engine_bridge()
@@ -252,11 +241,6 @@ class MainWindow(QMainWindow):
         if 0 <= index < len(self._views_list):
             self._view_stack.setCurrentIndex(index)
             self._status_bar.showMessage(f"Active Workbench View: {self.VIEW_NAMES[index]}", 1500)
-
-    def _on_cursor_coords(self, lon: float, lat: float) -> None:
-        ns = "N" if lat >= 0 else "S"
-        ew = "E" if lon >= 0 else "W"
-        self._lbl_cursor.setText(f"CURSOR: LAT {abs(lat):.2f}° {ns} | LON {abs(lon):.2f}° {ew}")
 
     def _on_toggle_theme(self, checked: bool) -> None:
         self._set_theme(checked)

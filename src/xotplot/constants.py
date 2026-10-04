@@ -206,3 +206,10 @@ STATUS_IDLE_COLOR: str = "#10b981"
 STATUS_BUSY_TEXT: str = "● BUSY"
 STATUS_BUSY_COLOR: str = "#f59e0b"
 VIEWPORT_DEBOUNCE_MS: int = 35
+
+# =============================================================================
+# Projection & UI Selection Styling Assumptions
+# =============================================================================
+PROJECTION_ACTIVE_BG: str = "#0284c7"
+PROJECTION_ACTIVE_FG: str = "#ffffff"
+PROJECTION_ACTIVE_BORDER: str = "#38bdf8"

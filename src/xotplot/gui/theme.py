@@ -100,6 +100,13 @@ QPushButton:disabled {
     border-color: #262a34;
 }
 
+QPushButton:checked, QPushButton[activeCard="true"] {
+    background-color: #0284c7;
+    color: #ffffff;
+    border: 2px solid #38bdf8;
+    font-weight: bold;
+}
+
 QPushButton#primaryAction {
     background-color: #004965;
     color: #8ed5ff;
@@ -332,6 +339,13 @@ QPushButton:disabled {
     background-color: #f8fafc;
     color: #94a3b8;
     border-color: #e2e8f0;
+}
+
+QPushButton:checked, QPushButton[activeCard="true"] {
+    background-color: #0284c7;
+    color: #ffffff;
+    border: 2px solid #0369a1;
+    font-weight: bold;
 }
 
 QPushButton#primaryAction {

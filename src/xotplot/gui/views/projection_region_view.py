@@ -38,6 +38,9 @@ from xotplot.constants import (
     DEFAULT_RIVER_COLOR,
     DEFAULT_SHP_COLOR,
     DEFAULT_STATE_COLOR,
+    PROJECTION_ACTIVE_BG,
+    PROJECTION_ACTIVE_BORDER,
+    PROJECTION_ACTIVE_FG,
     REGION_CATEGORIES,
     VIEWPORT_DEBOUNCE_MS,
 )
@@ -181,8 +184,10 @@ class ProjectionRegionView(QWidget):
         # ---------------------------------------------------------------------
         # 2. Cartopy CRS Library Grid Cards
         # ---------------------------------------------------------------------
-        crs_group = QGroupBox("2. Cartopy CRS Library", self)
-        crs_grid = QGridLayout(crs_group)
+        curr_crs = next((c for c in self.CRS_CARDS if c["id"] == self._current_crs_id), None)
+        title_suffix = f" — Active: {curr_crs['name']} [{curr_crs['code'].upper()}]" if curr_crs else ""
+        self.crs_group = QGroupBox(f"2. Cartopy CRS Library{title_suffix}", self)
+        crs_grid = QGridLayout(self.crs_group)
         crs_grid.setSpacing(6)
 
         self._btn_group = QButtonGroup(self)
@@ -191,12 +196,28 @@ class ProjectionRegionView(QWidget):
         for idx, crs_info in enumerate(self.CRS_CARDS):
             row = idx // 2
             col = idx % 2
-            card_btn = QPushButton(f"{crs_info['name']}\n[{crs_info['code'].upper()}]")
+            is_active = (crs_info["id"] == self._current_crs_id)
+            prefix = "● " if is_active else ""
+            card_btn = QPushButton(f"{prefix}{crs_info['name']}\n[{crs_info['code'].upper()}]")
             card_btn.setCheckable(True)
             card_btn.setToolTip(crs_info["desc"])
             card_btn.setMinimumHeight(44)
-            card_btn.setStyleSheet("text-align: center; font-size: 11px;")
-            if crs_info["id"] == self._current_crs_id:
+            card_btn.setStyleSheet(f"""
+                QPushButton {{
+                    text-align: center;
+                    font-size: 11px;
+                    border: 1px solid #3e484f;
+                    border-radius: 4px;
+                    padding: 4px;
+                }}
+                QPushButton:checked, QPushButton[activeCard="true"] {{
+                    background-color: {PROJECTION_ACTIVE_BG};
+                    color: {PROJECTION_ACTIVE_FG};
+                    border: 2px solid {PROJECTION_ACTIVE_BORDER};
+                    font-weight: bold;
+                }}
+            """)
+            if is_active:
                 card_btn.setChecked(True)
                 card_btn.setProperty("activeCard", True)
 
@@ -205,7 +226,7 @@ class ProjectionRegionView(QWidget):
             self._card_buttons[crs_info["id"]] = card_btn
             crs_grid.addWidget(card_btn, row, col)
 
-        panel_layout.addWidget(crs_group)
+        panel_layout.addWidget(self.crs_group)
 
         # ---------------------------------------------------------------------
         # 3. Projection Parameters
@@ -571,10 +592,16 @@ class ProjectionRegionView(QWidget):
             btn.setProperty("activeCard", is_active)
             btn.style().unpolish(btn)
             btn.style().polish(btn)
+            crs_meta = next((c for c in self.CRS_CARDS if c["id"] == cid), None)
+            if crs_meta:
+                prefix = "● " if is_active else ""
+                btn.setText(f"{prefix}{crs_meta['name']}\n[{crs_meta['code'].upper()}]")
 
         # Contextual enables for projection controls
         curr = next((c for c in self.CRS_CARDS if c["id"] == crs_id), None)
         if curr:
+            if hasattr(self, "crs_group"):
+                self.crs_group.setTitle(f"2. Cartopy CRS Library — Active: {curr['name']} [{curr['code'].upper()}]")
             self.lbl_sp1.setEnabled(curr["has_parallels"])
             self.spin_sp1.setEnabled(curr["has_parallels"])
             self.lbl_sp2.setEnabled(curr["has_parallels"])
@@ -847,6 +874,14 @@ class ProjectionRegionView(QWidget):
             btn.setProperty("activeCard", is_active)
             btn.style().unpolish(btn)
             btn.style().polish(btn)
+            crs_meta = next((c for c in self.CRS_CARDS if c["id"] == cid), None)
+            if crs_meta:
+                prefix = "● " if is_active else ""
+                btn.setText(f"{prefix}{crs_meta['name']}\n[{crs_meta['code'].upper()}]")
+
+        curr = next((c for c in self.CRS_CARDS if c["id"] == self._current_crs_id), None)
+        if curr and hasattr(self, "crs_group"):
+            self.crs_group.setTitle(f"2. Cartopy CRS Library — Active: {curr['name']} [{curr['code'].upper()}]")
 
         self.spin_central_lon.blockSignals(True)
         self.spin_central_lat.blockSignals(True)

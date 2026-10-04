@@ -12,3 +12,8 @@
 3. **Line-Only Coastline Vectors**:
    - Completely removed land and sea background color fills (`cfeature.LAND` and ocean blue fill removed).
    - Rendered with a clean, unshaded white canvas (`#ffffff`), crisp dark-slate coastlines (`#334155`), and subtle dashed national borders.
+
+4. **Active Projection Highlighting**:
+   - The selected projection card button is visually emphasized with `PROJECTION_ACTIVE_BG` (`#0284c7`), `PROJECTION_ACTIVE_BORDER` (`#38bdf8`), white text, and a `● ` bullet prefix.
+   - The card grid group box header dynamically indicates the active projection: `2. Cartopy CRS Library — Active: <Name> [<CODE>]`.
+   - The main window bottom status bar reflects the active projection via `PROJECTION: <crs_id>`.
