@@ -1,7 +1,7 @@
-"""GRIB2 dataset loader with hypercube inspection and systematic level merging."""
-
+import logging
 from pathlib import Path
 from typing import Dict, List
+import warnings
 import cfgrib
 import xarray as xr
 
@@ -11,6 +11,13 @@ from xotplot.constants import (
     CANONICAL_LON_NAME,
 )
 from xotplot.io.canonical import canonicalize_coordinates
+
+# Configure xarray combine defaults and suppress cfgrib noise
+xr.set_options(use_new_combine_kwarg_defaults=True)
+warnings.filterwarnings("ignore", category=FutureWarning, module="cfgrib.*")
+warnings.filterwarnings("ignore", category=FutureWarning, module="xarray.*")
+logging.getLogger("cfgrib").setLevel(logging.ERROR)
+logging.getLogger("cfgrib.messages").setLevel(logging.ERROR)
 
 
 def load_grib2_dataset(file_path: str | Path) -> xr.Dataset:

@@ -19,8 +19,17 @@ from xotplot.constants import DEFAULT_ENGINE_WORKERS
 
 def _engine_worker_main(conn: Connection) -> None:
     """Entry point for isolated plotting & IO engine child process."""
+    import logging
+    import warnings
     import matplotlib
     matplotlib.use("Agg")
+    import xarray as xr
+    xr.set_options(use_new_combine_kwarg_defaults=True)
+    warnings.filterwarnings("ignore", category=FutureWarning, module="cfgrib.*")
+    warnings.filterwarnings("ignore", category=FutureWarning, module="xarray.*")
+    logging.getLogger("cfgrib").setLevel(logging.ERROR)
+    logging.getLogger("cfgrib.messages").setLevel(logging.ERROR)
+
     from xotplot.engine.plotting.renderer import execute_render_job
     from xotplot.engine.io.registry import DatasetRegistry
     from xotplot.engine.io import open_dataset
