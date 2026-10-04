@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&family=Space+Grotesk:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-error-container":"#ffdad6","on-tertiary-fixed-variant":"#6900b3","background":"#0f131c","on-background":"#dfe2ef","surface-variant":"#31353f","on-secondary":"#003824","on-tertiary-container":"#6400ac","on-tertiary":"#490080","outline":"#87929a","secondary-fixed":"#6ffbbe","surface-container-low":"#181b25","on-secondary-container":"#00311f","on-primary-fixed":"#001e2c","tertiary-fixed-dim":"#ddb7ff","surface-container-lowest":"#0a0e17","error-container":"#93000a","tertiary-fixed":"#f0dbff","inverse-surface":"#dfe2ef","surface-container":"#1c1f29","secondary-fixed-dim":"#4edea3","on-primary-container":"#004965","surface-container-high":"#262a34","primary":"#8ed5ff","primary-fixed":"#c4e7ff","surface-dim":"#0f131c","on-secondary-fixed-variant":"#005236","secondary":"#4edea3","inverse-primary":"#00668a","on-surface":"#dfe2ef","outline-variant":"#3e484f","on-error":"#690005","surface-tint":"#7bd0ff","surface-container-highest":"#31353f","tertiary-container":"#ce9bff","on-primary-fixed-variant":"#004c69","on-secondary-fixed":"#002113","secondary-container":"#00a572","primary-container":"#38bdf8","error":"#ffb4ab","tertiary":"#e1bfff","surface-bright":"#353943","surface":"#0f131c","inverse-on-surface":"#2c303a","on-surface-variant":"#bdc8d1","on-primary":"#00354a","primary-fixed-dim":"#7bd0ff","on-tertiary-fixed":"#2c0051"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"space-sm":"0.25rem","gutter":"0.25rem","space-md":"0.5rem","space-xs":"0.125rem","margin":"0.25rem","space-xl":"1rem","space-lg":"0.75rem"},fontFamily:{"body-md":["Inter"],"headline-md":["Space Grotesk"],"label-lg":["JetBrains Mono"],"headline-sm":["Space Grotesk"],"body-lg":["Inter"],"label-md":["JetBrains Mono"],"headline-lg":["Space Grotesk"],"label-sm":["JetBrains Mono"],"body-sm":["Inter"]},fontSize:{"body-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"600"}],"label-lg":["12px",{"lineHeight":"16px","fontWeight":"500"}],"headline-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"600"}],"body-lg":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-md":["11px",{"lineHeight":"14px","fontWeight":"500"}],"headline-lg":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.02em","fontWeight":"400"}],"body-sm":["11px",{"lineHeight":"14px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-sm text-body-sm text-on-surface select-none antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-outline-variant"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-lowest border-b border-outline-variant"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[13px] text-primary">satellite_alt</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wide">xplot — Meteorological Visualization & Workflow Engine [PyQt6 / Cartopy Core]</span></div><div class="flex items-center"><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">minimize</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">check_box_outline_blank</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-on-error-container"><span class="material-symbols-outlined text-[12px]">close</span></button></div></div><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-low border-b border-outline-variant"><nav class="flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary font-headline-sm"><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="file" href="#">File</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="edit" href="#">Edit</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="view" href="#">View</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="layer" href="#">Layer</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="projection" href="#">Projection</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="colormap" href="#">Colormap</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="cli-export" href="#">CLI Export</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="tools" href="#">Tools</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="window" href="#">Window</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="help" href="#">Help</a></nav><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm text-on-surface-variant">SESSION: <span class="text-secondary font-label-sm text-label-sm">ONLINE</span></span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div><div class="h-8 px-space-md flex items-center justify-between bg-surface-container"><div class="flex items-center gap-space-sm"><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary">folder_open</span><span class="font-label-md text-label-md">Open Data</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-secondary">visibility</span><span class="font-label-md text-label-md">Preview</span></button><button class="h-6 px-space-md bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary flex items-center gap-space-xs border border-primary rounded font-label-md text-label-md"><span class="material-symbols-outlined text-[13px]">play_arrow</span><span>Render</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary-fixed">terminal</span><span class="font-label-md text-label-md">Gen CLI</span></button><div class="h-4 w-px bg-outline-variant mx-space-xs"></div><div class="flex items-center gap-space-xs"><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_in</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_out</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">pan_tool</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">restart_alt</span></button></div></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant"><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Backend: <strong class="text-primary font-label-sm text-label-sm">Qt6Agg</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">DPI: <strong class="text-on-surface font-label-sm text-label-sm">192</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Cache: <strong class="text-secondary font-label-sm text-label-sm">1.4 GB / 8.0 GB</strong></span></div></div></header><aside class="fixed left-0 top-20 bottom-5 w-64 bg-surface-container-low border-r border-outline-variant z-40 flex flex-col"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container border-b border-outline-variant"><span class="font-headline-sm text-headline-sm text-primary tracking-wider uppercase font-semibold">WORKBENCH DOCKS</span><span class="material-symbols-outlined text-[13px] text-outline">dock</span></div><nav class="flex-1 overflow-y-auto py-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md"><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="spatial-viewport" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-primary">public</span>Spatial Viewport (2D/3D)</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="variables-and-dimensions" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">data_table</span>Variables & Dimensions</a><a aria-current="page" class="flex items-center px-space-md py-space-sm transition-colors bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md" data-path="projection-and-cartopy" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">map</span>Projection & Cartopy</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="layer-stack-and-features" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">layers</span>Layer Stack & Features</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="colormap-transfer" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">palette</span>Colormap Transfer</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="cli-and-batch-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">terminal</span>CLI & Batch Engine</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="derived-diagnostics" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">functions</span>Derived Diagnostics</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="compute-and-dask-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">memory</span>Compute & Dask Engine</a></nav><div class="p-space-md border-t border-outline-variant bg-surface-container-lowest font-label-sm text-label-sm"><div class="flex justify-between items-center text-outline"><span class="font-label-sm text-label-sm">ACTIVE WORKSPACE</span><span class="text-secondary font-label-sm text-label-sm">era5_synoptic</span></div><div class="mt-space-xs text-on-surface-variant truncate font-label-sm text-label-sm">netcdf4://gfs_20241018_12z.nc</div></div></aside><div class="pl-64"><main class="w-full pt-20 pb-5 min-h-[calc(100vh-1.25rem)] bg-surface-dim"><div class="flex flex-col w-full">
+<div class="p-space-md grid grid-cols-12 gap-space-md min-h-[calc(100vh-6.25rem)]">
+<!-- LEFT PANEL: Cartopy CRS & Projection Library -->
+<section class="col-span-12 xl:col-span-3 flex flex-col gap-space-md">
+<!-- Section Header Card -->
+<div class="bg-surface-container p-space-md rounded shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">public</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider">Cartopy CRS Library</h2>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-space-xs bg-surface-container-high text-secondary rounded">PROJ 9.4.1</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Active reference definition for map transformations & geodetic features.</p>
+</div>
+<!-- Projection Selector Bento / List -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-xs shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pb-space-xs">
+<span>SELECT PROJECTION ENGINE</span>
+<span class="text-primary font-label-sm text-label-sm">8 LOADED</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs" id="proj-grid">
+<!-- Lambert Conformal (Selected) -->
+<button class="crs-card p-space-sm bg-surface-container-highest rounded text-left transition-all relative overflow-hidden group" data-crs="LambertConformal">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-primary"></div>
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-primary">filter_drama</span>
+<span class="font-label-sm text-label-sm text-primary px-space-xs bg-surface-container rounded">LCC</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">LambertConformal</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Mid-latitude synoptic</div>
+</button>
+<!-- Plate Carree -->
+<button class="crs-card p-space-sm bg-surface-container hover:bg-surface-container-high rounded text-left transition-all" data-crs="PlateCarree">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-outline">grid_4x4</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs bg-surface-container-lowest rounded">EPSG:4326</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">PlateCarree</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Equirectangular grid</div>
+</button>
+<!-- Polar Stereographic -->
+<button class="crs-card p-space-sm bg-surface-container hover:bg-surface-container-high rounded text-left transition-all" data-crs="PolarStereographic">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-outline">ac_unit</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs bg-surface-container-lowest rounded">N/S</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">PolarStereo</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Cryospheric / Polar</div>
+</button>
+<!-- Mercator -->
+<button class="crs-card p-space-sm bg-surface-container hover:bg-surface-container-high rounded text-left transition-all" data-crs="Mercator">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-outline">navigation</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs bg-surface-container-lowest rounded">EPSG:3857</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">Mercator</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Nautical rhumb lines</div>
+</button>
+<!-- Orthographic -->
+<button class="crs-card p-space-sm bg-surface-container hover:bg-surface-container-high rounded text-left transition-all" data-crs="Orthographic">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-outline">globe</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs bg-surface-container-lowest rounded">3D Sphere</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">Orthographic</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Full disc satellite</div>
+</button>
+<!-- Albers Equal Area -->
+<button class="crs-card p-space-sm bg-surface-container hover:bg-surface-container-high rounded text-left transition-all" data-crs="AlbersEqualArea">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-outline">crop_free</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs bg-surface-container-lowest rounded">EqualArea</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">AlbersEqualArea</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Areal precip budget</div>
+</button>
+<!-- Robinson -->
+<button class="crs-card p-space-sm bg-surface-container hover:bg-surface-container-high rounded text-left transition-all" data-crs="Robinson">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-outline">panorama</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs bg-surface-container-lowest rounded">Global</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">Robinson</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Global climatology</div>
+</button>
+<!-- Stereographic -->
+<button class="crs-card p-space-sm bg-surface-container hover:bg-surface-container-high rounded text-left transition-all" data-crs="Stereographic">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-[14px] text-outline">adjust</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant px-space-xs bg-surface-container-lowest rounded">Conformal</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface mt-space-xs truncate">Stereographic</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant truncate">Mesoscale storm scale</div>
+</button>
+</div>
+</div>
+<!-- Projection Parameters Form -->
+<div class="bg-surface-container-low p-space-md rounded flex-1 flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-wider uppercase font-semibold">Projection Parameters</span>
+<span class="material-symbols-outlined text-[14px] text-outline cursor-pointer hover:text-on-surface">tune</span>
+</div>
+<!-- Central Longitude -->
+<div class="bg-surface-container p-space-sm rounded flex items-center justify-between">
+<label class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-space-xs">
+<span>Central Longitude</span>
+<span class="font-label-sm text-label-sm text-outline">(lon_0)</span>
+</label>
+<div class="flex items-center bg-surface-container-lowest px-space-sm py-space-xs rounded gap-space-xs">
+<input class="w-16 bg-transparent text-right font-label-sm text-label-sm text-primary focus:outline-none" id="inp-central-lon" step="0.5" type="number" value="-95.0"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">°E</span>
+</div>
+</div>
+<!-- Central Latitude -->
+<div class="bg-surface-container p-space-sm rounded flex items-center justify-between">
+<label class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-space-xs">
+<span>Central Latitude</span>
+<span class="font-label-sm text-label-sm text-outline">(lat_0)</span>
+</label>
+<div class="flex items-center bg-surface-container-lowest px-space-sm py-space-xs rounded gap-space-xs">
+<input class="w-16 bg-transparent text-right font-label-sm text-label-sm text-primary focus:outline-none" id="inp-central-lat" step="0.5" type="number" value="25.0"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">°N</span>
+</div>
+</div>
+<!-- Standard Parallels -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Standard Parallels</span>
+<span class="font-label-sm text-label-sm text-secondary">Secant Conic</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="flex items-center justify-between bg-surface-container-lowest px-space-sm py-space-xs rounded">
+<span class="font-label-sm text-label-sm text-outline">lat_1</span>
+<input class="w-12 bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-lat1" step="0.5" type="number" value="33.0"/>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest px-space-sm py-space-xs rounded">
+<span class="font-label-sm text-label-sm text-outline">lat_2</span>
+<input class="w-12 bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-lat2" step="0.5" type="number" value="45.0"/>
+</div>
+</div>
+</div>
+<!-- False Easting / Northing -->
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="bg-surface-container p-space-sm rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">False Easting (m)</span>
+<input class="w-full bg-surface-container-lowest mt-space-xs px-space-sm py-space-xs rounded text-right font-label-sm text-label-sm text-on-surface focus:outline-none" type="text" value="0.0"/>
+</div>
+<div class="bg-surface-container p-space-sm rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant block">False Northing (m)</span>
+<input class="w-full bg-surface-container-lowest mt-space-xs px-space-sm py-space-xs rounded text-right font-label-sm text-label-sm text-on-surface focus:outline-none" type="text" value="0.0"/>
+</div>
+</div>
+<!-- Globe Ellipsoid -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Globe Datum / Ellipsoid</span>
+<span class="font-label-sm text-label-sm text-primary">ccrs.Globe()</span>
+</div>
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs">
+<button class="datum-btn py-space-xs px-space-sm bg-surface-container-highest text-primary font-label-sm text-label-sm rounded text-center">WGS84</button>
+<button class="datum-btn py-space-xs px-space-sm bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded text-center">Sphere</button>
+<button class="datum-btn py-space-xs px-space-sm bg-surface-container-lowest text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded text-center">GRS80</button>
+</div>
+</div>
+</div>
+</section>
+<!-- CENTER PANEL: Spatial Extent & Interactive Bounding Box Configurator -->
+<section class="col-span-12 xl:col-span-6 flex flex-col gap-space-md">
+<!-- Preset Regions Shelf -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-xs shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[15px] text-secondary">explore</span>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider">Region Extent Presets</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">cartopy.mpl.geoaxes.GeoAxes.set_extent()</span>
+</div>
+<div class="flex items-center gap-space-xs overflow-x-auto py-space-xs">
+<button class="preset-btn px-space-md py-space-xs bg-primary-container text-on-primary-container font-label-sm text-label-sm rounded whitespace-nowrap shadow-sm" data-preset="conus">CONUS (NAm)</button>
+<button class="preset-btn px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded whitespace-nowrap" data-preset="europe">Europe ECMWF</button>
+<button class="preset-btn px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded whitespace-nowrap" data-preset="eastasia">East Asia</button>
+<button class="preset-btn px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded whitespace-nowrap" data-preset="global">Global (4326)</button>
+<button class="preset-btn px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded whitespace-nowrap" data-preset="arctic">Arctic Circle</button>
+<button class="preset-btn px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded whitespace-nowrap" data-preset="tropical">TC Atlantic</button>
+<button class="preset-btn px-space-md py-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded whitespace-nowrap" data-preset="southern">Southern Ocean</button>
+</div>
+</div>
+<!-- Interactive Map Extent Viewport -->
+<div class="relative bg-surface-container-lowest rounded flex-1 min-h-[420px] overflow-hidden flex flex-col shadow-md">
+<!-- Canvas Overlay Bar -->
+<div class="absolute top-space-md left-space-md right-space-md z-10 flex items-center justify-between pointer-events-none">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest/90 backdrop-blur px-space-md py-space-xs rounded shadow-sm pointer-events-auto">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold" id="active-domain-name">CONUS Domain: 48 States + Boundary Buffer</span>
+</div>
+<div class="flex items-center gap-space-xs bg-surface-container-lowest/90 backdrop-blur p-space-xs rounded shadow-sm pointer-events-auto">
+<button class="w-6 h-6 flex items-center justify-center rounded bg-surface-container-high text-primary hover:bg-surface-variant" id="btn-aspect-ratio" title="Lock Aspect Ratio (1:1)">
+<span class="material-symbols-outlined text-[13px]">aspect_ratio</span>
+</button>
+<button class="w-6 h-6 flex items-center justify-center rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high" id="btn-fit-extent" title="Fit to Extent Bounds">
+<span class="material-symbols-outlined text-[13px]">fullscreen</span>
+</button>
+<button class="w-6 h-6 flex items-center justify-center rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high" id="btn-reset-view" title="Reset Viewport">
+<span class="material-symbols-outlined text-[13px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Synthetic Scientific Map Graphic SVG -->
+<div class="relative w-full h-full flex items-center justify-center p-space-lg select-none">
+<svg class="w-full h-full max-h-[460px]" preserveaspectratio="xMidYMid meet" viewbox="0 0 800 500">
+<defs>
+<pattern height="50" id="graticule-pattern" patternunits="userSpaceOnUse" width="80">
+<path d="M 80 0 L 0 0 0 50" fill="none" opacity="0.65" stroke="#3e484f" stroke-dasharray="2 2" stroke-width="0.5"></path>
+</pattern>
+<lineargradient id="domain-glow" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#38bdf8" stop-opacity="0.12"></stop>
+<stop offset="100%" stop-color="#4edea3" stop-opacity="0.04"></stop>
+</lineargradient>
+</defs>
+<!-- Base Grid Mesh -->
+<rect fill="#0f131c" height="500" width="800"></rect>
+<rect fill="url(#graticule-pattern)" height="500" width="800"></rect>
+<!-- Stylized Continental Vector Paths (North America / Atlantic focus) -->
+<g fill="#181b25" opacity="0.95" stroke="#31353f" stroke-width="1.2">
+<!-- North America simplified poly -->
+<path d="M 120 70 L 220 50 L 320 60 L 410 90 L 460 140 L 440 180 L 470 230 L 440 280 L 400 310 L 370 280 L 340 330 L 310 320 L 270 380 L 240 370 L 220 310 L 170 290 L 150 240 L 110 200 L 90 140 Z"></path>
+<!-- South America corner -->
+<path d="M 330 380 L 380 390 L 430 450 L 400 490 L 360 480 Z"></path>
+<!-- Europe / Atlantic fringe -->
+<path d="M 620 90 L 700 80 L 740 130 L 690 180 L 640 150 Z"></path>
+</g>
+<!-- Latitude Parallel Curves (Lambert Conformal Conic Projection Archetype) -->
+<path d="M 50 140 Q 400 90 750 140" fill="none" opacity="0.4" stroke="#87929a" stroke-dasharray="4 3" stroke-width="0.8"></path>
+<path d="M 50 230 Q 400 180 750 230" fill="none" opacity="0.4" stroke="#87929a" stroke-dasharray="4 3" stroke-width="0.8"></path>
+<path d="M 50 320 Q 400 270 750 320" fill="none" opacity="0.4" stroke="#87929a" stroke-dasharray="4 3" stroke-width="0.8"></path>
+<!-- Longitude Meridian Radials -->
+<path d="M 180 50 Q 220 260 260 470" fill="none" opacity="0.4" stroke="#87929a" stroke-dasharray="4 3" stroke-width="0.8"></path>
+<path d="M 390 40 L 400 480" fill="none" opacity="0.75" stroke="#8ed5ff" stroke-dasharray="3 3" stroke-width="1"></path>
+<path d="M 600 50 Q 580 260 540 470" fill="none" opacity="0.4" stroke="#87929a" stroke-dasharray="4 3" stroke-width="0.8"></path>
+<!-- Active Bounding Box Wireframe Overlay (Target Extent) -->
+<g id="extent-wireframe">
+<polygon fill="url(#domain-glow)" id="bbox-poly" points="160,110 580,110 580,380 160,380" stroke="#38bdf8" stroke-dasharray="none" stroke-width="1.75"></polygon>
+<!-- Buffer margin ring (+5%) -->
+<polygon fill="none" opacity="0.8" points="140,95 600,95 600,395 140,395" stroke="#4edea3" stroke-dasharray="3 3" stroke-width="1"></polygon>
+<!-- Corner Anchor Handles -->
+<circle class="cursor-nwse-resize" cx="160" cy="110" fill="#38bdf8" r="4"></circle>
+<circle class="cursor-nesw-resize" cx="580" cy="110" fill="#38bdf8" r="4"></circle>
+<circle class="cursor-nwse-resize" cx="580" cy="380" fill="#38bdf8" r="4"></circle>
+<circle class="cursor-nesw-resize" cx="160" cy="380" fill="#38bdf8" r="4"></circle>
+<!-- Center Crosshair for Central Coordinates -->
+<line stroke="#8ed5ff" stroke-width="1.5" x1="390" x2="410" y1="240" y2="240"></line>
+<line stroke="#8ed5ff" stroke-width="1.5" x1="400" x2="400" y1="230" y2="250"></line>
+<circle cx="400" cy="240" fill="none" r="14" stroke="#8ed5ff" stroke-dasharray="2 2" stroke-width="0.75"></circle>
+<!-- North Boundary Label -->
+<text class="font-label-sm text-[10px]" fill="#8ed5ff" x="370" y="103">55.0° N</text>
+<!-- South Boundary Label -->
+<text class="font-label-sm text-[10px]" fill="#8ed5ff" x="370" y="394">20.0° N</text>
+<!-- West Boundary Label -->
+<text class="font-label-sm text-[10px]" fill="#8ed5ff" x="96" y="244">-125.0° W</text>
+<!-- East Boundary Label -->
+<text class="font-label-sm text-[10px]" fill="#8ed5ff" x="586" y="244">-65.0° W</text>
+</g>
+</svg>
+</div>
+<!-- Telemetry Bottom Bar within Viewport -->
+<div class="px-space-md py-space-xs bg-surface-container-low flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center gap-space-md">
+<span>SPAN: <strong class="text-on-surface">60.0° lon × 35.0° lat</strong></span>
+<span>RATIO: <strong class="text-secondary">1.714 : 1</strong></span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[12px] text-primary">verified</span>
+<span class="text-primary font-label-sm text-label-sm">Domain Topology Valid</span>
+</div>
+</div>
+</div>
+<!-- Manual Extent Coordinates & Buffer Controls -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-wider uppercase font-semibold">Manual Bounding Box</span>
+<!-- Format Switch: Decimals vs DMS -->
+<div class="flex items-center bg-surface-container-lowest p-space-xs rounded gap-space-xs">
+<button class="px-space-sm py-space-xs bg-surface-container-high text-primary font-label-sm text-label-sm rounded" id="fmt-deg">DEG (°)</button>
+<button class="px-space-sm py-space-xs text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded" id="fmt-dms">DMS (° ' ")</button>
+</div>
+</div>
+<!-- Compass Cardinal Coordinates Matrix -->
+<div class="grid grid-cols-4 gap-space-xs">
+<!-- West Lon -->
+<div class="bg-surface-container p-space-sm rounded">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>WEST LON</span>
+<span class="text-primary">X_MIN</span>
+</div>
+<div class="mt-space-xs flex items-center bg-surface-container-lowest px-space-sm py-space-xs rounded">
+<input class="w-full bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-wlon" step="0.5" type="number" value="-125.0"/>
+<span class="font-label-sm text-label-sm text-outline ml-space-xs">°</span>
+</div>
+</div>
+<!-- East Lon -->
+<div class="bg-surface-container p-space-sm rounded">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>EAST LON</span>
+<span class="text-primary">X_MAX</span>
+</div>
+<div class="mt-space-xs flex items-center bg-surface-container-lowest px-space-sm py-space-xs rounded">
+<input class="w-full bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-elon" step="0.5" type="number" value="-65.0"/>
+<span class="font-label-sm text-label-sm text-outline ml-space-xs">°</span>
+</div>
+</div>
+<!-- South Lat -->
+<div class="bg-surface-container p-space-sm rounded">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>SOUTH LAT</span>
+<span class="text-primary">Y_MIN</span>
+</div>
+<div class="mt-space-xs flex items-center bg-surface-container-lowest px-space-sm py-space-xs rounded">
+<input class="w-full bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-slat" step="0.5" type="number" value="20.0"/>
+<span class="font-label-sm text-label-sm text-outline ml-space-xs">°</span>
+</div>
+</div>
+<!-- North Lat -->
+<div class="bg-surface-container p-space-sm rounded">
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>NORTH LAT</span>
+<span class="text-primary">Y_MAX</span>
+</div>
+<div class="mt-space-xs flex items-center bg-surface-container-lowest px-space-sm py-space-xs rounded">
+<input class="w-full bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-nlat" step="0.5" type="number" value="55.0"/>
+<span class="font-label-sm text-label-sm text-outline ml-space-xs">°</span>
+</div>
+</div>
+</div>
+<!-- Buffer Margin Slider & Lock Controls -->
+<div class="bg-surface-container p-space-sm rounded flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm flex-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">crop</span>
+<span class="font-body-sm text-body-sm text-on-surface whitespace-nowrap">Buffer Margin</span>
+<input class="w-full accent-secondary cursor-pointer h-1.5 bg-surface-container-lowest rounded" id="inp-buffer" max="25" min="0" type="range" value="5"/>
+<span class="font-label-sm text-label-sm text-secondary px-space-xs bg-surface-container-lowest rounded" id="buffer-val">+5%</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input checked="" class="accent-primary rounded w-3.5 h-3.5" type="checkbox"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Lock Aspect (Mercator/Plate)</span>
+</label>
+<button class="px-space-md py-space-xs bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm rounded transition-all" id="btn-apply-extent">Update Bounds</button>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT PANEL: Graticules, Gridlines & Labels Styling -->
+<section class="col-span-12 xl:col-span-3 flex flex-col gap-space-md">
+<!-- Gridlines & Ticks Configurator -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">grid_on</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider">Graticules & Styling</h2>
+</div>
+<label class="flex items-center gap-space-xs cursor-pointer">
+<input checked="" class="accent-primary w-3.5 h-3.5 rounded" id="chk-gridlines" type="checkbox"/>
+<span class="font-label-sm text-label-sm text-secondary">ENABLED</span>
+</label>
+</div>
+<!-- Spacing Intervals dlat / dlon -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Graticule Spacing Intervals</span>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="bg-surface-container-lowest p-space-xs rounded flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">dlat (lat)</span>
+<div class="flex items-center gap-space-xs">
+<input class="w-10 bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-dlat" step="1.0" type="number" value="5.0"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">°</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-xs rounded flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">dlon (lon)</span>
+<div class="flex items-center gap-space-xs">
+<input class="w-10 bg-transparent text-right font-label-sm text-label-sm text-on-surface focus:outline-none" id="inp-dlon" step="1.0" type="number" value="10.0"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">°</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Line Style, Color & Alpha -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Stroke Properties</span>
+<span class="font-label-sm text-label-sm text-primary">Matplotlib Line2D</span>
+</div>
+<!-- Style picker -->
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs">
+<button class="line-style-btn py-space-xs px-space-xs bg-surface-container-highest text-primary font-label-sm text-label-sm rounded text-center">Dashed (--) </button>
+<button class="line-style-btn py-space-xs px-space-xs bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm rounded text-center">Dotted (:) </button>
+<button class="line-style-btn py-space-xs px-space-xs bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm rounded text-center">Solid (-) </button>
+</div>
+<!-- Color & Alpha controls -->
+<div class="grid grid-cols-2 gap-space-xs pt-space-xs">
+<div class="bg-surface-container-lowest p-space-xs rounded flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">Color</span>
+<div class="flex items-center gap-space-xs">
+<span class="w-3.5 h-3.5 rounded-full bg-outline"></span>
+<span class="font-label-sm text-label-sm text-on-surface">#87929a</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-xs rounded flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-outline">Alpha</span>
+<span class="font-label-sm text-label-sm text-secondary">0.40</span>
+</div>
+</div>
+</div>
+<!-- Tick Labels Positioning -->
+<div class="bg-surface-container p-space-sm rounded flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Boundary Label Placement</span>
+<span class="font-label-sm text-label-sm text-outline">Cartopy 0.23+</span>
+</div>
+<div class="grid grid-cols-4 gap-space-xs pt-space-xs text-center">
+<label class="bg-surface-container-lowest p-space-xs rounded flex flex-col items-center gap-space-xs cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Top</span>
+<input class="accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+</label>
+<label class="bg-surface-container-lowest p-space-xs rounded flex flex-col items-center gap-space-xs cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Bottom</span>
+<input checked="" class="accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+</label>
+<label class="bg-surface-container-lowest p-space-xs rounded flex flex-col items-center gap-space-xs cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Left</span>
+<input checked="" class="accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+</label>
+<label class="bg-surface-container-lowest p-space-xs rounded flex flex-col items-center gap-space-xs cursor-pointer">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Right</span>
+<input class="accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+</label>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-xs rounded mt-space-xs">
+<span class="font-label-sm text-label-sm text-outline">Formatter Class</span>
+<span class="font-label-sm text-label-sm text-primary">Latitude/LongitudeFormatter</span>
+</div>
+</div>
+</div>
+<!-- Natural Earth Vector Resolution -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-xs shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider font-semibold">Vector Feature Scale</span>
+<span class="font-label-sm text-label-sm text-secondary">Natural Earth v5</span>
+</div>
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs">
+<button class="scale-btn py-space-xs px-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded text-center">110m (Low)</button>
+<button class="scale-btn py-space-xs px-space-xs bg-surface-container-highest text-primary font-label-sm text-label-sm rounded text-center">50m (Med)</button>
+<button class="scale-btn py-space-xs px-space-xs bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm rounded text-center">10m (High)</button>
+</div>
+<label class="flex items-center gap-space-xs cursor-pointer pt-space-xs">
+<input checked="" class="accent-primary w-3.5 h-3.5 rounded" type="checkbox"/>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Auto-scale vectors dynamically during zoom pan</span>
+</label>
+</div>
+<!-- Live CLI Flags Preview Box -->
+<div class="bg-surface-container-lowest p-space-md rounded flex flex-col gap-space-xs shadow-md mt-auto">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-[13px]">terminal</span>
+<span class="font-headline-sm text-headline-sm uppercase tracking-wider font-semibold">Live CLI Flag Output</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-sm py-space-xs bg-surface-container-high hover:bg-surface-variant text-on-surface rounded font-label-sm text-label-sm" id="btn-copy-cli">
+<span class="material-symbols-outlined text-[12px]">content_copy</span>
+<span>Copy</span>
+</button>
+</div>
+<div class="bg-surface-dim p-space-sm rounded font-label-sm text-label-sm text-secondary select-all break-all overflow-x-auto" id="cli-output">
+          xplot proj --crs LambertConformal --central-lon -95.0 --standard-parallels 33.0,45.0 --extent -125,-65,20,55 --gridlines 5,10
+        </div>
+</div>
+</section>
+</div>
+</div>
+<script>
+  (function initSpatialEngine() {
+    const state = {
+      crs: 'LambertConformal',
+      centralLon: -95.0,
+      centralLat: 25.0,
+      lat1: 33.0,
+      lat2: 45.0,
+      wlon: -125.0,
+      elon: -65.0,
+      slat: 20.0,
+      nlat: 55.0,
+      dlat: 5.0,
+      dlon: 10.0,
+      gridlines: true,
+      buffer: 5,
+      isDms: false
+    };
+
+    const cliElem = document.getElementById('cli-output');
+
+    function updateCliCommand() {
+      if (!cliElem) return;
+      cliElem.innerText = `xplot proj --crs ${state.crs} --central-lon ${state.centralLon} --standard-parallels ${state.lat1},${state.lat2} --extent ${state.wlon},${state.elon},${state.slat},${state.nlat} --gridlines ${state.dlat},${state.dlon}`;
+    }
+
+    // CRS selection
+    const crsButtons = document.querySelectorAll('.crs-card');
+    crsButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        crsButtons.forEach(b => {
+          b.classList.remove('bg-surface-container-highest');
+          b.classList.add('bg-surface-container');
+          const bar = b.querySelector('.absolute');
+          if (bar) bar.remove();
+        });
+        btn.classList.add('bg-surface-container-highest');
+        btn.classList.remove('bg-surface-container');
+        
+        const bar = document.createElement('div');
+        bar.className = 'absolute left-0 top-0 bottom-0 w-0.5 bg-primary';
+        btn.appendChild(bar);
+
+        state.crs = btn.getAttribute('data-crs') || 'LambertConformal';
+        updateCliCommand();
+      });
+    });
+
+    // Preset Regions Extent Click Handlers
+    const presets = {
+      conus: { name: 'CONUS (North America)', wlon: -125.0, elon: -65.0, slat: 20.0, nlat: 55.0, cLon: -95.0, cLat: 38.0 },
+      europe: { name: 'Europe ECMWF Synoptic', wlon: -15.0, elon: 40.0, slat: 32.0, nlat: 72.0, cLon: 10.0, cLat: 52.0 },
+      eastasia: { name: 'East Asia Typhoon Basin', wlon: 100.0, elon: 160.0, slat: 10.0, nlat: 55.0, cLon: 125.0, cLat: 30.0 },
+      global: { name: 'Global Spherical (4326)', wlon: -180.0, elon: 180.0, slat: -90.0, nlat: 90.0, cLon: 0.0, cLat: 0.0 },
+      arctic: { name: 'Arctic Circle Circumpolar', wlon: -180.0, elon: 180.0, slat: 60.0, nlat: 90.0, cLon: 0.0, cLat: 90.0 },
+      tropical: { name: 'Tropical Cyclone Atlantic', wlon: -100.0, elon: -15.0, slat: 5.0, nlat: 40.0, cLon: -55.0, cLat: 22.0 },
+      southern: { name: 'Southern Ocean Westerlies', wlon: -180.0, elon: 180.0, slat: -75.0, nlat: -40.0, cLon: 0.0, cLat: -60.0 }
+    };
+
+    const presetButtons = document.querySelectorAll('.preset-btn');
+    presetButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetButtons.forEach(b => {
+          b.classList.remove('bg-primary-container', 'text-on-primary-container');
+          b.classList.add('bg-surface-container', 'text-on-surface-variant');
+        });
+        btn.classList.add('bg-primary-container', 'text-on-primary-container');
+        btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+
+        const key = btn.getAttribute('data-preset');
+        if (presets[key]) {
+          const p = presets[key];
+          state.wlon = p.wlon;
+          state.elon = p.elon;
+          state.slat = p.slat;
+          state.nlat = p.nlat;
+          state.centralLon = p.cLon;
+          state.centralLat = p.cLat;
+
+          document.getElementById('inp-wlon').value = p.wlon;
+          document.getElementById('inp-elon').value = p.elon;
+          document.getElementById('inp-slat').value = p.slat;
+          document.getElementById('inp-nlat').value = p.nlat;
+          document.getElementById('inp-central-lon').value = p.cLon;
+          document.getElementById('inp-central-lat').value = p.cLat;
+
+          const title = document.getElementById('active-domain-name');
+          if (title) title.innerText = p.name;
+          updateCliCommand();
+        }
+      });
+    });
+
+    // Inputs listener
+    ['inp-central-lon', 'inp-central-lat', 'inp-lat1', 'inp-lat2', 'inp-wlon', 'inp-elon', 'inp-slat', 'inp-nlat', 'inp-dlat', 'inp-dlon'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => {
+          state.centralLon = parseFloat(document.getElementById('inp-central-lon').value) || 0;
+          state.centralLat = parseFloat(document.getElementById('inp-central-lat').value) || 0;
+          state.lat1 = parseFloat(document.getElementById('inp-lat1').value) || 0;
+          state.lat2 = parseFloat(document.getElementById('inp-lat2').value) || 0;
+          state.wlon = parseFloat(document.getElementById('inp-wlon').value) || 0;
+          state.elon = parseFloat(document.getElementById('inp-elon').value) || 0;
+          state.slat = parseFloat(document.getElementById('inp-slat').value) || 0;
+          state.nlat = parseFloat(document.getElementById('inp-nlat').value) || 0;
+          state.dlat = parseFloat(document.getElementById('inp-dlat').value) || 0;
+          state.dlon = parseFloat(document.getElementById('inp-dlon').value) || 0;
+          updateCliCommand();
+        });
+      }
+    });
+
+    // Buffer range input
+    const bufferSlider = document.getElementById('inp-buffer');
+    const bufferVal = document.getElementById('buffer-val');
+    if (bufferSlider && bufferVal) {
+      bufferSlider.addEventListener('input', (e) => {
+        state.buffer = e.target.value;
+        bufferVal.innerText = `+${state.buffer}%`;
+      });
+    }
+
+    // Copy CLI Button
+    const copyBtn = document.getElementById('btn-copy-cli');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', () => {
+        if (cliElem) {
+          navigator.clipboard.writeText(cliElem.innerText).then(() => {
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span class="material-symbols-outlined text-[12px] text-secondary">check</span><span>Copied!</span>';
+            setTimeout(() => {
+              copyBtn.innerHTML = originalText;
+            }, 1800);
+          });
+        }
+      });
+    }
+
+    // Line Style Switch
+    const lineBtns = document.querySelectorAll('.line-style-btn');
+    lineBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        lineBtns.forEach(b => {
+          b.classList.remove('bg-surface-container-highest', 'text-primary');
+          b.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
+        });
+        btn.classList.add('bg-surface-container-highest', 'text-primary');
+        btn.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant');
+      });
+    });
+
+    // Vector Scale Switch
+    const scaleBtns = document.querySelectorAll('.scale-btn');
+    scaleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        scaleBtns.forEach(b => {
+          b.classList.remove('bg-surface-container-highest', 'text-primary');
+          b.classList.add('bg-surface-container', 'text-on-surface-variant');
+        });
+        btn.classList.add('bg-surface-container-highest', 'text-primary');
+        btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+      });
+    });
+
+    // Format DMS / DEG Switch
+    const fmtDeg = document.getElementById('fmt-deg');
+    const fmtDms = document.getElementById('fmt-dms');
+    if (fmtDeg && fmtDms) {
+      fmtDeg.addEventListener('click', () => {
+        fmtDeg.classList.add('bg-surface-container-high', 'text-primary');
+        fmtDeg.classList.remove('text-on-surface-variant');
+        fmtDms.classList.remove('bg-surface-container-high', 'text-primary');
+        fmtDms.classList.add('text-on-surface-variant');
+      });
+      fmtDms.addEventListener('click', () => {
+        fmtDms.classList.add('bg-surface-container-high', 'text-primary');
+        fmtDms.classList.remove('text-on-surface-variant');
+        fmtDeg.classList.remove('bg-surface-container-high', 'text-primary');
+        fmtDeg.classList.add('text-on-surface-variant');
+      });
+    }
+  })();
+</script></main></div><footer class="fixed bottom-0 left-0 right-0 h-5 bg-surface-container-lowest border-t border-outline-variant z-50 flex items-center justify-between px-space-md font-label-sm text-label-sm text-on-surface-variant"><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[11px] text-primary">explore</span><span>LAT: <strong class="text-on-surface font-label-sm text-label-sm">42.3601° N</strong>  LON: <strong class="text-on-surface font-label-sm text-label-sm">71.0589° W</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>PROBED: <strong class="text-secondary font-label-sm text-label-sm">284.15 K (T2M)</strong></span></div><div class="pl-space-md"><span>PROJECTION: <strong class="text-on-surface font-label-sm text-label-sm">PlateCarree (EPSG:4326)</strong></span></div></div><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span>FPS: <strong class="text-on-surface font-label-sm text-label-sm">59.8</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>CUDA: <strong class="text-secondary font-label-sm text-label-sm">READY (0.42 ms)</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>MEM: <strong class="text-on-surface font-label-sm text-label-sm">24%</strong></span></div></div></footer></body></html>

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&family=Space+Grotesk:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-error-container":"#ffdad6","on-tertiary-fixed-variant":"#6900b3","background":"#0f131c","on-background":"#dfe2ef","surface-variant":"#31353f","on-secondary":"#003824","on-tertiary-container":"#6400ac","on-tertiary":"#490080","outline":"#87929a","secondary-fixed":"#6ffbbe","surface-container-low":"#181b25","on-secondary-container":"#00311f","on-primary-fixed":"#001e2c","tertiary-fixed-dim":"#ddb7ff","surface-container-lowest":"#0a0e17","error-container":"#93000a","tertiary-fixed":"#f0dbff","inverse-surface":"#dfe2ef","surface-container":"#1c1f29","secondary-fixed-dim":"#4edea3","on-primary-container":"#004965","surface-container-high":"#262a34","primary":"#8ed5ff","primary-fixed":"#c4e7ff","surface-dim":"#0f131c","on-secondary-fixed-variant":"#005236","secondary":"#4edea3","inverse-primary":"#00668a","on-surface":"#dfe2ef","outline-variant":"#3e484f","on-error":"#690005","surface-tint":"#7bd0ff","surface-container-highest":"#31353f","tertiary-container":"#ce9bff","on-primary-fixed-variant":"#004c69","on-secondary-fixed":"#002113","secondary-container":"#00a572","primary-container":"#38bdf8","error":"#ffb4ab","tertiary":"#e1bfff","surface-bright":"#353943","surface":"#0f131c","inverse-on-surface":"#2c303a","on-surface-variant":"#bdc8d1","on-primary":"#00354a","primary-fixed-dim":"#7bd0ff","on-tertiary-fixed":"#2c0051"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"space-sm":"0.25rem","gutter":"0.25rem","space-md":"0.5rem","space-xs":"0.125rem","margin":"0.25rem","space-xl":"1rem","space-lg":"0.75rem"},fontFamily:{"body-md":["Inter"],"headline-md":["Space Grotesk"],"label-lg":["JetBrains Mono"],"headline-sm":["Space Grotesk"],"body-lg":["Inter"],"label-md":["JetBrains Mono"],"headline-lg":["Space Grotesk"],"label-sm":["JetBrains Mono"],"body-sm":["Inter"]},fontSize:{"body-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"600"}],"label-lg":["12px",{"lineHeight":"16px","fontWeight":"500"}],"headline-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"600"}],"body-lg":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-md":["11px",{"lineHeight":"14px","fontWeight":"500"}],"headline-lg":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.02em","fontWeight":"400"}],"body-sm":["11px",{"lineHeight":"14px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-sm text-body-sm text-on-surface select-none antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-outline-variant"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-lowest border-b border-outline-variant"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[13px] text-primary">satellite_alt</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wide">xplot — Meteorological Visualization & Workflow Engine [PyQt6 / Cartopy Core]</span></div><div class="flex items-center"><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">minimize</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">check_box_outline_blank</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-on-error-container"><span class="material-symbols-outlined text-[12px]">close</span></button></div></div><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-low border-b border-outline-variant"><nav class="flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary font-headline-sm"><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="file" href="#">File</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="edit" href="#">Edit</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="view" href="#">View</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="layer" href="#">Layer</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="projection" href="#">Projection</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="colormap" href="#">Colormap</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="cli-export" href="#">CLI Export</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="tools" href="#">Tools</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="window" href="#">Window</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="help" href="#">Help</a></nav><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm text-on-surface-variant">SESSION: <span class="text-secondary font-label-sm text-label-sm">ONLINE</span></span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div><div class="h-8 px-space-md flex items-center justify-between bg-surface-container"><div class="flex items-center gap-space-sm"><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary">folder_open</span><span class="font-label-md text-label-md">Open Data</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-secondary">visibility</span><span class="font-label-md text-label-md">Preview</span></button><button class="h-6 px-space-md bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary flex items-center gap-space-xs border border-primary rounded font-label-md text-label-md"><span class="material-symbols-outlined text-[13px]">play_arrow</span><span>Render</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary-fixed">terminal</span><span class="font-label-md text-label-md">Gen CLI</span></button><div class="h-4 w-px bg-outline-variant mx-space-xs"></div><div class="flex items-center gap-space-xs"><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_in</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_out</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">pan_tool</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">restart_alt</span></button></div></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant"><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Backend: <strong class="text-primary font-label-sm text-label-sm">Qt6Agg</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">DPI: <strong class="text-on-surface font-label-sm text-label-sm">192</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Cache: <strong class="text-secondary font-label-sm text-label-sm">1.4 GB / 8.0 GB</strong></span></div></div></header><aside class="fixed left-0 top-20 bottom-5 w-64 bg-surface-container-low border-r border-outline-variant z-40 flex flex-col"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container border-b border-outline-variant"><span class="font-headline-sm text-headline-sm text-primary tracking-wider uppercase font-semibold">WORKBENCH DOCKS</span><span class="material-symbols-outlined text-[13px] text-outline">dock</span></div><nav class="flex-1 overflow-y-auto py-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md"><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="spatial-viewport" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-primary">public</span>Spatial Viewport (2D/3D)</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="variables-and-dimensions" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">data_table</span>Variables & Dimensions</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="projection-and-cartopy" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">map</span>Projection & Cartopy</a><a aria-current="page" class="flex items-center px-space-md py-space-sm transition-colors bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md" data-path="layer-stack-and-features" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">layers</span>Layer Stack & Features</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="colormap-transfer" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">palette</span>Colormap Transfer</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="cli-and-batch-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">terminal</span>CLI & Batch Engine</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="derived-diagnostics" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">functions</span>Derived Diagnostics</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="compute-and-dask-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">memory</span>Compute & Dask Engine</a></nav><div class="p-space-md border-t border-outline-variant bg-surface-container-lowest font-label-sm text-label-sm"><div class="flex justify-between items-center text-outline"><span class="font-label-sm text-label-sm">ACTIVE WORKSPACE</span><span class="text-secondary font-label-sm text-label-sm">era5_synoptic</span></div><div class="mt-space-xs text-on-surface-variant truncate font-label-sm text-label-sm">netcdf4://gfs_20241018_12z.nc</div></div></aside><div class="pl-64"><main class="w-full pt-20 pb-5 min-h-[calc(100vh-1.25rem)] bg-surface-dim"><div class="flex flex-col w-full">
+<!-- Sub-header Breadcrumb / Sub-toolbar strip -->
+<div class="px-space-md py-space-xs bg-surface-container-low flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-sm font-label-sm text-label-sm">
+<span class="text-primary flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px]">layers</span>
+<span>CARTOGRAPHIC COMPOSITOR</span>
+</span>
+<span class="text-outline">/</span>
+<span class="text-on-surface">Vector Feature & Raster Blending Pipeline</span>
+<span class="text-outline">/</span>
+<span class="text-secondary font-label-sm">CRS: LambertConformal (central_lon=-96.0, lat_1=33.0, lat_2=45.0)</span>
+</div>
+<div class="flex items-center gap-space-md font-label-sm text-label-sm">
+<span class="text-on-surface-variant flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>Cartopy GEOS Native: Active</span>
+</span>
+<span class="text-outline-variant">|</span>
+<span class="text-primary-fixed">7 Blended Entities</span>
+<span class="text-outline-variant">|</span>
+<button class="bg-surface-container-high hover:bg-surface-bright text-primary px-space-md py-space-xs rounded flex items-center gap-space-xs shadow-sm">
+<span class="material-symbols-outlined text-[13px]">refresh</span>
+<span>Re-project Viewport</span>
+</button>
+</div>
+</div>
+<!-- Primary 3-Column Dock Layout -->
+<div class="p-gutter grid grid-cols-12 gap-gutter">
+<!-- LEFT PANEL: Ordered Layer Stack (Col 1-4) -->
+<section class="col-span-12 xl:col-span-4 flex flex-col gap-gutter">
+<!-- Layer Stack Header & Tools -->
+<div class="bg-surface-container-low p-space-md rounded shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">format_list_bulleted</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-wider uppercase">Active Layer Stack (Z-Order)</h2>
+</div>
+<span class="px-space-sm py-space-xs bg-surface-container-highest text-primary-fixed font-label-sm text-label-sm rounded">Top-Down Draw</span>
+</div>
+<!-- Layer Action Bar (Icon Matrix) -->
+<div class="grid grid-cols-6 gap-space-xs pt-space-xs">
+<button class="h-6 bg-surface-container hover:bg-surface-container-highest text-primary flex items-center justify-center rounded shadow-sm" title="Add Vector Shapefile">
+<span class="material-symbols-outlined text-[14px]">polyline</span>
+</button>
+<button class="h-6 bg-surface-container hover:bg-surface-container-highest text-secondary flex items-center justify-center rounded shadow-sm" title="Add Gridded Field">
+<span class="material-symbols-outlined text-[14px]">grid_4x4</span>
+</button>
+<button class="h-6 bg-surface-container hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface flex items-center justify-center rounded shadow-sm" title="Duplicate Layer">
+<span class="material-symbols-outlined text-[14px]">content_copy</span>
+</button>
+<button class="h-6 bg-surface-container hover:bg-error-container hover:text-on-error-container text-on-surface-variant flex items-center justify-center rounded shadow-sm" title="Remove Layer">
+<span class="material-symbols-outlined text-[14px]">delete</span>
+</button>
+<button class="h-6 bg-surface-container hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface flex items-center justify-center rounded shadow-sm" title="Move Up">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+</button>
+<button class="h-6 bg-surface-container hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface flex items-center justify-center rounded shadow-sm" title="Move Down">
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+</button>
+</div>
+<!-- Add Button Quick Actions -->
+<div class="flex gap-space-xs mt-space-xs">
+<button class="flex-1 h-6 px-space-sm bg-surface-container hover:bg-surface-bright text-primary font-label-sm text-label-sm flex items-center justify-center gap-space-xs rounded shadow-sm">
+<span class="material-symbols-outlined text-[13px]">add</span>
+<span>.shp / .geojson</span>
+</button>
+<button class="flex-1 h-6 px-space-sm bg-surface-container hover:bg-surface-bright text-secondary font-label-sm text-label-sm flex items-center justify-center gap-space-xs rounded shadow-sm">
+<span class="material-symbols-outlined text-[13px]">add_chart</span>
+<span>Gridded / NetCDF</span>
+</button>
+</div>
+</div>
+<!-- Drag & Drop Layer Items Container -->
+<div class="flex flex-col gap-space-xs">
+<!-- Layer 1 (Active / Selected) -->
+<div class="bg-surface-container-high p-space-sm rounded shadow-sm flex flex-col gap-space-xs relative group cursor-pointer">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline cursor-grab">drag_indicator</span>
+<input checked="" class="w-3 h-3 accent-primary cursor-pointer" type="checkbox"/>
+<button class="text-primary hover:text-primary-fixed flex items-center">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-[150px]">NOAA_Severe_Outlooks_Day1.shp</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="bg-error-container text-on-error-container font-label-sm text-label-sm px-space-xs rounded">Z: 30</span>
+<span class="material-symbols-outlined text-[14px] text-tertiary">category</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pl-6">
+<span class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-sm bg-error inline-block"></span>
+<span>Vector Polygon • 42 Feats</span>
+</span>
+<span class="text-primary font-label-sm">85% Opacity</span>
+</div>
+</div>
+<!-- Layer 2 -->
+<div class="bg-surface-container-low hover:bg-surface-container p-space-sm rounded shadow-sm flex flex-col gap-space-xs relative group cursor-pointer transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline cursor-grab">drag_indicator</span>
+<input checked="" class="w-3 h-3 accent-primary cursor-pointer" type="checkbox"/>
+<button class="text-primary hover:text-primary-fixed flex items-center">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-[150px]">Wind Vector Barbs (850 hPa)</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-space-xs rounded">Z: 25</span>
+<span class="material-symbols-outlined text-[14px] text-secondary">air</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pl-6">
+<span>U/V Field (skip=4) • Scale: 1.0</span>
+<span class="text-on-surface-variant font-label-sm">UGRD,VGRD</span>
+</div>
+</div>
+<!-- Layer 3 -->
+<div class="bg-surface-container-low hover:bg-surface-container p-space-sm rounded shadow-sm flex flex-col gap-space-xs relative group cursor-pointer transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline cursor-grab">drag_indicator</span>
+<input checked="" class="w-3 h-3 accent-primary cursor-pointer" type="checkbox"/>
+<button class="text-primary hover:text-primary-fixed flex items-center">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-[150px]">US_State_Boundaries.shp</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-space-xs rounded">Z: 20</span>
+<span class="material-symbols-outlined text-[14px] text-outline">timeline</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pl-6">
+<span>Lines • stroke 0.8px</span>
+<span class="text-outline font-label-sm">#71717a</span>
+</div>
+</div>
+<!-- Layer 4 -->
+<div class="bg-surface-container-low hover:bg-surface-container p-space-sm rounded shadow-sm flex flex-col gap-space-xs relative group cursor-pointer transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline cursor-grab">drag_indicator</span>
+<input checked="" class="w-3 h-3 accent-primary cursor-pointer" type="checkbox"/>
+<button class="text-primary hover:text-primary-fixed flex items-center">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-[150px]">Isobaric Contours (HGT 500)</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-space-xs rounded">Z: 15</span>
+<span class="material-symbols-outlined text-[14px] text-tertiary">water</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pl-6">
+<span>Interval 60m • σ=0.8</span>
+<span class="text-secondary font-label-sm">Labelled clabel</span>
+</div>
+</div>
+<!-- Layer 5 -->
+<div class="bg-surface-container-low hover:bg-surface-container p-space-sm rounded shadow-sm flex flex-col gap-space-xs relative group cursor-pointer transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline cursor-grab">drag_indicator</span>
+<input checked="" class="w-3 h-3 accent-primary cursor-pointer" type="checkbox"/>
+<button class="text-primary hover:text-primary-fixed flex items-center">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-[150px]">2m Temperature (TMP_2m)</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-space-xs rounded">Z: 10</span>
+<span class="material-symbols-outlined text-[14px] text-primary">palette</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pl-6">
+<div class="h-2 w-20 rounded-sm bg-gradient-to-r from-blue-600 via-amber-400 to-red-600"></div>
+<span class="text-primary font-label-sm">turbo (contourf)</span>
+</div>
+</div>
+<!-- Layer 6 -->
+<div class="bg-surface-container-low hover:bg-surface-container p-space-sm rounded shadow-sm flex flex-col gap-space-xs relative group cursor-pointer transition-colors">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline cursor-grab">drag_indicator</span>
+<input checked="" class="w-3 h-3 accent-primary cursor-pointer" type="checkbox"/>
+<button class="text-primary hover:text-primary-fixed flex items-center">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-[150px]">Natural Earth Coastlines & Lakes</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-space-xs rounded">Z: 5</span>
+<span class="material-symbols-outlined text-[14px] text-outline">terrain</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pl-6">
+<span>NaturalEarthFeature 10m scale</span>
+<span class="text-outline font-label-sm">Cartopy Built-in</span>
+</div>
+</div>
+<!-- Layer 7 -->
+<div class="bg-surface-container-low hover:bg-surface-container p-space-sm rounded shadow-sm flex flex-col gap-space-xs relative group cursor-pointer transition-colors opacity-70">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline cursor-grab">drag_indicator</span>
+<input checked="" class="w-3 h-3 accent-primary cursor-pointer" type="checkbox"/>
+<button class="text-primary hover:text-primary-fixed flex items-center">
+<span class="material-symbols-outlined text-[14px]">visibility</span>
+</button>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate max-w-[150px]">Shaded Relief / Land-Sea Mask</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="bg-surface-container-highest text-on-surface font-label-sm text-label-sm px-space-xs rounded">Z: 0</span>
+<span class="material-symbols-outlined text-[14px] text-outline">image</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pl-6">
+<span>SRTM 1km hillshade basemap</span>
+<span class="text-outline font-label-sm">Alpha 0.40</span>
+</div>
+</div>
+</div>
+<!-- Quick Telemetry Card -->
+<div class="bg-surface-container-lowest p-space-md rounded shadow-sm flex flex-col gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<div class="flex justify-between items-center text-outline">
+<span>COMPOSITOR STATUS</span>
+<span class="text-secondary font-label-sm">DIRTY BUFFERS: 0</span>
+</div>
+<div class="flex justify-between items-center text-on-surface">
+<span>Memory Footprint (Layers):</span>
+<span class="text-primary font-label-sm">184.2 MB</span>
+</div>
+<div class="flex justify-between items-center text-on-surface">
+<span>Cartopy Render Engine:</span>
+<span class="text-on-surface font-label-sm">Agg / Matplotlib 3.8</span>
+</div>
+</div>
+</section>
+<!-- CENTER PANEL: Layer Configuration Inspector (Col 5-8) -->
+<section class="col-span-12 xl:col-span-5 flex flex-col gap-gutter">
+<!-- Top Inspector Bar -->
+<div class="bg-surface-container-low p-space-md rounded shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">tune</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-wider uppercase">Layer Symbology & Attributes Inspector</h2>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm">
+<span class="text-outline">TARGET:</span>
+<span class="text-primary font-label-sm">NOAA_Severe_Outlooks_Day1.shp</span>
+</div>
+</div>
+<!-- Tab Bar for Selected Layer -->
+<div class="flex items-center gap-space-xs bg-surface-container-lowest p-space-xs rounded">
+<button class="px-space-md py-space-xs bg-surface-container-high text-primary font-label-md text-label-md rounded shadow-sm flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px]">palette</span>
+<span>Symbology</span>
+</button>
+<button class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md rounded flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px]">filter_alt</span>
+<span>Attribute Query</span>
+</button>
+<button class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md rounded flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px]">crop</span>
+<span>Spatial Extent</span>
+</button>
+<button class="px-space-md py-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-label-md text-label-md rounded flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px]">code</span>
+<span>WKT Geometry</span>
+</button>
+</div>
+<!-- Symbology Styling Form Controls -->
+<div class="bg-surface-container p-space-md rounded shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-headline-sm text-headline-sm text-primary uppercase">Vector Styling Engine</span>
+<span class="font-label-sm text-label-sm text-secondary">Shapely Polygon Handler</span>
+</div>
+<!-- Color & Fill Matrix -->
+<div class="grid grid-cols-2 gap-space-md">
+<!-- Fill Configuration -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
+<span>Fill Mode:</span>
+<span class="text-primary font-label-sm">Rule-Based / Solid</span>
+</label>
+<div class="flex items-center gap-space-xs">
+<div class="w-6 h-6 rounded bg-error-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[13px] text-on-error-container">format_color_fill</span>
+</div>
+<select class="flex-1 h-6 bg-surface-container-lowest text-on-surface font-label-sm text-label-sm px-space-xs rounded outline-none shadow-sm">
+<option>Solid Color (RGBA: 239, 68, 68, 0.45)</option>
+<option>Attribute: CATEGORY (Categorical)</option>
+<option>Attribute: DN (Sequential Viridis)</option>
+<option>Hatch / Stipple Pattern (NW-SE)</option>
+</select>
+</div>
+</div>
+<!-- Stroke Configuration -->
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
+<span>Stroke Border:</span>
+<span class="text-error font-label-sm">#ef4444 • 1.5px</span>
+</label>
+<div class="flex items-center gap-space-xs">
+<input class="w-20 h-6 bg-surface-container-lowest text-on-surface font-label-sm text-label-sm px-space-xs rounded text-center outline-none shadow-sm" type="text" value="#ef4444"/>
+<select class="flex-1 h-6 bg-surface-container-lowest text-on-surface font-label-sm text-label-sm px-space-xs rounded outline-none shadow-sm">
+<option>Solid Stroke</option>
+<option>Dashed (4, 2)</option>
+<option>Dotted (1, 1)</option>
+<option>Dash-Dot (6, 2, 2, 2)</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Sliders: Width and Opacity -->
+<div class="grid grid-cols-2 gap-space-md pt-space-xs">
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Stroke Width</span>
+<span class="text-on-surface font-label-sm">1.50 pt</span>
+</div>
+<input class="accent-primary cursor-pointer w-full h-1 bg-surface-container-lowest rounded" max="5.0" min="0.1" step="0.1" type="range" value="1.5"/>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Alpha Transparency</span>
+<span class="text-primary font-label-sm">85%</span>
+</div>
+<input class="accent-primary cursor-pointer w-full h-1 bg-surface-container-lowest rounded" max="100" min="0" type="range" value="85"/>
+</div>
+</div>
+<!-- Feature Clipping & Transforms -->
+<div class="flex items-center justify-between pt-space-xs">
+<label class="flex items-center gap-space-xs cursor-pointer font-label-sm text-label-sm text-on-surface">
+<input checked="" class="w-3 h-3 accent-primary" type="checkbox"/>
+<span>Clip to Current Cartopy Map Extent (Fast GEOS)</span>
+</label>
+<label class="flex items-center gap-space-xs cursor-pointer font-label-sm text-label-sm text-on-surface">
+<input checked="" class="w-3 h-3 accent-primary" type="checkbox"/>
+<span>Auto Transform on Viewport Zoom</span>
+</label>
+</div>
+</div>
+<!-- Attribute Filter Query Box -->
+<div class="bg-surface-container p-space-md rounded shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase">Attribute Filter Expression (Pandas/GEOS SQL)</span>
+<span class="text-secondary font-label-sm text-label-sm">VALID QUERY</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="flex-1 bg-surface-container-lowest p-space-xs rounded flex items-center font-label-sm text-label-sm text-primary shadow-sm">
+<span class="text-secondary mr-space-xs">></span>
+<input class="w-full bg-transparent text-on-surface outline-none font-label-sm" type="text" value="CATEGORY == 'ENH' or CATEGORY == 'SLGT'"/>
+</div>
+<button class="h-6 px-space-md bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary font-label-md text-label-md rounded shadow-sm">
+              Apply
+            </button>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant pt-space-xs">
+<span>Encoding: <strong class="text-on-surface font-label-sm">UTF-8</strong></span>
+<span>Total Shape Records: <strong class="text-primary font-label-sm">42 Geometries</strong></span>
+<span>Matched Query: <strong class="text-secondary font-label-sm">18 Geometries</strong></span>
+</div>
+</div>
+<!-- Geometry Coordinate Table Snippet (WKT Preview) -->
+<div class="bg-surface-container p-space-md rounded shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase">Vector Geometry Coordinates (WKT / Shapely)</span>
+<span class="font-label-sm text-label-sm text-outline">SRID: EPSG:4326</span>
+</div>
+<div class="overflow-x-auto bg-surface-container-lowest rounded shadow-sm">
+<table class="w-full font-label-sm text-label-sm text-left">
+<thead class="bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<tr>
+<th class="py-space-xs px-space-sm">FID</th>
+<th class="py-space-xs px-space-sm">TYPE</th>
+<th class="py-space-xs px-space-sm">CATEGORY</th>
+<th class="py-space-xs px-space-sm">AREA (deg²)</th>
+<th class="py-space-xs px-space-sm">WELL-KNOWN TEXT PREVIEW</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface">
+<tr class="bg-surface-container-low hover:bg-surface-container">
+<td class="py-space-xs px-space-sm text-outline font-label-sm">001</td>
+<td class="py-space-xs px-space-sm text-primary font-label-sm">POLYGON</td>
+<td class="py-space-xs px-space-sm text-error font-label-sm font-semibold">ENH</td>
+<td class="py-space-xs px-space-sm text-on-surface-variant font-label-sm">14.821</td>
+<td class="py-space-xs px-space-sm text-outline truncate max-w-[200px] font-label-sm">POLYGON ((-97.41 35.22, -96.12 36.45, -95.02 34.88...))</td>
+</tr>
+<tr class="bg-surface-container-lowest hover:bg-surface-container">
+<td class="py-space-xs px-space-sm text-outline font-label-sm">002</td>
+<td class="py-space-xs px-space-sm text-primary font-label-sm">POLYGON</td>
+<td class="py-space-xs px-space-sm text-secondary font-label-sm font-semibold">SLGT</td>
+<td class="py-space-xs px-space-sm text-on-surface-variant font-label-sm">38.910</td>
+<td class="py-space-xs px-space-sm text-outline truncate max-w-[200px] font-label-sm">POLYGON ((-100.12 33.15, -98.24 38.01, -93.88 37.42...))</td>
+</tr>
+<tr class="bg-surface-container-low hover:bg-surface-container">
+<td class="py-space-xs px-space-sm text-outline font-label-sm">003</td>
+<td class="py-space-xs px-space-sm text-primary font-label-sm">POLYGON</td>
+<td class="py-space-xs px-space-sm text-secondary font-label-sm font-semibold">SLGT</td>
+<td class="py-space-xs px-space-sm text-on-surface-variant font-label-sm">08.204</td>
+<td class="py-space-xs px-space-sm text-outline truncate max-w-[200px] font-label-sm">POLYGON ((-88.45 32.10, -86.90 33.50, -87.12 31.05...))</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT PANEL: Vector Ingestion & Batch Asset Pool (Col 9-12) -->
+<section class="col-span-12 xl:col-span-3 flex flex-col gap-gutter">
+<!-- Shapefile Repository List -->
+<div class="bg-surface-container-low p-space-md rounded shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[16px] text-primary">folder_special</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface tracking-wider uppercase">Workspace Vector Store</h2>
+</div>
+<span class="text-outline font-label-sm text-label-sm">3 Cached</span>
+</div>
+<!-- Repository Files -->
+<div class="flex flex-col gap-space-xs pt-space-xs font-label-sm text-label-sm">
+<div class="bg-surface-container p-space-xs rounded flex items-center justify-between group hover:bg-surface-container-high transition-colors shadow-sm">
+<div class="flex items-center gap-space-xs truncate">
+<span class="material-symbols-outlined text-[14px] text-tertiary">polyline</span>
+<span class="text-on-surface truncate font-label-sm">./shapes/conus_counties.shp</span>
+</div>
+<button class="h-5 px-space-xs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-primary-fixed rounded flex items-center shadow-sm">
+<span class="material-symbols-outlined text-[11px]">add</span>
+</button>
+</div>
+<div class="bg-surface-container p-space-xs rounded flex items-center justify-between group hover:bg-surface-container-high transition-colors shadow-sm">
+<div class="flex items-center gap-space-xs truncate">
+<span class="material-symbols-outlined text-[14px] text-primary">water</span>
+<span class="text-on-surface truncate font-label-sm">./shapes/rivers.shp</span>
+</div>
+<button class="h-5 px-space-xs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-primary-fixed rounded flex items-center shadow-sm">
+<span class="material-symbols-outlined text-[11px]">add</span>
+</button>
+</div>
+<div class="bg-surface-container p-space-xs rounded flex items-center justify-between group hover:bg-surface-container-high transition-colors shadow-sm">
+<div class="flex items-center gap-space-xs truncate">
+<span class="material-symbols-outlined text-[14px] text-secondary">radar</span>
+<span class="text-on-surface truncate font-label-sm">./shapes/radar_nexrad.shp</span>
+</div>
+<button class="h-5 px-space-xs bg-surface-container-highest hover:bg-primary hover:text-on-primary text-primary-fixed rounded flex items-center shadow-sm">
+<span class="material-symbols-outlined text-[11px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Drag & Drop Ingestion Box -->
+<div class="bg-surface-container-low p-space-md rounded shadow-sm flex flex-col gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase">Ingest Shapefile / GeoPackage</span>
+<div class="h-28 bg-surface-container-lowest rounded flex flex-col items-center justify-center gap-space-xs text-center p-space-sm shadow-sm cursor-pointer hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[24px] text-primary">upload_file</span>
+<span class="font-label-sm text-label-sm text-on-surface">Drop .shp, .gpkg, .geojson, .kml</span>
+<span class="font-label-sm text-label-sm text-outline">or click to browse local filesystem</span>
+</div>
+</div>
+<!-- CLI Batch Generation Box -->
+<div class="bg-surface-container-low p-space-md rounded shadow-sm flex flex-col gap-space-xs flex-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-primary-fixed">terminal</span>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase">CLI Generator Snippet</span>
+</div>
+<button class="h-5 px-space-xs bg-surface-container-highest hover:bg-surface-bright text-primary font-label-sm text-label-sm rounded flex items-center gap-space-xs shadow-sm" id="copyCliBtn">
+<span class="material-symbols-outlined text-[11px]">content_paste</span>
+<span>Copy</span>
+</button>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded font-label-sm text-label-sm text-secondary shadow-sm overflow-x-auto select-all leading-relaxed whitespace-pre-wrap break-all">xplot layers \
+  --add-shapefile ./shapes/NOAA_outlooks.shp \
+  --filter "CATEGORY in [SLGT,ENH]" \
+  --style fill=#ef4444,stroke=1.5 \
+  --add-barbs UGRD,VGRD \
+  --z-order 25</div>
+<div class="flex items-center justify-between pt-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span>Batch execution ready</span>
+<span class="text-primary cursor-pointer hover:underline">Open in Terminal →</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+<script>
+  // Simple micro-interaction for CLI snippet copy
+  document.getElementById('copyCliBtn')?.addEventListener('click', function() {
+    const textToCopy = 'xplot layers --add-shapefile ./shapes/NOAA_outlooks.shp --filter "CATEGORY in [SLGT,ENH]" --style fill=#ef4444,stroke=1.5 --add-barbs UGRD,VGRD --z-order 25';
+    navigator.clipboard?.writeText(textToCopy);
+    const span = this.querySelector('span:last-child');
+    if (span) {
+      span.textContent = 'Copied!';
+      setTimeout(() => {
+        span.textContent = 'Copy';
+      }, 1500);
+    }
+  });
+</script></main></div><footer class="fixed bottom-0 left-0 right-0 h-5 bg-surface-container-lowest border-t border-outline-variant z-50 flex items-center justify-between px-space-md font-label-sm text-label-sm text-on-surface-variant"><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[11px] text-primary">explore</span><span>LAT: <strong class="text-on-surface font-label-sm text-label-sm">42.3601° N</strong>  LON: <strong class="text-on-surface font-label-sm text-label-sm">71.0589° W</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>PROBED: <strong class="text-secondary font-label-sm text-label-sm">284.15 K (T2M)</strong></span></div><div class="pl-space-md"><span>PROJECTION: <strong class="text-on-surface font-label-sm text-label-sm">PlateCarree (EPSG:4326)</strong></span></div></div><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span>FPS: <strong class="text-on-surface font-label-sm text-label-sm">59.8</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>CUDA: <strong class="text-secondary font-label-sm text-label-sm">READY (0.42 ms)</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>MEM: <strong class="text-on-surface font-label-sm text-label-sm">24%</strong></span></div></div></footer></body></html>

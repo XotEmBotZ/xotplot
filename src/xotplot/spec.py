@@ -1,0 +1,1 @@
+"""Plot specification schema."""

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&family=Space+Grotesk:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-error-container":"#ffdad6","on-tertiary-fixed-variant":"#6900b3","background":"#0f131c","on-background":"#dfe2ef","surface-variant":"#31353f","on-secondary":"#003824","on-tertiary-container":"#6400ac","on-tertiary":"#490080","outline":"#87929a","secondary-fixed":"#6ffbbe","surface-container-low":"#181b25","on-secondary-container":"#00311f","on-primary-fixed":"#001e2c","tertiary-fixed-dim":"#ddb7ff","surface-container-lowest":"#0a0e17","error-container":"#93000a","tertiary-fixed":"#f0dbff","inverse-surface":"#dfe2ef","surface-container":"#1c1f29","secondary-fixed-dim":"#4edea3","on-primary-container":"#004965","surface-container-high":"#262a34","primary":"#8ed5ff","primary-fixed":"#c4e7ff","surface-dim":"#0f131c","on-secondary-fixed-variant":"#005236","secondary":"#4edea3","inverse-primary":"#00668a","on-surface":"#dfe2ef","outline-variant":"#3e484f","on-error":"#690005","surface-tint":"#7bd0ff","surface-container-highest":"#31353f","tertiary-container":"#ce9bff","on-primary-fixed-variant":"#004c69","on-secondary-fixed":"#002113","secondary-container":"#00a572","primary-container":"#38bdf8","error":"#ffb4ab","tertiary":"#e1bfff","surface-bright":"#353943","surface":"#0f131c","inverse-on-surface":"#2c303a","on-surface-variant":"#bdc8d1","on-primary":"#00354a","primary-fixed-dim":"#7bd0ff","on-tertiary-fixed":"#2c0051"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"space-sm":"0.25rem","gutter":"0.25rem","space-md":"0.5rem","space-xs":"0.125rem","margin":"0.25rem","space-xl":"1rem","space-lg":"0.75rem"},fontFamily:{"body-md":["Inter"],"headline-md":["Space Grotesk"],"label-lg":["JetBrains Mono"],"headline-sm":["Space Grotesk"],"body-lg":["Inter"],"label-md":["JetBrains Mono"],"headline-lg":["Space Grotesk"],"label-sm":["JetBrains Mono"],"body-sm":["Inter"]},fontSize:{"body-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"600"}],"label-lg":["12px",{"lineHeight":"16px","fontWeight":"500"}],"headline-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"600"}],"body-lg":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-md":["11px",{"lineHeight":"14px","fontWeight":"500"}],"headline-lg":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.02em","fontWeight":"400"}],"body-sm":["11px",{"lineHeight":"14px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-sm text-body-sm text-on-surface select-none antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-outline-variant"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-lowest border-b border-outline-variant"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[13px] text-primary">satellite_alt</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wide">xplot — Meteorological Visualization & Workflow Engine [PyQt6 / Cartopy Core]</span></div><div class="flex items-center"><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">minimize</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">check_box_outline_blank</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-on-error-container"><span class="material-symbols-outlined text-[12px]">close</span></button></div></div><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-low border-b border-outline-variant"><nav class="flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary font-headline-sm"><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="file" href="#">File</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="edit" href="#">Edit</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="view" href="#">View</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="layer" href="#">Layer</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="projection" href="#">Projection</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="colormap" href="#">Colormap</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="cli-export" href="#">CLI Export</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="tools" href="#">Tools</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="window" href="#">Window</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="help" href="#">Help</a></nav><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm text-on-surface-variant">SESSION: <span class="text-secondary font-label-sm text-label-sm">ONLINE</span></span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div><div class="h-8 px-space-md flex items-center justify-between bg-surface-container"><div class="flex items-center gap-space-sm"><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary">folder_open</span><span class="font-label-md text-label-md">Open Data</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-secondary">visibility</span><span class="font-label-md text-label-md">Preview</span></button><button class="h-6 px-space-md bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary flex items-center gap-space-xs border border-primary rounded font-label-md text-label-md"><span class="material-symbols-outlined text-[13px]">play_arrow</span><span>Render</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary-fixed">terminal</span><span class="font-label-md text-label-md">Gen CLI</span></button><div class="h-4 w-px bg-outline-variant mx-space-xs"></div><div class="flex items-center gap-space-xs"><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_in</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_out</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">pan_tool</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">restart_alt</span></button></div></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant"><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Backend: <strong class="text-primary font-label-sm text-label-sm">Qt6Agg</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">DPI: <strong class="text-on-surface font-label-sm text-label-sm">192</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Cache: <strong class="text-secondary font-label-sm text-label-sm">1.4 GB / 8.0 GB</strong></span></div></div></header><aside class="fixed left-0 top-20 bottom-5 w-64 bg-surface-container-low border-r border-outline-variant z-40 flex flex-col"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container border-b border-outline-variant"><span class="font-headline-sm text-headline-sm text-primary tracking-wider uppercase font-semibold">WORKBENCH DOCKS</span><span class="material-symbols-outlined text-[13px] text-outline">dock</span></div><nav class="flex-1 overflow-y-auto py-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md"><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="spatial-viewport" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-primary">public</span>Spatial Viewport (2D/3D)</a><a aria-current="page" class="flex items-center px-space-md py-space-sm transition-colors bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md" data-path="variables-and-dimensions" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">data_table</span>Variables & Dimensions</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="projection-and-cartopy" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">map</span>Projection & Cartopy</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="layer-stack-and-features" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">layers</span>Layer Stack & Features</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="colormap-transfer" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">palette</span>Colormap Transfer</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="cli-and-batch-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">terminal</span>CLI & Batch Engine</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="derived-diagnostics" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">functions</span>Derived Diagnostics</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="compute-and-dask-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">memory</span>Compute & Dask Engine</a></nav><div class="p-space-md border-t border-outline-variant bg-surface-container-lowest font-label-sm text-label-sm"><div class="flex justify-between items-center text-outline"><span class="font-label-sm text-label-sm">ACTIVE WORKSPACE</span><span class="text-secondary font-label-sm text-label-sm">era5_synoptic</span></div><div class="mt-space-xs text-on-surface-variant truncate font-label-sm text-label-sm">netcdf4://gfs_20241018_12z.nc</div></div></aside><div class="pl-64"><main class="w-full pt-20 pb-5 min-h-[calc(100vh-1.25rem)] bg-surface-dim"><div class="flex flex-col w-full">
+<div class="p-space-sm space-y-space-sm">
+<!-- Top Context & Protocol Ribbon -->
+<div class="flex items-center justify-between px-space-md py-space-xs bg-surface-container-low rounded">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-[15px]">database</span>
+<span>VARIABLES & DIMENSIONS INSPECTOR</span>
+</div>
+<span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-surface-container-high text-secondary-fixed">CF-1.8 COMPLIANT</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>GFS_Global_0p25deg_20241028_1200F024.grib2</span>
+</span>
+</div>
+<div class="flex items-center gap-space-sm font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Storage Engine:</span>
+<span class="px-space-xs py-0.5 bg-surface-container-highest text-primary-fixed rounded">cfgrib / eccodes 2.34.0</span>
+<span class="text-on-surface-variant ml-space-sm">Active Chunk Memory:</span>
+<span class="text-secondary font-label-md text-label-md">1.48 GB</span>
+</div>
+</div>
+<!-- 3-Column Core Inspector Grid -->
+<div class="grid grid-cols-12 gap-space-sm items-start">
+<!-- ================= LEFT DOCK: Dataset Tree & Dimension Slicers ================= -->
+<section class="col-span-12 xl:col-span-3 flex flex-col gap-space-sm">
+<!-- Dataset Architecture Card -->
+<div class="bg-surface-container rounded p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-headline-sm text-headline-sm text-primary uppercase tracking-wide">Coordinate Axes (5D)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-container-high text-on-surface-variant rounded">EPSG:4326</span>
+</div>
+<div class="space-y-space-xs mt-space-xs">
+<!-- Dim 1: Time -->
+<div class="bg-surface-container-low p-space-xs rounded">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px] text-primary">schedule</span>
+                  time
+                </span>
+<span class="text-on-surface-variant">64 steps (3h dt)</span>
+</div>
+<div class="flex items-center justify-between mt-space-xs text-on-surface font-label-sm text-label-sm">
+<span class="text-outline">Active: T+24h</span>
+<span class="text-secondary">2024-10-28T12:00:00Z</span>
+</div>
+</div>
+<!-- Dim 2: isobaricInhPa -->
+<div class="bg-surface-container-high p-space-xs rounded">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px] text-primary">layers</span>
+                  isobaricInhPa
+                </span>
+<span class="text-secondary font-semibold">idx: 4 (500 hPa)</span>
+</div>
+<div class="grid grid-cols-5 gap-space-xs mt-space-xs">
+<button class="py-0.5 text-center rounded bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant">1000</button>
+<button class="py-0.5 text-center rounded bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant">850</button>
+<button class="py-0.5 text-center rounded bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant">700</button>
+<button class="py-0.5 text-center rounded bg-primary-container text-on-primary-container font-semibold font-label-sm text-label-sm">500</button>
+<button class="py-0.5 text-center rounded bg-surface-container-low text-on-surface-variant font-label-sm text-label-sm hover:bg-surface-variant">250</button>
+</div>
+<div class="flex justify-between items-center text-outline font-label-sm text-label-sm mt-space-xs">
+<span>Domain: 1000..100 hPa</span>
+<span>9 Vert Levels</span>
+</div>
+</div>
+<!-- Dim 3: Latitude -->
+<div class="bg-surface-container-low p-space-xs rounded">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px] text-primary">check_indeterminate_small</span>
+                  latitude
+                </span>
+<span class="text-on-surface-variant">721 pts (0.25°)</span>
+</div>
+<div class="flex items-center justify-between text-outline font-label-sm text-label-sm mt-space-xs">
+<span>Span: -90.00° .. +90.00°</span>
+<span class="text-on-surface">Subgrid: Global</span>
+</div>
+</div>
+<!-- Dim 4: Longitude -->
+<div class="bg-surface-container-low p-space-xs rounded">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px] text-primary">east</span>
+                  longitude
+                </span>
+<span class="text-on-surface-variant">1440 pts (0.25°)</span>
+</div>
+<div class="flex items-center justify-between text-outline font-label-sm text-label-sm mt-space-xs">
+<span>Span: 0.00° .. 359.75°</span>
+<span class="text-on-surface">Circular wrap</span>
+</div>
+</div>
+<!-- Dim 5: Ensemble -->
+<div class="bg-surface-container-low p-space-xs rounded">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-primary font-semibold flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px] text-primary">groups_2</span>
+                  ensemble
+                </span>
+<span class="text-on-surface-variant">30 members</span>
+</div>
+<div class="flex items-center justify-between text-outline font-label-sm text-label-sm mt-space-xs">
+<span>Selected: ens_00 (Control)</span>
+<span class="text-secondary font-label-sm text-label-sm">Ctrl Run</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Dimension Slicer Controls Panel -->
+<div class="bg-surface-container rounded p-space-md shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary uppercase tracking-wide">Interactive Slicer Deck</span>
+<button class="px-space-sm py-0.5 rounded bg-surface-container-highest hover:bg-surface-variant font-label-sm text-label-sm text-primary">
+              Auto-Lock
+            </button>
+</div>
+<!-- Vertical Level Slider -->
+<div class="space-y-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">Vertical Level Index: <strong class="text-primary">4 / 9</strong></span>
+<span class="text-secondary font-semibold">500 hPa Geopotential</span>
+</div>
+<input class="w-full h-1 bg-surface-container-lowest rounded accent-primary-container cursor-pointer" max="8" min="0" type="range" value="4"/>
+<div class="flex justify-between font-label-sm text-label-sm text-outline">
+<span>1000 hPa</span>
+<span>700 hPa</span>
+<span>500 hPa</span>
+<span>250 hPa</span>
+<span>100 hPa</span>
+</div>
+</div>
+<!-- Time Step Scrubber -->
+<div class="space-y-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">Forecast Step: <strong class="text-primary">8 (F024)</strong></span>
+<span class="text-outline">Range: 0..64</span>
+</div>
+<input class="w-full h-1 bg-surface-container-lowest rounded accent-secondary cursor-pointer" max="64" min="0" type="range" value="8"/>
+<div class="flex items-center gap-space-xs">
+<button class="flex-1 py-1 rounded bg-surface-container-high hover:bg-surface-variant flex items-center justify-center font-label-sm text-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[13px]">skip_previous</span> Step -1
+              </button>
+<button class="flex-1 py-1 rounded bg-surface-container-high hover:bg-surface-variant flex items-center justify-center font-label-sm text-label-sm text-on-surface">
+<span class="material-symbols-outlined text-[13px]">play_arrow</span> Animate
+              </button>
+<button class="flex-1 py-1 rounded bg-surface-container-high hover:bg-surface-variant flex items-center justify-center font-label-sm text-label-sm text-on-surface">
+                Step +1 <span class="material-symbols-outlined text-[13px]">skip_next</span>
+</button>
+</div>
+</div>
+<!-- Bounding Box Lat/Lon Range Slicer -->
+<div class="space-y-space-xs bg-surface-container-low p-space-xs rounded">
+<span class="font-headline-sm text-headline-sm text-on-surface">Spatial Bounding Clip (ROI)</span>
+<div class="grid grid-cols-2 gap-space-xs font-label-sm text-label-sm mt-space-xs">
+<div>
+<span class="text-outline">Lat Min:</span>
+<input class="w-full bg-surface-container-lowest text-on-surface text-right px-space-xs py-0.5 rounded font-label-sm text-label-sm" type="text" value="20.0"/>
+</div>
+<div>
+<span class="text-outline">Lat Max:</span>
+<input class="w-full bg-surface-container-lowest text-on-surface text-right px-space-xs py-0.5 rounded font-label-sm text-label-sm" type="text" value="60.0"/>
+</div>
+<div>
+<span class="text-outline">Lon Min:</span>
+<input class="w-full bg-surface-container-lowest text-on-surface text-right px-space-xs py-0.5 rounded font-label-sm text-label-sm" type="text" value="230.0"/>
+</div>
+<div>
+<span class="text-outline">Lon Max:</span>
+<input class="w-full bg-surface-container-lowest text-on-surface text-right px-space-xs py-0.5 rounded font-label-sm text-label-sm" type="text" value="300.0"/>
+</div>
+</div>
+<div class="flex justify-end gap-space-xs pt-space-xs">
+<button class="px-space-sm py-0.5 rounded bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">CONUS Clip</button>
+<button class="px-space-sm py-0.5 rounded bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">Europe</button>
+<button class="px-space-sm py-0.5 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold">Reset Global</button>
+</div>
+</div>
+</div>
+<!-- Memory Cache & Chunk Layout Indicator -->
+<div class="bg-surface-container rounded p-space-md">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">Chunk Configuration:</span>
+<span class="text-primary font-label-sm text-label-sm font-semibold">(1, 1, 360, 720)</span>
+</div>
+<div class="w-full bg-surface-container-lowest h-2 rounded mt-space-xs overflow-hidden flex">
+<div class="bg-primary w-2/5 h-full"></div>
+<div class="bg-secondary w-1/4 h-full"></div>
+<div class="bg-surface-container-highest flex-1 h-full"></div>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant mt-space-xs">
+<span>Dask Task Graph: 128 nodes</span>
+<span class="text-secondary font-semibold">Lazy Evaluated</span>
+</div>
+</div>
+</section>
+<!-- ================= CENTER DOCK: Variable Catalog & Field Inspection ================= -->
+<section class="col-span-12 xl:col-span-6 flex flex-col gap-space-sm">
+<!-- Variable Search & Physics Category Pills -->
+<div class="bg-surface-container rounded p-space-md shadow-sm space-y-space-xs">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1.5 text-outline text-[16px]">search</span>
+<input class="w-full bg-surface-container-lowest text-on-surface pl-8 pr- space-md py-1 rounded font-body-sm text-body-sm focus:outline-none" placeholder="Filter variables by name, CF standard_name, GRIB parameter (e.g. HGT, geopotential_height)..." type="text"/>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap pt-space-xs">
+<span class="font-label-sm text-label-sm text-outline mr-space-xs">DOMAIN FILTER:</span>
+<button class="px-space-sm py-0.5 rounded bg-primary-container text-on-primary-container font-label-sm text-label-sm font-semibold">ALL (24)</button>
+<button class="px-space-sm py-0.5 rounded bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Dynamics (8)</button>
+<button class="px-space-sm py-0.5 rounded bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Thermodynamics (6)</button>
+<button class="px-space-sm py-0.5 rounded bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Moisture (4)</button>
+<button class="px-space-sm py-0.5 rounded bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Surface (4)</button>
+<button class="px-space-sm py-0.5 rounded bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">Radiation (2)</button>
+</div>
+</div>
+<!-- Variables Table -->
+<div class="bg-surface-container rounded shadow-sm overflow-hidden">
+<div class="px-space-md py-space-xs bg-surface-container-high flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary uppercase tracking-wide">Variable Matrix</span>
+<div class="flex items-center gap-space-sm font-label-sm text-label-sm text-on-surface-variant">
+<span>8 of 24 displayed</span>
+<span class="text-outline">|</span>
+<button class="hover:text-primary flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px]">refresh</span> Refresh Ingest
+              </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead class="bg-surface-container-low font-label-sm text-label-sm text-outline uppercase tracking-wider">
+<tr>
+<th class="py-1 px-space-sm text-center w-8">Sel</th>
+<th class="py-1 px-space-xs">Short</th>
+<th class="py-1 px-space-xs">CF Standard Name</th>
+<th class="py-1 px-space-xs">Shape</th>
+<th class="py-1 px-space-xs">Dtype</th>
+<th class="py-1 px-space-xs">Units</th>
+<th class="py-1 px-space-xs text-right pr-space-md">FillValue</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 font-label-sm text-label-sm">
+<!-- Row 1: Selected HGT -->
+<tr class="bg-surface-container-high hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input checked="" class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-primary">HGT</td>
+<td class="py-1.5 px-space-xs text-on-surface">geopotential_height</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 9, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">gpm</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+<!-- Row 2: TMP -->
+<tr class="bg-surface-container-low hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-on-surface">TMP</td>
+<td class="py-1.5 px-space-xs text-on-surface">air_temperature</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 9, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">K</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+<!-- Row 3: UGRD -->
+<tr class="bg-surface-container hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-on-surface">UGRD</td>
+<td class="py-1.5 px-space-xs text-on-surface">eastward_wind</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 9, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">m s-1</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+<!-- Row 4: VGRD -->
+<tr class="bg-surface-container-low hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-on-surface">VGRD</td>
+<td class="py-1.5 px-space-xs text-on-surface">northward_wind</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 9, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">m s-1</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+<!-- Row 5: RH -->
+<tr class="bg-surface-container hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-on-surface">RH</td>
+<td class="py-1.5 px-space-xs text-on-surface">relative_humidity</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 9, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">%</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+<!-- Row 6: PRMSL -->
+<tr class="bg-surface-container-low hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-on-surface">PRMSL</td>
+<td class="py-1.5 px-space-xs text-on-surface">air_pressure_at_mean_sea_level</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">Pa</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+<!-- Row 7: APCP -->
+<tr class="bg-surface-container hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-on-surface">APCP</td>
+<td class="py-1.5 px-space-xs text-on-surface">total_precipitation</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">kg m-2</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+<!-- Row 8: CAPE -->
+<tr class="bg-surface-container-low hover:bg-surface-variant cursor-pointer">
+<td class="py-1.5 px-space-sm text-center">
+<input class="accent-primary cursor-pointer" name="active_variable" type="radio"/>
+</td>
+<td class="py-1.5 px-space-xs font-semibold text-on-surface">CAPE</td>
+<td class="py-1.5 px-space-xs text-on-surface">convective_available_potential_energy</td>
+<td class="py-1.5 px-space-xs text-on-surface-variant font-label-sm text-label-sm">(64, 721, 1440)</td>
+<td class="py-1.5 px-space-xs text-secondary">float32</td>
+<td class="py-1.5 px-space-xs text-primary-fixed">J kg-1</td>
+<td class="py-1.5 px-space-xs text-right pr-space-md text-outline">9.999e20</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- In-Depth CF-Conventions Attribute Viewer & Statistical Summary Split -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-sm">
+<!-- CF Attribute Viewer Card -->
+<div class="bg-surface-container rounded p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-headline-sm text-headline-sm text-primary uppercase tracking-wide">CF Metadata & GRIB Key Attributes</span>
+<span class="font-label-sm text-label-sm text-outline">var: HGT</span>
+</div>
+<div class="space-y-1 mt-space-xs font-label-sm text-label-sm">
+<div class="flex justify-between py-0.5 px-space-xs rounded bg-surface-container-low">
+<span class="text-outline">long_name:</span>
+<span class="text-on-surface font-body-sm text-body-sm text-right">Geopotential Height</span>
+</div>
+<div class="flex justify-between py-0.5 px-space-xs rounded bg-surface-container-lowest">
+<span class="text-outline">valid_range:</span>
+<span class="text-secondary font-label-sm text-label-sm">[-500.0, 45000.0] gpm</span>
+</div>
+<div class="flex justify-between py-0.5 px-space-xs rounded bg-surface-container-low">
+<span class="text-outline">GRIB_element:</span>
+<span class="text-on-surface font-label-sm text-label-sm">HGT</span>
+</div>
+<div class="flex justify-between py-0.5 px-space-xs rounded bg-surface-container-lowest">
+<span class="text-outline">GRIB_shortName:</span>
+<span class="text-on-surface font-label-sm text-label-sm">gh</span>
+</div>
+<div class="flex justify-between py-0.5 px-space-xs rounded bg-surface-container-low">
+<span class="text-outline">grid_type:</span>
+<span class="text-primary-fixed font-label-sm text-label-sm">regular_ll</span>
+</div>
+<div class="flex justify-between py-0.5 px-space-xs rounded bg-surface-container-lowest">
+<span class="text-outline">coordinates:</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">time isobaricInhPa latitude longitude</span>
+</div>
+<div class="flex justify-between py-0.5 px-space-xs rounded bg-surface-container-low">
+<span class="text-outline">discipline:</span>
+<span class="text-on-surface font-label-sm text-label-sm">0 (Meteorological Products)</span>
+</div>
+</div>
+</div>
+<!-- Quick Statistical Summary Card -->
+<div class="bg-surface-container rounded p-space-md shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-headline-sm text-headline-sm text-primary uppercase tracking-wide">Active Slice Moments (500 hPa)</span>
+<span class="font-label-sm text-label-sm text-secondary font-semibold">VALIDATED</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs mt-space-xs font-label-sm text-label-sm">
+<div class="p-space-xs rounded bg-surface-container-low">
+<div class="text-outline">Minimum Value</div>
+<div class="font-headline-md text-headline-md text-primary mt-0.5">4,812.4 gpm</div>
+<div class="text-outline">Polar vortex core</div>
+</div>
+<div class="p-space-xs rounded bg-surface-container-low">
+<div class="text-outline">Maximum Value</div>
+<div class="font-headline-md text-headline-md text-secondary mt-0.5">5,948.1 gpm</div>
+<div class="text-outline">Subtropical ridge</div>
+</div>
+<div class="p-space-xs rounded bg-surface-container-low">
+<div class="text-outline">Field Mean (Weighted)</div>
+<div class="font-headline-md text-headline-md text-on-surface mt-0.5">5,542.8 gpm</div>
+<div class="text-outline">Cos(lat) corrected</div>
+</div>
+<div class="p-space-xs rounded bg-surface-container-low">
+<div class="text-outline">Standard Deviation</div>
+<div class="font-headline-md text-headline-md text-on-surface mt-0.5">284.6 gpm</div>
+<div class="text-outline">Baroclinicity metric</div>
+</div>
+</div>
+</div>
+<!-- Nan / Health Bar -->
+<div class="mt-space-xs pt-space-xs bg-surface-container-lowest p-space-xs rounded flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">NaN / Masked: <strong class="text-secondary">0 (0.00%)</strong></span>
+<span class="text-outline">Memory Buffer: <strong class="text-primary">4.15 MB (float32)</strong></span>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= RIGHT DOCK: Reduction, Conversions, CLI & Extraction ================= -->
+<section class="col-span-12 xl:col-span-3 flex flex-col gap-space-sm">
+<!-- Dimension Reduction & Regridding Deck -->
+<div class="bg-surface-container rounded p-space-md shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary uppercase tracking-wide">Dimension Reduction</span>
+<span class="material-symbols-outlined text-[15px] text-outline">tune</span>
+</div>
+<!-- Reductions -->
+<div class="space-y-space-xs font-label-sm text-label-sm">
+<label class="text-outline block">Axis Reduction Operation:</label>
+<select class="w-full bg-surface-container-lowest text-on-surface px-space-xs py-1 rounded font-label-sm text-label-sm focus:outline-none">
+<option>None (Direct Orthogonal Slice)</option>
+<option>Mean along Time axis (Temporal Avg)</option>
+<option>Zonal Mean (along Longitude)</option>
+<option>Vertical Integral (Mass-Weighted)</option>
+<option>Max Value Projection (along Time)</option>
+<option>Min Value Projection (along Time)</option>
+</select>
+<div class="flex items-center gap-space-sm pt-space-xs">
+<label class="flex items-center gap-space-xs text-on-surface cursor-pointer">
+<input checked="" class="accent-primary" type="checkbox"/>
+<span>Squeeze singleton dims</span>
+</label>
+</div>
+</div>
+<!-- Regridder / Interpolation -->
+<div class="space-y-space-xs font-label-sm text-label-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="text-outline">Target Grid / Interpolation:</span>
+<span class="text-primary-fixed">ESMF Core</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<select class="bg-surface-container-lowest text-on-surface px-space-xs py-1 rounded font-label-sm text-label-sm focus:outline-none">
+<option>Native (0.25° x 0.25°)</option>
+<option>ERA5 (0.50° x 0.50°)</option>
+<option>Coarse GCM (1.0° x 1.0°)</option>
+<option>Custom Bounding Box</option>
+</select>
+<select class="bg-surface-container-lowest text-on-surface px-space-xs py-1 rounded font-label-sm text-label-sm focus:outline-none">
+<option>Bilinear</option>
+<option>Nearest Neighbor</option>
+<option>Conservative 2nd-order</option>
+<option>Cubic Spline</option>
+</select>
+</div>
+</div>
+<!-- Unit Conversion -->
+<div class="space-y-space-xs font-label-sm text-label-sm pt-space-xs">
+<span class="text-outline block">Dynamic Unit Conversion (UDUNITS):</span>
+<div class="flex items-center gap-space-xs">
+<button class="flex-1 py-1 rounded bg-primary-container text-on-primary-container font-semibold font-label-sm text-label-sm">gpm (Native)</button>
+<button class="flex-1 py-1 rounded bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">dam</button>
+<button class="flex-1 py-1 rounded bg-surface-container-high hover:bg-surface-variant text-on-surface-variant font-label-sm text-label-sm">km</button>
+</div>
+</div>
+</div>
+<!-- Live CLI Command Generator -->
+<div class="bg-surface-container rounded p-space-md shadow-sm space-y-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-primary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-[15px]">terminal</span>
+<span class="uppercase">CLI Batch Snippet</span>
+</div>
+<button class="px-space-xs py-0.5 bg-surface-container-highest hover:bg-surface-variant text-primary-fixed rounded font-label-sm text-label-sm flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[11px]">content_copy</span> Copy
+            </button>
+</div>
+<div class="p-space-xs rounded bg-surface-container-lowest font-label-sm text-label-sm text-secondary-fixed break-all font-mono leading-relaxed select-all">
+            xplot slice \<br/>
+              --file GFS_Global_0p25deg_20241028_1200F024.grib2 \<br/>
+              --var HGT \<br/>
+              --dim isobaricInhPa=500 \<br/>
+              --dim time=2024-10-28T12:00:00 \<br/>
+              --roi 20.0,230.0,60.0,300.0 \<br/>
+              --convert-units gpm \<br/>
+              --squeeze \<br/>
+              --backend cartopy --render
+          </div>
+</div>
+<!-- Export & Ingest Action Buttons -->
+<div class="bg-surface-container rounded p-space-md shadow-sm space-y-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wide block">Data Extraction & Dump</span>
+<div class="grid grid-cols-3 gap-space-xs pt-space-xs">
+<button class="py-1.5 rounded bg-surface-container-high hover:bg-surface-variant text-primary font-label-sm text-label-sm font-semibold flex flex-col items-center gap-0.5">
+<span class="material-symbols-outlined text-[15px]">dataset</span>
+<span>NetCDF4</span>
+</button>
+<button class="py-1.5 rounded bg-surface-container-high hover:bg-surface-variant text-secondary font-label-sm text-label-sm font-semibold flex flex-col items-center gap-0.5">
+<span class="material-symbols-outlined text-[15px]">folder_zip</span>
+<span>Zarr Store</span>
+</button>
+<button class="py-1.5 rounded bg-surface-container-high hover:bg-surface-variant text-primary-fixed font-label-sm text-label-sm font-semibold flex flex-col items-center gap-0.5">
+<span class="material-symbols-outlined text-[15px]">grid_view</span>
+<span>NumPy (.npy)</span>
+</button>
+</div>
+<button class="w-full mt-space-sm py-1.5 rounded bg-primary text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-space-xs hover:bg-primary-fixed">
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+<span>SEND SLICE TO 2D VIEWPORT</span>
+</button>
+</div>
+<!-- Python In-Memory API Console Stub -->
+<div class="p-space-xs rounded bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant flex items-center justify-between">
+<span class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px] text-secondary">code</span>
+<span>Kernel: Python 3.11.8 (xarray 2024.03)</span>
+</span>
+<span class="text-primary font-semibold">Active In-Core</span>
+</div>
+</section>
+</div>
+</div>
+</div></main></div><footer class="fixed bottom-0 left-0 right-0 h-5 bg-surface-container-lowest border-t border-outline-variant z-50 flex items-center justify-between px-space-md font-label-sm text-label-sm text-on-surface-variant"><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[11px] text-primary">explore</span><span>LAT: <strong class="text-on-surface font-label-sm text-label-sm">42.3601° N</strong>  LON: <strong class="text-on-surface font-label-sm text-label-sm">71.0589° W</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>PROBED: <strong class="text-secondary font-label-sm text-label-sm">284.15 K (T2M)</strong></span></div><div class="pl-space-md"><span>PROJECTION: <strong class="text-on-surface font-label-sm text-label-sm">PlateCarree (EPSG:4326)</strong></span></div></div><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span>FPS: <strong class="text-on-surface font-label-sm text-label-sm">59.8</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>CUDA: <strong class="text-secondary font-label-sm text-label-sm">READY (0.42 ms)</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>MEM: <strong class="text-on-surface font-label-sm text-label-sm">24%</strong></span></div></div></footer></body></html>

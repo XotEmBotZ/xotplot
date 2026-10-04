@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&family=Space+Grotesk:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-error-container":"#ffdad6","on-tertiary-fixed-variant":"#6900b3","background":"#0f131c","on-background":"#dfe2ef","surface-variant":"#31353f","on-secondary":"#003824","on-tertiary-container":"#6400ac","on-tertiary":"#490080","outline":"#87929a","secondary-fixed":"#6ffbbe","surface-container-low":"#181b25","on-secondary-container":"#00311f","on-primary-fixed":"#001e2c","tertiary-fixed-dim":"#ddb7ff","surface-container-lowest":"#0a0e17","error-container":"#93000a","tertiary-fixed":"#f0dbff","inverse-surface":"#dfe2ef","surface-container":"#1c1f29","secondary-fixed-dim":"#4edea3","on-primary-container":"#004965","surface-container-high":"#262a34","primary":"#8ed5ff","primary-fixed":"#c4e7ff","surface-dim":"#0f131c","on-secondary-fixed-variant":"#005236","secondary":"#4edea3","inverse-primary":"#00668a","on-surface":"#dfe2ef","outline-variant":"#3e484f","on-error":"#690005","surface-tint":"#7bd0ff","surface-container-highest":"#31353f","tertiary-container":"#ce9bff","on-primary-fixed-variant":"#004c69","on-secondary-fixed":"#002113","secondary-container":"#00a572","primary-container":"#38bdf8","error":"#ffb4ab","tertiary":"#e1bfff","surface-bright":"#353943","surface":"#0f131c","inverse-on-surface":"#2c303a","on-surface-variant":"#bdc8d1","on-primary":"#00354a","primary-fixed-dim":"#7bd0ff","on-tertiary-fixed":"#2c0051"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"space-sm":"0.25rem","gutter":"0.25rem","space-md":"0.5rem","space-xs":"0.125rem","margin":"0.25rem","space-xl":"1rem","space-lg":"0.75rem"},fontFamily:{"body-md":["Inter"],"headline-md":["Space Grotesk"],"label-lg":["JetBrains Mono"],"headline-sm":["Space Grotesk"],"body-lg":["Inter"],"label-md":["JetBrains Mono"],"headline-lg":["Space Grotesk"],"label-sm":["JetBrains Mono"],"body-sm":["Inter"]},fontSize:{"body-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"600"}],"label-lg":["12px",{"lineHeight":"16px","fontWeight":"500"}],"headline-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"600"}],"body-lg":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-md":["11px",{"lineHeight":"14px","fontWeight":"500"}],"headline-lg":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.02em","fontWeight":"400"}],"body-sm":["11px",{"lineHeight":"14px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-sm text-body-sm text-on-surface select-none antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-outline-variant"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-lowest border-b border-outline-variant"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[13px] text-primary">satellite_alt</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wide">xplot — Meteorological Visualization & Workflow Engine [PyQt6 / Cartopy Core]</span></div><div class="flex items-center"><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">minimize</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">check_box_outline_blank</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-on-error-container"><span class="material-symbols-outlined text-[12px]">close</span></button></div></div><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-low border-b border-outline-variant"><nav class="flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary font-headline-sm"><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="file" href="#">File</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="edit" href="#">Edit</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="view" href="#">View</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="layer" href="#">Layer</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="projection" href="#">Projection</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="colormap" href="#">Colormap</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="cli-export" href="#">CLI Export</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="tools" href="#">Tools</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="window" href="#">Window</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="help" href="#">Help</a></nav><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm text-on-surface-variant">SESSION: <span class="text-secondary font-label-sm text-label-sm">ONLINE</span></span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div><div class="h-8 px-space-md flex items-center justify-between bg-surface-container"><div class="flex items-center gap-space-sm"><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary">folder_open</span><span class="font-label-md text-label-md">Open Data</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-secondary">visibility</span><span class="font-label-md text-label-md">Preview</span></button><button class="h-6 px-space-md bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary flex items-center gap-space-xs border border-primary rounded font-label-md text-label-md"><span class="material-symbols-outlined text-[13px]">play_arrow</span><span>Render</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary-fixed">terminal</span><span class="font-label-md text-label-md">Gen CLI</span></button><div class="h-4 w-px bg-outline-variant mx-space-xs"></div><div class="flex items-center gap-space-xs"><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_in</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_out</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">pan_tool</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">restart_alt</span></button></div></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant"><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Backend: <strong class="text-primary font-label-sm text-label-sm">Qt6Agg</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">DPI: <strong class="text-on-surface font-label-sm text-label-sm">192</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Cache: <strong class="text-secondary font-label-sm text-label-sm">1.4 GB / 8.0 GB</strong></span></div></div></header><aside class="fixed left-0 top-20 bottom-5 w-64 bg-surface-container-low border-r border-outline-variant z-40 flex flex-col"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container border-b border-outline-variant"><span class="font-headline-sm text-headline-sm text-primary tracking-wider uppercase font-semibold">WORKBENCH DOCKS</span><span class="material-symbols-outlined text-[13px] text-outline">dock</span></div><nav class="flex-1 overflow-y-auto py-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md"><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="spatial-viewport" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-primary">public</span>Spatial Viewport (2D/3D)</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="variables-and-dimensions" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">data_table</span>Variables & Dimensions</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="projection-and-cartopy" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">map</span>Projection & Cartopy</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="layer-stack-and-features" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">layers</span>Layer Stack & Features</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="colormap-transfer" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">palette</span>Colormap Transfer</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="cli-and-batch-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">terminal</span>CLI & Batch Engine</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="derived-diagnostics" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">functions</span>Derived Diagnostics</a><a aria-current="page" class="flex items-center px-space-md py-space-sm transition-colors bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md" data-path="compute-and-dask-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">memory</span>Compute & Dask Engine</a></nav><div class="p-space-md border-t border-outline-variant bg-surface-container-lowest font-label-sm text-label-sm"><div class="flex justify-between items-center text-outline"><span class="font-label-sm text-label-sm">ACTIVE WORKSPACE</span><span class="text-secondary font-label-sm text-label-sm">era5_synoptic</span></div><div class="mt-space-xs text-on-surface-variant truncate font-label-sm text-label-sm">netcdf4://gfs_20241018_12z.nc</div></div></aside><div class="pl-64"><main class="w-full pt-20 pb-5 min-h-[calc(100vh-1.25rem)] bg-surface-dim"><div class="flex flex-col w-full">
+<div class="p-space-md flex flex-col gap-space-md">
+<!-- Top Micro Telemetry Ribbon -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-lg">
+<div class="flex items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">DASK DISTRIBUTED SCHEDULER</span>
+<span class="bg-surface-container px-space-sm py-space-xs font-label-sm text-label-sm text-secondary rounded">RUNNING (tcp://127.0.0.1:8786)</span>
+</div>
+<div class="hidden lg:flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant">
+<span>THROUGHPUT: <strong class="text-primary font-label-sm text-label-sm">1.84 GB/s</strong></span>
+<span>TASKS IN-FLIGHT: <strong class="text-on-surface font-label-sm text-label-sm">42 / 576</strong></span>
+<span>SPILL BUFFER: <strong class="text-secondary font-label-sm text-label-sm">0.00 MB</strong> (NVMe Tier 0)</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<a class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-primary flex items-center gap-space-xs rounded shadow-sm font-label-sm text-label-sm" href="http://localhost:8787/status" target="_blank">
+<span class="material-symbols-outlined text-[13px]">open_in_new</span>
+<span>http://localhost:8787/status</span>
+</a>
+<button class="h-6 px-space-sm bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs rounded font-label-sm text-label-sm" id="btn-kill-restart">
+<span class="material-symbols-outlined text-[13px] text-error">restart_alt</span>
+<span>Reset Graph</span>
+</button>
+</div>
+</div>
+<!-- Main 3-Column Dock Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md">
+<!-- Column 1: Cluster & Resource Manager (3 cols) -->
+<div class="xl:col-span-3 flex flex-col gap-space-md">
+<!-- Cluster Profile Card -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[15px]">lan</span>
+              CLUSTER ARCHITECTURE
+            </span>
+<span class="font-label-sm text-label-sm text-secondary bg-surface-container-lowest px-space-xs py-0.5 rounded">HEALTHY</span>
+</div>
+<!-- Selector -->
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Cluster Type:</span>
+<div class="grid grid-cols-2 gap-space-xs">
+<button class="cluster-btn h-7 bg-surface-container-highest text-primary font-label-sm text-label-sm rounded flex items-center justify-center gap-space-xs shadow-sm" id="cluster-local">
+<span class="material-symbols-outlined text-[13px]">laptop_chromebook</span>
+<span>LocalCluster</span>
+</button>
+<button class="cluster-btn h-7 bg-surface-container-low text-on-surface-variant hover:bg-surface-variant font-label-sm text-label-sm rounded flex items-center justify-center gap-space-xs" id="cluster-mpi">
+<span class="material-symbols-outlined text-[13px]">hub</span>
+<span>Dask-MPI</span>
+</button>
+<button class="cluster-btn h-7 bg-surface-container-low text-on-surface-variant hover:bg-surface-variant font-label-sm text-label-sm rounded flex items-center justify-center gap-space-xs" id="cluster-slurm">
+<span class="material-symbols-outlined text-[13px]">dns</span>
+<span>SlurmCluster</span>
+</button>
+<button class="cluster-btn h-7 bg-surface-container-low text-on-surface-variant hover:bg-surface-variant font-label-sm text-label-sm rounded flex items-center justify-center gap-space-xs" id="cluster-coiled">
+<span class="material-symbols-outlined text-[13px]">cloud</span>
+<span>Coiled / Cloud</span>
+</button>
+</div>
+</div>
+<!-- Topology & Resource Adjusters -->
+<div class="flex flex-col gap-space-md bg-surface-container-low p-space-md rounded">
+<!-- Workers -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Worker Processes:</span>
+<span class="text-on-surface font-semibold" id="val-workers">8 workers</span>
+</div>
+<input class="w-full h-1 bg-surface-container-highest rounded accent-primary-container cursor-pointer" id="slider-workers" max="16" min="1" type="range" value="8"/>
+<div class="flex justify-between text-[9px] text-outline font-label-sm text-label-sm">
+<span>1 node</span>
+<span class="text-primary font-label-sm text-label-sm">32 Total Threads</span>
+<span>16 nodes</span>
+</div>
+</div>
+<!-- Memory per worker -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Memory Limit / Worker:</span>
+<span class="text-on-surface font-semibold" id="val-mem">4.0 GB</span>
+</div>
+<input class="w-full h-1 bg-surface-container-highest rounded accent-secondary cursor-pointer" id="slider-mem" max="16" min="1" step="0.5" type="range" value="4"/>
+<div class="flex justify-between text-[9px] text-outline font-label-sm text-label-sm">
+<span>1.0 GB</span>
+<span class="text-secondary font-label-sm text-label-sm">32.0 GB Total Pool</span>
+<span>16.0 GB</span>
+</div>
+</div>
+<!-- Thread ratio -->
+<div class="flex justify-between items-center bg-surface-container-lowest p-space-xs rounded">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Threads / Worker:</span>
+<span class="font-label-sm text-label-sm text-primary px-space-sm bg-surface-container rounded">4 (OMP/MKL affinity)</span>
+</div>
+</div>
+<!-- Connection Telemetry Card -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-on-surface text-[11px]">SCHEDULER STATUS</span>
+<div class="grid grid-cols-2 gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">State</div>
+<div class="text-secondary">HEALTHY</div>
+</div>
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">Latency</div>
+<div class="text-on-surface">0.31 ms</div>
+</div>
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">Active Keys</div>
+<div class="text-on-surface">576 keys</div>
+</div>
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">Spill Tier</div>
+<div class="text-primary">NVMe Scratch</div>
+</div>
+</div>
+</div>
+<!-- Quick Action Buttons -->
+<div class="flex gap-space-sm">
+<button class="flex-1 h-7 bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary font-label-sm text-label-sm rounded flex items-center justify-center gap-space-xs shadow-sm">
+<span class="material-symbols-outlined text-[13px]">bolt</span>
+<span>Re-scale Cluster</span>
+</button>
+<button class="h-7 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-sm text-label-sm rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Distributed Scratch Configuration -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-outline">hard_drive</span>
+            CACHE & DISK SPILLBACK POLICY
+          </span>
+<div class="flex flex-col gap-space-xs font-label-sm text-label-sm">
+<div class="flex justify-between text-on-surface-variant">
+<span>Eviction Algorithm:</span>
+<span class="text-primary">LRU (Least Recently Used)</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Spill Directory:</span>
+<span class="text-on-surface truncate max-w-[150px]">/tmp/dask-scratch</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>Memory Threshold:</span>
+<span class="text-secondary">85% soft / 95% kill</span>
+</div>
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden mt-space-xs">
+<div class="bg-secondary h-full" style="width: 24%;"></div>
+</div>
+<div class="flex justify-between text-[9px] text-outline">
+<span>Used: 7.68 GB</span>
+<span>Target: 32.0 GB</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 2: NetCDF/GRIB2 Xarray Chunking Optimizer (5 cols) -->
+<div class="xl:col-span-5 flex flex-col gap-space-md">
+<!-- Multi-dimensional Chunk Matrix Visualizer -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[15px] text-primary">view_in_ar</span>
+<span class="font-headline-sm text-headline-sm text-primary">4D DATASET CHUNK MATRIX (XARRAY)</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">ERA5 Reanalysis (gfs_20241018.nc)</span>
+</div>
+<!-- Dataset Metadata Overview Bar -->
+<div class="bg-surface-container-low rounded p-space-xs grid grid-cols-4 gap-space-xs font-label-sm text-label-sm text-center">
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">Time Steps</div>
+<div class="text-primary font-semibold">64</div>
+</div>
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">Isobaric (hPa)</div>
+<div class="text-primary font-semibold">9</div>
+</div>
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">Latitude</div>
+<div class="text-primary font-semibold">721</div>
+</div>
+<div class="bg-surface-container p-space-xs rounded">
+<div class="text-[9px] text-outline">Longitude</div>
+<div class="text-primary font-semibold">1440</div>
+</div>
+</div>
+<!-- Chunk Visual Grid Matrix -->
+<div class="bg-surface-container-lowest p-space-md rounded flex flex-col gap-space-sm">
+<div class="flex justify-between items-center">
+<span class="font-headline-sm text-headline-sm text-[11px] text-on-surface">SPATIAL-TEMPORAL TILING PREVIEW</span>
+<div class="flex items-center gap-space-md font-label-sm text-label-sm text-outline">
+<span class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded bg-secondary"></span> Cached In-RAM</span>
+<span class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded bg-primary-container"></span> Processing</span>
+<span class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded bg-surface-variant"></span> Lazy Ready</span>
+</div>
+</div>
+<!-- SVG Grid Representation -->
+<div class="w-full flex justify-center py-space-xs">
+<svg class="w-full max-h-[170px] select-none" viewbox="0 0 460 170">
+<!-- Isobaric Layer Group 1 -->
+<g transform="translate(10, 10)">
+<text fill="#87929a" font-family="JetBrains Mono" font-size="8" x="0" y="8">Level: 1000hPa (T=0..32)</text>
+<!-- Tile 1 -->
+<rect fill="#00a572" height="42" opacity="0.85" rx="2" width="98" x="0" y="14"></rect>
+<text fill="#002113" font-family="JetBrains Mono" font-size="9" font-weight="600" x="6" y="32">Chunk (0,0)</text>
+<text fill="#002113" font-family="JetBrains Mono" font-size="8" x="6" y="46">12.4 MB • w0</text>
+<!-- Tile 2 -->
+<rect fill="#00a572" height="42" opacity="0.85" rx="2" width="98" x="104" y="14"></rect>
+<text fill="#002113" font-family="JetBrains Mono" font-size="9" font-weight="600" x="110" y="32">Chunk (0,1)</text>
+<text fill="#002113" font-family="JetBrains Mono" font-size="8" x="110" y="46">12.4 MB • w1</text>
+<!-- Tile 3 -->
+<rect fill="#38bdf8" height="42" opacity="0.9" rx="2" width="98" x="208" y="14"></rect>
+<text fill="#001e2c" font-family="JetBrains Mono" font-size="9" font-weight="600" x="214" y="32">Chunk (1,0)</text>
+<text fill="#001e2c" font-family="JetBrains Mono" font-size="8" x="214" y="46">12.4 MB • w2</text>
+<!-- Tile 4 -->
+<rect fill="#31353f" height="42" opacity="0.9" rx="2" width="98" x="312" y="14"></rect>
+<text fill="#dfe2ef" font-family="JetBrains Mono" font-size="9" font-weight="600" x="318" y="32">Chunk (1,1)</text>
+<text fill="#87929a" font-family="JetBrains Mono" font-size="8" x="318" y="46">12.4 MB • Idle</text>
+</g>
+<!-- Isobaric Layer Group 2 -->
+<g transform="translate(10, 78)">
+<text fill="#87929a" font-family="JetBrains Mono" font-size="8" x="0" y="8">Level: 850hPa (T=33..64)</text>
+<!-- Tile 5 -->
+<rect fill="#38bdf8" height="42" opacity="0.9" rx="2" width="98" x="0" y="14"></rect>
+<text fill="#001e2c" font-family="JetBrains Mono" font-size="9" font-weight="600" x="6" y="32">Chunk (2,0)</text>
+<text fill="#001e2c" font-family="JetBrains Mono" font-size="8" x="6" y="46">12.4 MB • w3</text>
+<!-- Tile 6 -->
+<rect fill="#31353f" height="42" opacity="0.9" rx="2" width="98" x="104" y="14"></rect>
+<text fill="#dfe2ef" font-family="JetBrains Mono" font-size="9" font-weight="600" x="110" y="32">Chunk (2,1)</text>
+<text fill="#87929a" font-family="JetBrains Mono" font-size="8" x="110" y="46">12.4 MB • Lazy</text>
+<!-- Tile 7 -->
+<rect fill="#31353f" height="42" opacity="0.9" rx="2" width="98" x="208" y="14"></rect>
+<text fill="#dfe2ef" font-family="JetBrains Mono" font-size="9" font-weight="600" x="214" y="32">Chunk (3,0)</text>
+<text fill="#87929a" font-family="JetBrains Mono" font-size="8" x="214" y="46">12.4 MB • Lazy</text>
+<!-- Tile 8 -->
+<rect fill="#31353f" height="42" opacity="0.9" rx="2" width="98" x="312" y="14"></rect>
+<text fill="#dfe2ef" font-family="JetBrains Mono" font-size="9" font-weight="600" x="318" y="32">Chunk (3,1)</text>
+<text fill="#87929a" font-family="JetBrains Mono" font-size="8" x="318" y="46">12.4 MB • Lazy</text>
+</g>
+<g transform="translate(416, 24)">
+<text fill="#38bdf8" font-family="JetBrains Mono" font-size="10" x="0" y="40">+568</text>
+<text fill="#87929a" font-family="JetBrains Mono" font-size="8" x="0" y="52">tiles</text>
+</g>
+</svg>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm bg-surface-container px-space-sm py-space-xs rounded">
+<span>Per-chunk Size: <strong class="text-secondary font-label-sm text-label-sm">12.4 MB</strong> (L3 cache aligned)</span>
+<span>Total Array Shape: <strong class="text-on-surface font-label-sm text-label-sm">[64, 9, 721, 1440]</strong></span>
+</div>
+</div>
+<!-- Dimension Inputs -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface-variant text-[11px]">CHUNK DIMENSION CONFIGURATION</span>
+<div class="grid grid-cols-2 gap-space-sm font-label-sm text-label-sm">
+<div class="flex items-center justify-between bg-surface-container-low p-space-xs rounded">
+<span class="text-on-surface-variant">time:</span>
+<input class="w-24 h-5 px-space-xs bg-surface-container-lowest text-right text-primary rounded outline-none font-label-sm text-label-sm" type="text" value="1 (timestep)"/>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low p-space-xs rounded">
+<span class="text-on-surface-variant">isobaricInhPa:</span>
+<input class="w-24 h-5 px-space-xs bg-surface-container-lowest text-right text-primary rounded outline-none font-label-sm text-label-sm" type="text" value="1 level/task"/>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low p-space-xs rounded">
+<span class="text-on-surface-variant">latitude:</span>
+<input class="w-24 h-5 px-space-xs bg-surface-container-lowest text-right text-primary rounded outline-none font-label-sm text-label-sm" type="text" value="360"/>
+</div>
+<div class="flex items-center justify-between bg-surface-container-low p-space-xs rounded">
+<span class="text-on-surface-variant">longitude:</span>
+<input class="w-24 h-5 px-space-xs bg-surface-container-lowest text-right text-primary rounded outline-none font-label-sm text-label-sm" type="text" value="720"/>
+</div>
+</div>
+</div>
+<!-- Advisory Callout Banner -->
+<div class="bg-surface-container-lowest p-space-md rounded flex items-start gap-space-md">
+<span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">verified</span>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-secondary">Optimal Chunk Topology Achieved</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Chunk memory fits comfortably in the 10 MB - 100 MB guideline. Generated Dask compute graph contains <strong>576 tasks</strong>, minimizing inter-worker IPC overhead.
+              </p>
+</div>
+</div>
+<!-- Lazy Task Graph Preview -->
+<div class="bg-surface-container-low p-space-md rounded flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<span class="font-headline-sm text-headline-sm text-[11px] text-on-surface flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[13px] text-tertiary">account_tree</span>
+                COMPUTATION TASK GRAPH (LAZY DAG)
+              </span>
+<span class="font-label-sm text-label-sm text-outline">5 Operations</span>
+</div>
+<!-- Micro DAG Node Strip -->
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-sm rounded overflow-x-auto gap-space-xs font-label-sm text-label-sm">
+<div class="flex flex-col items-center bg-surface-container px-space-sm py-space-xs rounded min-w-[70px]">
+<span class="text-[9px] text-outline">INPUT</span>
+<span class="text-on-surface">open_nc</span>
+</div>
+<span class="material-symbols-outlined text-[12px] text-outline">arrow_forward</span>
+<div class="flex flex-col items-center bg-surface-container px-space-sm py-space-xs rounded min-w-[70px]">
+<span class="text-[9px] text-outline">SLICE</span>
+<span class="text-on-surface">sel(lev=850)</span>
+</div>
+<span class="material-symbols-outlined text-[12px] text-outline">arrow_forward</span>
+<div class="flex flex-col items-center bg-surface-container px-space-sm py-space-xs rounded min-w-[80px]">
+<span class="text-[9px] text-secondary">CALC</span>
+<span class="text-secondary font-medium">frontogenesis</span>
+</div>
+<span class="material-symbols-outlined text-[12px] text-outline">arrow_forward</span>
+<div class="flex flex-col items-center bg-surface-container px-space-sm py-space-xs rounded min-w-[75px]">
+<span class="text-[9px] text-primary">CARTOPY</span>
+<span class="text-primary font-medium">reproject</span>
+</div>
+<span class="material-symbols-outlined text-[12px] text-outline">arrow_forward</span>
+<div class="flex flex-col items-center bg-surface-container px-space-sm py-space-xs rounded min-w-[75px]">
+<span class="text-[9px] text-tertiary">RENDER</span>
+<span class="text-tertiary font-medium">contourf</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Column 3: Worker Progress & Live Telemetry (4 cols) -->
+<div class="xl:col-span-4 flex flex-col gap-space-md">
+<!-- Worker Utilization Panel -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<span class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[15px]">memory</span>
+              WORKER PROCESS TELEMETRY (w0..w7)
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Live Poll: 250ms</span>
+</div>
+<!-- Worker Metric Bars -->
+<div class="flex flex-col gap-space-xs font-label-sm text-label-sm">
+<!-- Worker 0 -->
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col gap-space-xs">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-primary font-medium">w0 (PID 40912)</span>
+<span class="text-on-surface-variant">CPU: 88% • RAM: 2.8 / 4.0 GB</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-primary h-full" style="width: 88%;"></div>
+</div>
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-secondary h-full" style="width: 70%;"></div>
+</div>
+</div>
+</div>
+<!-- Worker 1 -->
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col gap-space-xs">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-primary font-medium">w1 (PID 40913)</span>
+<span class="text-on-surface-variant">CPU: 94% • RAM: 3.1 / 4.0 GB</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-primary h-full" style="width: 94%;"></div>
+</div>
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-secondary h-full" style="width: 77%;"></div>
+</div>
+</div>
+</div>
+<!-- Worker 2 -->
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col gap-space-xs">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-primary font-medium">w2 (PID 40914)</span>
+<span class="text-on-surface-variant">CPU: 62% • RAM: 2.2 / 4.0 GB</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-primary h-full" style="width: 62%;"></div>
+</div>
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-secondary h-full" style="width: 55%;"></div>
+</div>
+</div>
+</div>
+<!-- Worker 3 -->
+<div class="bg-surface-container-low p-space-xs rounded flex flex-col gap-space-xs">
+<div class="flex justify-between items-center text-[10px]">
+<span class="text-primary font-medium">w3 (PID 40915)</span>
+<span class="text-on-surface-variant">CPU: 74% • RAM: 2.4 / 4.0 GB</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-primary h-full" style="width: 74%;"></div>
+</div>
+<div class="w-full bg-surface-container-lowest h-1.5 rounded overflow-hidden">
+<div class="bg-secondary h-full" style="width: 60%;"></div>
+</div>
+</div>
+</div>
+<!-- Worker 4..7 Summary collapsed row -->
+<div class="bg-surface-container-low p-space-xs rounded flex items-center justify-between text-[10px] text-on-surface-variant">
+<span>w4..w7 (4 Workers active)</span>
+<span class="text-on-surface font-label-sm text-label-sm">AVG CPU: 71% • POOL: 8.6 / 16.0 GB</span>
+</div>
+</div>
+</div>
+<!-- Task Stream Gantt Chart Preview -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[15px] text-primary">waterfall_chart</span>
+              DASK TASK STREAM (LAST 10s)
+            </span>
+<div class="flex items-center gap-space-xs text-[9px] text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded bg-primary"></span> io-read
+              <span class="w-2 h-2 rounded bg-secondary"></span> fronto
+              <span class="w-2 h-2 rounded bg-tertiary"></span> render
+            </div>
+</div>
+<!-- Gantt Waterfall Visual Strip -->
+<div class="bg-surface-container-lowest p-space-sm rounded flex flex-col gap-space-xs">
+<div class="h-4 w-full flex items-center gap-0.5">
+<div class="h-3 bg-primary rounded-xs" style="width: 25%;"></div>
+<div class="h-3 bg-surface-container-highest rounded-xs" style="width: 5%;"></div>
+<div class="h-3 bg-secondary rounded-xs" style="width: 45%;"></div>
+<div class="h-3 bg-tertiary rounded-xs" style="width: 25%;"></div>
+</div>
+<div class="h-4 w-full flex items-center gap-0.5">
+<div class="h-3 bg-surface-container-highest rounded-xs" style="width: 10%;"></div>
+<div class="h-3 bg-primary rounded-xs" style="width: 28%;"></div>
+<div class="h-3 bg-secondary rounded-xs" style="width: 32%;"></div>
+<div class="h-3 bg-tertiary rounded-xs" style="width: 30%;"></div>
+</div>
+<div class="h-4 w-full flex items-center gap-0.5">
+<div class="h-3 bg-primary rounded-xs" style="width: 30%;"></div>
+<div class="h-3 bg-secondary rounded-xs" style="width: 40%;"></div>
+<div class="h-3 bg-surface-container-highest rounded-xs" style="width: 5%;"></div>
+<div class="h-3 bg-tertiary rounded-xs" style="width: 25%;"></div>
+</div>
+<div class="h-4 w-full flex items-center gap-0.5">
+<div class="h-3 bg-primary rounded-xs" style="width: 22%;"></div>
+<div class="h-3 bg-secondary rounded-xs" style="width: 48%;"></div>
+<div class="h-3 bg-tertiary rounded-xs" style="width: 30%;"></div>
+</div>
+<div class="flex justify-between text-[9px] text-outline font-label-sm text-label-sm mt-space-xs">
+<span>-10.0s</span>
+<span>-5.0s</span>
+<span>0.0s (Now)</span>
+</div>
+</div>
+</div>
+<!-- Generated CLI Execution Flags -->
+<div class="bg-surface-container rounded-lg p-space-md shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-primary flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px]">terminal</span>
+              LIVE CLI EXPORT COMMAND
+            </span>
+<button class="text-primary hover:text-on-primary-fixed-variant text-[11px] font-label-sm text-label-sm flex items-center gap-space-xs" id="btn-copy-cli">
+<span class="material-symbols-outlined text-[13px]">content_copy</span>
+<span id="copy-status">Copy</span>
+</button>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded font-label-sm text-label-sm text-on-surface overflow-x-auto select-all">
+<code class="text-secondary font-label-sm text-label-sm whitespace-pre" id="cli-string">xplot compute --dask-cluster local --n-workers 8 --threads-per-worker 4 --memory-limit 4GB --chunk-dims time=1,lat=360,lon=720</code>
+</div>
+<span class="text-[9px] text-outline font-label-sm text-label-sm">
+            Syncs state with <code class="text-on-surface-variant font-label-sm text-label-sm">xplot-core.json</code> workstation profile.
+          </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Micro interactions for sliders and selectors
+  const workerSlider = document.getElementById('slider-workers');
+  const memSlider = document.getElementById('slider-mem');
+  const workerVal = document.getElementById('val-workers');
+  const memVal = document.getElementById('val-mem');
+  const cliString = document.getElementById('cli-string');
+  const copyBtn = document.getElementById('btn-copy-cli');
+  const copyStatus = document.getElementById('copy-status');
+
+  function updateCLI() {
+    const w = workerSlider ? workerSlider.value : 8;
+    const m = memSlider ? memSlider.value : 4;
+    if (workerVal) workerVal.textContent = `${w} workers`;
+    if (memVal) memVal.textContent = `${parseFloat(m).toFixed(1)} GB`;
+    if (cliString) {
+      cliString.textContent = `xplot compute --dask-cluster local --n-workers ${w} --threads-per-worker 4 --memory-limit ${m}GB --chunk-dims time=1,lat=360,lon=720`;
+    }
+  }
+
+  if (workerSlider) workerSlider.addEventListener('input', updateCLI);
+  if (memSlider) memSlider.addEventListener('input', updateCLI);
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      if (cliString) {
+        navigator.clipboard.writeText(cliString.textContent.trim());
+        copyStatus.textContent = 'Copied!';
+        setTimeout(() => { copyStatus.textContent = 'Copy'; }, 1800);
+      }
+    });
+  }
+
+  // Cluster switch styling
+  const clusterBtns = document.querySelectorAll('.cluster-btn');
+  clusterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      clusterBtns.forEach(b => {
+        b.classList.remove('bg-surface-container-highest', 'text-primary');
+        b.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+      });
+      btn.classList.add('bg-surface-container-highest', 'text-primary');
+      btn.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+    });
+  });
+</script></main></div><footer class="fixed bottom-0 left-0 right-0 h-5 bg-surface-container-lowest border-t border-outline-variant z-50 flex items-center justify-between px-space-md font-label-sm text-label-sm text-on-surface-variant"><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[11px] text-primary">explore</span><span>LAT: <strong class="text-on-surface font-label-sm text-label-sm">42.3601° N</strong>  LON: <strong class="text-on-surface font-label-sm text-label-sm">71.0589° W</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>PROBED: <strong class="text-secondary font-label-sm text-label-sm">284.15 K (T2M)</strong></span></div><div class="pl-space-md"><span>PROJECTION: <strong class="text-on-surface font-label-sm text-label-sm">PlateCarree (EPSG:4326)</strong></span></div></div><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span>FPS: <strong class="text-on-surface font-label-sm text-label-sm">59.8</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>CUDA: <strong class="text-secondary font-label-sm text-label-sm">READY (0.42 ms)</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>MEM: <strong class="text-on-surface font-label-sm text-label-sm">24%</strong></span></div></div></footer></body></html>

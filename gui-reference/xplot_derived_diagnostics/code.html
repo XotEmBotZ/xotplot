@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@100..900&family=Space+Grotesk:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"on-error-container":"#ffdad6","on-tertiary-fixed-variant":"#6900b3","background":"#0f131c","on-background":"#dfe2ef","surface-variant":"#31353f","on-secondary":"#003824","on-tertiary-container":"#6400ac","on-tertiary":"#490080","outline":"#87929a","secondary-fixed":"#6ffbbe","surface-container-low":"#181b25","on-secondary-container":"#00311f","on-primary-fixed":"#001e2c","tertiary-fixed-dim":"#ddb7ff","surface-container-lowest":"#0a0e17","error-container":"#93000a","tertiary-fixed":"#f0dbff","inverse-surface":"#dfe2ef","surface-container":"#1c1f29","secondary-fixed-dim":"#4edea3","on-primary-container":"#004965","surface-container-high":"#262a34","primary":"#8ed5ff","primary-fixed":"#c4e7ff","surface-dim":"#0f131c","on-secondary-fixed-variant":"#005236","secondary":"#4edea3","inverse-primary":"#00668a","on-surface":"#dfe2ef","outline-variant":"#3e484f","on-error":"#690005","surface-tint":"#7bd0ff","surface-container-highest":"#31353f","tertiary-container":"#ce9bff","on-primary-fixed-variant":"#004c69","on-secondary-fixed":"#002113","secondary-container":"#00a572","primary-container":"#38bdf8","error":"#ffb4ab","tertiary":"#e1bfff","surface-bright":"#353943","surface":"#0f131c","inverse-on-surface":"#2c303a","on-surface-variant":"#bdc8d1","on-primary":"#00354a","primary-fixed-dim":"#7bd0ff","on-tertiary-fixed":"#2c0051"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"space-sm":"0.25rem","gutter":"0.25rem","space-md":"0.5rem","space-xs":"0.125rem","margin":"0.25rem","space-xl":"1rem","space-lg":"0.75rem"},fontFamily:{"body-md":["Inter"],"headline-md":["Space Grotesk"],"label-lg":["JetBrains Mono"],"headline-sm":["Space Grotesk"],"body-lg":["Inter"],"label-md":["JetBrains Mono"],"headline-lg":["Space Grotesk"],"label-sm":["JetBrains Mono"],"body-sm":["Inter"]},fontSize:{"body-md":["12px",{"lineHeight":"16px","fontWeight":"400"}],"headline-md":["15px",{"lineHeight":"20px","letterSpacing":"-0.005em","fontWeight":"600"}],"label-lg":["12px",{"lineHeight":"16px","fontWeight":"500"}],"headline-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"600"}],"body-lg":["13px",{"lineHeight":"18px","fontWeight":"400"}],"label-md":["11px",{"lineHeight":"14px","fontWeight":"500"}],"headline-lg":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"label-sm":["10px",{"lineHeight":"12px","letterSpacing":"0.02em","fontWeight":"400"}],"body-sm":["11px",{"lineHeight":"14px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface font-body-sm text-body-sm text-on-surface select-none antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-outline-variant"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-lowest border-b border-outline-variant"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[13px] text-primary">satellite_alt</span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wide">xplot — Meteorological Visualization & Workflow Engine [PyQt6 / Cartopy Core]</span></div><div class="flex items-center"><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">minimize</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[12px]">check_box_outline_blank</span></button><button class="w-7 h-6 flex items-center justify-center text-on-surface-variant hover:bg-error-container hover:text-on-error-container"><span class="material-symbols-outlined text-[12px]">close</span></button></div></div><div class="h-6 px-space-md flex items-center justify-between bg-surface-container-low border-b border-outline-variant"><nav class="flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary font-headline-sm"><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="file" href="#">File</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="edit" href="#">Edit</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="view" href="#">View</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="layer" href="#">Layer</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="projection" href="#">Projection</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="colormap" href="#">Colormap</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="cli-export" href="#">CLI Export</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="tools" href="#">Tools</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="window" href="#">Window</a><a class="px-space-md py-space-xs text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-headline-sm text-headline-sm" data-path="help" href="#">Help</a></nav><div class="flex items-center gap-space-md"><span class="font-label-sm text-label-sm text-on-surface-variant">SESSION: <span class="text-secondary font-label-sm text-label-sm">ONLINE</span></span><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div><div class="h-8 px-space-md flex items-center justify-between bg-surface-container"><div class="flex items-center gap-space-sm"><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary">folder_open</span><span class="font-label-md text-label-md">Open Data</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-secondary">visibility</span><span class="font-label-md text-label-md">Preview</span></button><button class="h-6 px-space-md bg-primary-container hover:bg-primary text-on-primary-container hover:text-on-primary flex items-center gap-space-xs border border-primary rounded font-label-md text-label-md"><span class="material-symbols-outlined text-[13px]">play_arrow</span><span>Render</span></button><button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface flex items-center gap-space-xs border border-outline-variant rounded"><span class="material-symbols-outlined text-[13px] text-primary-fixed">terminal</span><span class="font-label-md text-label-md">Gen CLI</span></button><div class="h-4 w-px bg-outline-variant mx-space-xs"></div><div class="flex items-center gap-space-xs"><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_in</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">zoom_out</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">pan_tool</span></button><button class="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface border border-transparent hover:border-outline-variant rounded"><span class="material-symbols-outlined text-[14px]">restart_alt</span></button></div></div><div class="flex items-center gap-space-md font-label-sm text-label-sm text-on-surface-variant"><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Backend: <strong class="text-primary font-label-sm text-label-sm">Qt6Agg</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">DPI: <strong class="text-on-surface font-label-sm text-label-sm">192</strong></span><span class="px-space-sm py-space-xs bg-surface-container-lowest border border-outline-variant rounded">Cache: <strong class="text-secondary font-label-sm text-label-sm">1.4 GB / 8.0 GB</strong></span></div></div></header><aside class="fixed left-0 top-20 bottom-5 w-64 bg-surface-container-low border-r border-outline-variant z-40 flex flex-col"><div class="h-6 px-space-md flex items-center justify-between bg-surface-container border-b border-outline-variant"><span class="font-headline-sm text-headline-sm text-primary tracking-wider uppercase font-semibold">WORKBENCH DOCKS</span><span class="material-symbols-outlined text-[13px] text-outline">dock</span></div><nav class="flex-1 overflow-y-auto py-space-xs" data-active-classes="bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md"><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="spatial-viewport" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-primary">public</span>Spatial Viewport (2D/3D)</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="variables-and-dimensions" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">data_table</span>Variables & Dimensions</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="projection-and-cartopy" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">map</span>Projection & Cartopy</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="layer-stack-and-features" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">layers</span>Layer Stack & Features</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="colormap-transfer" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">palette</span>Colormap Transfer</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="cli-and-batch-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">terminal</span>CLI & Batch Engine</a><a aria-current="page" class="flex items-center px-space-md py-space-sm transition-colors bg-surface-container-high text-primary border-l-2 border-primary-container font-label-md" data-path="derived-diagnostics" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">functions</span>Derived Diagnostics</a><a class="flex items-center px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface border-l-2 border-transparent transition-colors font-label-md text-label-md" data-path="compute-and-dask-engine" href="#"><span class="material-symbols-outlined text-[15px] mr-space-md text-outline">memory</span>Compute & Dask Engine</a></nav><div class="p-space-md border-t border-outline-variant bg-surface-container-lowest font-label-sm text-label-sm"><div class="flex justify-between items-center text-outline"><span class="font-label-sm text-label-sm">ACTIVE WORKSPACE</span><span class="text-secondary font-label-sm text-label-sm">era5_synoptic</span></div><div class="mt-space-xs text-on-surface-variant truncate font-label-sm text-label-sm">netcdf4://gfs_20241018_12z.nc</div></div></aside><div class="pl-64"><main class="w-full pt-20 pb-5 min-h-[calc(100vh-1.25rem)] bg-surface-dim"><div class="flex flex-col w-full">
+<div class="grid grid-cols-12 gap-gutter p-gutter h-[calc(100vh-6.25rem)] overflow-hidden">
+<!-- LEFT PANEL: Diagnostic Formula Library & Inputs Checklist -->
+<section class="col-span-3 flex flex-col bg-surface-container-low rounded overflow-hidden select-none">
+<div class="px-space-md py-space-sm bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">functions</span>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider">Diagnostic Presets</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary bg-surface-container-lowest px-space-sm py-space-xs rounded">MetPy Core 1.6</span>
+</div>
+<!-- Live Memory Verification Banner -->
+<div class="p-space-md bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant uppercase tracking-wider">Memory Pipeline</span>
+<span class="text-secondary font-semibold flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> 8 / 8 Tensors Bound
+          </span>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-secondary bg-surface-container-lowest px-space-sm py-space-xs rounded">
+<span class="material-symbols-outlined text-[13px] text-secondary">check_circle</span>
+<span class="truncate">Active Slice: 850 hPa Synoptic (GFS Oct 18)</span>
+</div>
+</div>
+<!-- Presets Categories List -->
+<div class="flex-1 overflow-y-auto p-space-sm space-y-space-sm">
+<!-- Category: Kinematic -->
+<div class="bg-surface-container-lowest rounded p-space-sm space-y-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant font-headline-sm text-headline-sm px-space-xs">
+<span class="uppercase tracking-wider">Kinematic</span>
+<span class="font-label-sm text-label-sm text-outline">5 items</span>
+</div>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('vorticity')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Relative Vorticity (ζ)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">10⁻⁵ s⁻¹</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">UGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">VGRD</span>
+<span class="font-label-sm text-label-sm text-outline ml-auto">curl(v)</span>
+</div>
+</button>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('divergence')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Horiz. Divergence (∇·V)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">s⁻¹</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">UGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">VGRD</span>
+<span class="font-label-sm text-label-sm text-outline ml-auto">div(v)</span>
+</div>
+</button>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('streamfunction')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Streamfunction (ψ)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">m² s⁻¹</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">UGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">VGRD</span>
+<span class="font-label-sm text-label-sm text-outline ml-auto">Poisson</span>
+</div>
+</button>
+</div>
+<!-- Category: Thermodynamic -->
+<div class="bg-surface-container-lowest rounded p-space-sm space-y-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant font-headline-sm text-headline-sm px-space-xs">
+<span class="uppercase tracking-wider">Thermodynamic</span>
+<span class="font-label-sm text-label-sm text-outline">5 items</span>
+</div>
+<button class="w-full text-left p-space-sm rounded bg-surface-container-high ring-1 ring-primary flex flex-col gap-space-xs group" onclick="selectDiagnostic('theta_e')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-primary font-semibold">Equiv. Potential Temp (θ_e)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-primary/20 text-primary rounded">K</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">TMP</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">RH</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">PRES</span>
+<span class="font-label-sm text-label-sm text-secondary ml-auto flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[12px]">check</span> Valid
+              </span>
+</div>
+</button>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('theta')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Potential Temp (θ)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">K</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">TMP</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">PRES</span>
+<span class="font-label-sm text-label-sm text-outline ml-auto">Poisson Exner</span>
+</div>
+</button>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('dewpoint')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Dewpoint (T_d)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">°C</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">TMP</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">RH</span>
+<span class="font-label-sm text-label-sm text-outline ml-auto">Bolton</span>
+</div>
+</button>
+</div>
+<!-- Category: Dynamic / Severe Synoptic -->
+<div class="bg-surface-container-lowest rounded p-space-sm space-y-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant font-headline-sm text-headline-sm px-space-xs">
+<span class="uppercase tracking-wider">Dynamic / Severe</span>
+<span class="font-label-sm text-label-sm text-outline">7 items</span>
+</div>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('frontogenesis')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Frontogenesis (Petterssen 2D)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">K/100km·3h</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">TMP</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">UGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">VGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">PRES</span>
+</div>
+</button>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('qvectors')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Q-Vector Divergence (∇·Q)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">m·s⁻²·kg⁻¹</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">HGT</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">TMP</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">UGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">VGRD</span>
+</div>
+</button>
+<button class="w-full text-left p-space-sm rounded bg-surface-container hover:bg-surface-container-high flex flex-col gap-space-xs group transition-colors" onclick="selectDiagnostic('srh')" type="button">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface group-hover:text-primary">Storm Relative Helicity (0-3km)</span>
+<span class="font-label-sm text-label-sm px-space-xs bg-surface-variant text-on-surface-variant rounded">m² s⁻²</span>
+</div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">UGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">VGRD</span>
+<span class="font-label-sm text-label-sm text-secondary bg-secondary/10 px-space-xs rounded">HGT</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Active Requirements Status Footnote -->
+<div class="p-space-md bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px] text-secondary">database</span>
+<span>Cache: <strong class="text-on-surface">TMP, RH, U, V, HGT, PRES</strong></span>
+</div>
+<span class="font-label-sm text-label-sm text-primary underline cursor-pointer hover:text-primary-fixed">Browse CF Vars</span>
+</div>
+</section>
+<!-- CENTER PANEL: Mathematical Expression Editor & Live Slicing Evaluator -->
+<section class="col-span-6 flex flex-col bg-surface-container-low rounded overflow-hidden">
+<!-- Editor Header Strip -->
+<div class="px-space-md py-space-sm bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[15px] text-secondary">terminal</span>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider">NumPy / MetPy Expression Engine</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">JIT Numba:</span>
+<span class="px-space-xs py-space-xs rounded bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">Active</span>
+</div>
+</div>
+<!-- Target Variable Metadata Specification Strip -->
+<div class="p-space-md bg-surface-container grid grid-cols-12 gap-space-md">
+<div class="col-span-4 flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Target Variable Name</label>
+<input class="h-6 px-space-sm bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded focus:outline-none focus:ring-1 focus:ring-primary" id="target-var" type="text" value="FRONTOGENESIS_850"/>
+</div>
+<div class="col-span-3 flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">Target Units</label>
+<input class="h-6 px-space-sm bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded focus:outline-none focus:ring-1 focus:ring-primary" id="target-units" type="text" value="K / (100km * 3h)"/>
+</div>
+<div class="col-span-5 flex flex-col gap-space-xs">
+<label class="font-label-sm text-label-sm text-on-surface-variant uppercase">CF Standard Long Name</label>
+<input class="h-6 px-space-sm bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded focus:outline-none focus:ring-1 focus:ring-primary" id="target-longname" type="text" value="850 hPa 2D Petterssen Frontogenesis Field"/>
+</div>
+</div>
+<!-- Memory Token Click-to-Insert Toolbar -->
+<div class="px-space-md py-space-xs bg-surface-container-lowest flex items-center justify-between">
+<div class="flex items-center gap-space-xs overflow-x-auto py-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mr-space-xs">Insert Tensor:</span>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-primary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('TMP')" type="button">+ TMP</button>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-primary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('UGRD')" type="button">+ UGRD</button>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-primary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('VGRD')" type="button">+ VGRD</button>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-primary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('PRES')" type="button">+ PRES</button>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-primary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('HGT')" type="button">+ HGT</button>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-primary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('RH')" type="button">+ RH</button>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-secondary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('dx')" type="button">+ dx</button>
+<button class="px-space-sm py-space-xs rounded bg-surface-container-high hover:bg-surface-variant text-secondary font-label-sm text-label-sm font-semibold transition-colors" onclick="insertToken('dy')" type="button">+ dy</button>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-variant rounded" onclick="clearEditor()" title="Clear formula" type="button">
+<span class="material-symbols-outlined text-[15px]">delete_sweep</span>
+</button>
+</div>
+</div>
+<!-- Syntax-Highlit Code Area -->
+<div class="flex-1 bg-surface-dim p-space-md font-label-md text-label-md overflow-y-auto leading-relaxed flex flex-col justify-between">
+<textarea class="w-full flex-1 bg-transparent text-primary-fixed focus:outline-none resize-none font-label-md text-label-md font-mono" id="formula-editor" rows="8" spellcheck="false"># Petterssen 2D Frontogenesis function (Kinematic Deformation & Tilt)
+theta = potential_temperature(PRES, TMP)
+dtheta_dx, dtheta_dy = mpcalc.gradient(theta, deltas=(dy, dx))
+du_dx, du_dy = mpcalc.gradient(UGRD, deltas=(dy, dx))
+dv_dx, dv_dy = mpcalc.gradient(VGRD, deltas=(dy, dx))
+
+mag_grad_theta = np.hypot(dtheta_dx, dtheta_dy) + 1e-12
+D_stretch = du_dx - dv_dy
+D_shear = dv_dx + du_dy
+
+alpha = 0.5 * np.arctan2(D_shear, D_stretch)
+FRONT_850 = -0.5 * mag_grad_theta * (
+    (du_dx * np.cos(2*alpha) + dv_dy * np.sin(2*alpha))
+) * 1.08e7  # K / (100km * 3h)</textarea>
+<div class="flex items-center justify-between pt-space-md text-on-surface-variant font-label-sm text-label-sm bg-surface-dim">
+<div class="flex items-center gap-space-md">
+<span>Dimensions: <strong class="text-on-surface">[time: 1, lat: 721, lon: 1440]</strong></span>
+<span>Mesh: <strong class="text-secondary">0.25° Equirectangular</strong></span>
+</div>
+<span class="text-primary font-mono">AST Status: Parsed OK</span>
+</div>
+</div>
+<!-- Evaluation Toolbar & Instant Diagnostic Mini-Preview Viewport -->
+<div class="p-space-md bg-surface-container flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<button class="h-7 px-space-md bg-primary hover:bg-primary-fixed text-on-primary font-headline-sm text-headline-sm rounded flex items-center gap-space-xs font-semibold shadow-sm transition-all" onclick="evaluateSlice()" type="button">
+<span class="material-symbols-outlined text-[15px]">play_circle</span>
+<span>Evaluate on Active Slice</span>
+</button>
+<button class="h-7 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-md text-label-md rounded flex items-center gap-space-xs transition-colors" type="button">
+<span class="material-symbols-outlined text-[14px] text-tertiary">memory</span>
+<span>Dask Lazy Graph</span>
+</button>
+</div>
+<div class="flex items-center gap-space-md font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Exec Time: <strong class="text-secondary font-mono">14.2 ms</strong></span>
+<span class="text-on-surface-variant">Allocated: <strong class="text-on-surface font-mono">33.2 MB</strong></span>
+</div>
+</div>
+<!-- Inline Visual Evaluation Contour Preview Card -->
+<div class="h-36 bg-surface-container-lowest rounded p-space-sm flex flex-col justify-between relative overflow-hidden">
+<div class="flex items-center justify-between z-10">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm text-primary font-semibold">Slice Preview: 850 hPa Baroclinic Zone</span>
+<span class="font-label-sm text-label-sm bg-surface-container-high text-on-surface-variant px-space-xs rounded">PlateCarree</span>
+</div>
+<div class="flex items-center gap-space-sm font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Min: <strong class="text-primary font-mono">-1.84</strong></span>
+<span class="text-on-surface-variant">Mean: <strong class="text-on-surface font-mono">+0.12</strong></span>
+<span class="text-on-surface-variant">Max: <strong class="text-secondary font-mono">+4.92</strong> K/100km·3h</span>
+</div>
+</div>
+<!-- Synthetic Meteorological Vector & Contour Field (Inline SVG) -->
+<svg class="absolute inset-0 w-full h-full opacity-70 pointer-events-none" preserveaspectratio="none" viewbox="0 0 500 120">
+<defs>
+<lineargradient id="frontoGrad" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#00668a" stop-opacity="0.2"></stop>
+<stop offset="45%" stop-color="#4edea3" stop-opacity="0.3"></stop>
+<stop offset="65%" stop-color="#38bdf8" stop-opacity="0.5"></stop>
+<stop offset="85%" stop-color="#ce9bff" stop-opacity="0.7"></stop>
+<stop offset="100%" stop-color="#ffb4ab" stop-opacity="0.8"></stop>
+</lineargradient>
+</defs>
+<!-- Isobaric Geopotential Isopleths -->
+<path d="M-10,90 Q 120,40 250,70 T 520,30" fill="none" stroke="#8ed5ff" stroke-dasharray="3 3" stroke-width="0.75"></path>
+<path d="M-10,110 Q 140,60 270,90 T 520,50" fill="none" stroke="#8ed5ff" stroke-dasharray="3 3" stroke-width="0.75"></path>
+<path d="M-10,130 Q 160,80 290,110 T 520,70" fill="none" stroke="#8ed5ff" stroke-dasharray="3 3" stroke-width="0.75"></path>
+<!-- Intense Frontogenesis Band -->
+<path d="M 120,120 Q 230,40 330,65 T 480,10 L 460,0 Q 310,50 210,30 T 90,120 Z" fill="url(#frontoGrad)"></path>
+<!-- Petterssen Deformation Arrows -->
+<line stroke="#4edea3" stroke-width="1.5" x1="180" x2="210" y1="55" y2="45"></line>
+<polygon fill="#4edea3" points="212,44 204,42 207,48"></polygon>
+<line stroke="#4edea3" stroke-width="1.5" x1="240" x2="270" y1="55" y2="52"></line>
+<polygon fill="#4edea3" points="272,51 264,49 266,56"></polygon>
+<line stroke="#4edea3" stroke-width="1.5" x1="300" x2="330" y1="62" y2="68"></line>
+<polygon fill="#4edea3" points="332,69 324,65 326,72"></polygon>
+<line stroke="#4edea3" stroke-width="1.5" x1="360" x2="390" y1="70" y2="82"></line>
+<polygon fill="#4edea3" points="392,83 384,78 387,85"></polygon>
+</svg>
+<!-- Spectral Colormap Scalar Ramp Bar -->
+<div class="z-10 flex items-center gap-space-sm pt-space-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Frontogenesis [K/100km·3h]</span>
+<div class="h-2 flex-1 rounded-sm bg-gradient-to-r from-inverse-primary via-secondary to-tertiary"></div>
+<span class="font-label-sm text-label-sm text-primary">+5.0</span>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT PANEL: Computational Derivatives Configuration & Live CLI Batch Generator -->
+<section class="col-span-3 flex flex-col bg-surface-container-low rounded overflow-hidden select-none">
+<div class="px-space-md py-space-sm bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[15px] text-primary">tune</span>
+<span class="font-headline-sm text-headline-sm text-on-surface uppercase tracking-wider">Spatial Stencils & Grid</span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface" title="Reset defaults" type="button">
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto p-space-md space-y-space-md">
+<!-- Numerical Derivative Scheme -->
+<div class="bg-surface-container-lowest p-space-md rounded space-y-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center justify-between">
+<span>Finite Difference Stencil</span>
+<span class="material-symbols-outlined text-[14px] text-outline">calculate</span>
+</span>
+<div class="space-y-space-xs pt-space-xs">
+<label class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high cursor-pointer">
+<span class="font-label-md text-label-md text-on-surface">2nd Order Centered</span>
+<input checked="" class="accent-primary" name="stencil" type="radio" value="2nd"/>
+</label>
+<label class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high cursor-pointer">
+<span class="font-label-md text-label-md text-on-surface">4th Order Compact (Pade)</span>
+<input class="accent-primary" name="stencil" type="radio" value="4th"/>
+</label>
+<label class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high cursor-pointer">
+<span class="font-label-md text-label-md text-on-surface">Spherical Cos(Lat) Metric</span>
+<input checked="" class="accent-primary" id="metric-toggle" onchange="updateCliOutput()" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Vertical Coordinate Transformations -->
+<div class="bg-surface-container-lowest p-space-md rounded space-y-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center justify-between">
+<span>Vertical Cross/Surface Interp</span>
+<span class="material-symbols-outlined text-[14px] text-outline">layers</span>
+</span>
+<div class="grid grid-cols-1 gap-space-xs pt-space-xs">
+<button class="v-mode px-space-sm py-space-xs text-left rounded bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold flex items-center justify-between" onclick="setVerticalMode('isobaric', this)" type="button">
+<span>Isobaric Slices</span>
+<span class="font-label-sm text-label-sm">850, 700, 500 hPa</span>
+</button>
+<button class="v-mode px-space-sm py-space-xs text-left rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center justify-between transition-colors" onclick="setVerticalMode('isentropic', this)" type="button">
+<span>Isentropic (Theta)</span>
+<span class="font-label-sm text-label-sm text-outline">320 K (MetPy)</span>
+</button>
+<button class="v-mode px-space-sm py-space-xs text-left rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center justify-between transition-colors" onclick="setVerticalMode('pv', this)" type="button">
+<span>Dynamic Tropopause (PV)</span>
+<span class="font-label-sm text-label-sm text-outline">2.0 PVU</span>
+</button>
+</div>
+</div>
+<!-- Derivative Spatial Pre-filter -->
+<div class="bg-surface-container-lowest p-space-md rounded space-y-space-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center justify-between">
+<span>Spectral Pre-Smoothing Filter</span>
+<span class="material-symbols-outlined text-[14px] text-outline">blur_on</span>
+</span>
+<div class="space-y-space-sm pt-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface-variant">Gaussian Filter (σ):</span>
+<span class="font-mono text-primary font-label-md text-label-md" id="sigma-val">1.0</span>
+</div>
+<input class="w-full accent-primary bg-surface-variant h-1 rounded appearance-none cursor-pointer" max="3" min="0" oninput="updateSigma(this.value)" step="0.25" type="range" value="1.0"/>
+<label class="flex items-center justify-between p-space-xs rounded bg-surface-container hover:bg-surface-container-high cursor-pointer">
+<span class="font-label-md text-label-md text-on-surface">9-Point Shapiro Filter</span>
+<input class="accent-primary" type="checkbox"/>
+</label>
+</div>
+</div>
+<!-- Live CLI Command Generator Container -->
+<div class="bg-surface-container-lowest p-space-md rounded space-y-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[14px] text-primary">terminal</span>
+<span>CLI Batch Stmt</span>
+</span>
+<button class="text-primary hover:text-primary-fixed flex items-center gap-space-xs font-label-sm text-label-sm" onclick="copyCliCommand()" type="button">
+<span class="material-symbols-outlined text-[12px]">content_copy</span>
+<span id="copy-label">Copy</span>
+</button>
+</div>
+<div class="p-space-sm bg-surface-dim rounded font-mono text-[10px] leading-tight text-secondary break-all selection:bg-primary selection:text-on-primary">
+<code id="cli-output">xplot diag --calc "frontogenesis(TMP, UGRD, VGRD, level=850)" --unit "K/100km/3h" --metric-lat --output-var FRONT_850</code>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span>Subprocess target: <span class="text-on-surface font-mono">xplot_worker.py</span></span>
+<span class="text-secondary font-mono">Exit 0</span>
+</div>
+</div>
+</div>
+<!-- Commit Action Footer -->
+<div class="p-space-md bg-surface-container flex items-center justify-between">
+<button class="h-6 px-space-md bg-secondary hover:bg-secondary-fixed text-on-secondary font-label-md text-label-md rounded flex items-center gap-space-xs font-semibold transition-colors" onclick="exportDataArray()" type="button">
+<span class="material-symbols-outlined text-[13px]">save</span>
+<span>Save to Dataset</span>
+</button>
+<button class="h-6 px-space-md bg-surface-container-high hover:bg-surface-variant text-on-surface font-label-md text-label-md rounded transition-colors" type="button">
+          Discard
+        </button>
+</div>
+</section>
+</div>
+</div>
+<script>
+  function insertToken(token) {
+    const editor = document.getElementById('formula-editor');
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const text = editor.value;
+    editor.value = text.substring(0, start) + token + text.substring(end);
+    editor.focus();
+    editor.selectionStart = editor.selectionEnd = start + token.length;
+    updateCliOutput();
+  }
+
+  function clearEditor() {
+    const editor = document.getElementById('formula-editor');
+    editor.value = '';
+    editor.focus();
+  }
+
+  function selectDiagnostic(diagType) {
+    const editor = document.getElementById('formula-editor');
+    const targetVar = document.getElementById('target-var');
+    const targetUnits = document.getElementById('target-units');
+    const targetLong = document.getElementById('target-longname');
+
+    if (diagType === 'frontogenesis') {
+      targetVar.value = 'FRONTOGENESIS_850';
+      targetUnits.value = 'K / (100km * 3h)';
+      targetLong.value = '850 hPa 2D Petterssen Frontogenesis Field';
+      editor.value = `# Petterssen 2D Frontogenesis function (Kinematic Deformation & Tilt)
+theta = potential_temperature(PRES, TMP)
+dtheta_dx, dtheta_dy = mpcalc.gradient(theta, deltas=(dy, dx))
+du_dx, du_dy = mpcalc.gradient(UGRD, deltas=(dy, dx))
+dv_dx, dv_dy = mpcalc.gradient(VGRD, deltas=(dy, dx))
+
+mag_grad_theta = np.hypot(dtheta_dx, dtheta_dy) + 1e-12
+D_stretch = du_dx - dv_dy
+D_shear = dv_dx + du_dy
+
+alpha = 0.5 * np.arctan2(D_shear, D_stretch)
+FRONT_850 = -0.5 * mag_grad_theta * (
+    (du_dx * np.cos(2*alpha) + dv_dy * np.sin(2*alpha))
+) * 1.08e7  # K / (100km * 3h)`;
+    } else if (diagType === 'theta_e') {
+      targetVar.value = 'EQUIV_POT_TEMP';
+      targetUnits.value = 'K';
+      targetLong.value = 'Equivalent Potential Temperature (θ_e)';
+      editor.value = `# Bolton (1980) Equivalent Potential Temperature Formulation
+t_k = TMP
+p_pa = PRES
+rh_pct = RH
+
+td = mpcalc.dewpoint_from_relative_humidity(t_k, rh_pct)
+EQUIV_POT_TEMP = mpcalc.equivalent_potential_temperature(p_pa, t_k, td)`;
+    } else if (diagType === 'vorticity') {
+      targetVar.value = 'REL_VORTICITY';
+      targetUnits.value = '10^-5 s^-1';
+      targetLong.value = 'Vertical Component of Relative Vorticity (ζ)';
+      editor.value = `# Relative Vorticity: Curl of the horizontal wind field
+dv_dx, _ = mpcalc.gradient(VGRD, deltas=(dy, dx))
+_, du_dy = mpcalc.gradient(UGRD, deltas=(dy, dx))
+REL_VORTICITY = (dv_dx - du_dy) * 1e5`;
+    } else if (diagType === 'divergence') {
+      targetVar.value = 'HORIZ_DIVERGENCE';
+      targetUnits.value = '10^-5 s^-1';
+      targetLong.value = 'Horizontal Velocity Divergence';
+      editor.value = `# Horizontal Divergence: ∇_h · V
+du_dx, _ = mpcalc.gradient(UGRD, deltas=(dy, dx))
+_, dv_dy = mpcalc.gradient(VGRD, deltas=(dy, dx))
+HORIZ_DIVERGENCE = (du_dx + dv_dy) * 1e5`;
+    } else if (diagType === 'qvectors') {
+      targetVar.value = 'Q_VECTOR_DIV';
+      targetUnits.value = 'm s^-2 kg^-1';
+      targetLong.value = 'Hoskins Q-Vector Divergence Field';
+      editor.value = `# Hoskins and Pedder Q-Vectors formulation for synoptic forcing
+theta = potential_temperature(PRES, TMP)
+q1, q2 = mpcalc.q_vector(UGRD, VGRD, theta, PRES, deltas=(dy, dx))
+Q_VECTOR_DIV = mpcalc.divergence(q1, q2, deltas=(dy, dx))`;
+    } else if (diagType === 'theta') {
+      targetVar.value = 'THETA_K';
+      targetUnits.value = 'K';
+      targetLong.value = 'Dry Potential Temperature (θ)';
+      editor.value = `# Dry Potential Temperature via Poisson Exner
+THETA_K = mpcalc.potential_temperature(PRES, TMP)`;
+    } else if (diagType === 'dewpoint') {
+      targetVar.value = 'DEWPOINT_C';
+      targetUnits.value = 'degC';
+      targetLong.value = 'Surface / Isobaric Dewpoint Temperature';
+      editor.value = `# Dewpoint Temperature derivation
+DEWPOINT_C = mpcalc.dewpoint_from_relative_humidity(TMP, RH).to('degC')`;
+    } else if (diagType === 'streamfunction') {
+      targetVar.value = 'STREAMFUNCTION';
+      targetUnits.value = 'm^2 s^-1';
+      targetLong.value = 'Kinematic Streamfunction ψ';
+      editor.value = `# Streamfunction inversion from vorticity via Poisson solver
+vort = mpcalc.vorticity(UGRD, VGRD, deltas=(dy, dx))
+STREAMFUNCTION = solve_poisson(vort, dx, dy)`;
+    } else if (diagType === 'srh') {
+      targetVar.value = 'SRH_0_3KM';
+      targetUnits.value = 'm^2 s^-2';
+      targetLong.value = '0-3 km Storm Relative Helicity';
+      editor.value = `# 0-3km Storm Relative Helicity using Bunkers storm motion
+u_storm, v_storm = mpcalc.bunkers_storm_motion(UGRD, VGRD, HGT)
+srh = mpcalc.storm_relative_helicity(HGT, UGRD, VGRD, depth=3000, storm_u=u_storm, storm_v=v_storm)
+SRH_0_3KM = srh[0]`;
+    }
+
+    updateCliOutput();
+  }
+
+  function setVerticalMode(mode, btnElement) {
+    document.querySelectorAll('.v-mode').forEach(b => {
+      b.className = 'v-mode px-space-sm py-space-xs text-left rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center justify-between transition-colors';
+    });
+    btnElement.className = 'v-mode px-space-sm py-space-xs text-left rounded bg-primary-container text-on-primary-container font-label-md text-label-md font-semibold flex items-center justify-between';
+    updateCliOutput();
+  }
+
+  function updateSigma(val) {
+    document.getElementById('sigma-val').innerText = parseFloat(val).toFixed(2);
+    updateCliOutput();
+  }
+
+  function updateCliOutput() {
+    const targetVar = document.getElementById('target-var').value || 'OUT_VAR';
+    const targetUnits = document.getElementById('target-units').value || 'units';
+    const isMetric = document.getElementById('metric-toggle')?.checked ? ' --metric-lat' : '';
+    const cliOutput = document.getElementById('cli-output');
+    cliOutput.innerText = `xplot diag --calc "${targetVar.toLowerCase()}(TMP, UGRD, VGRD, level=850)" --unit "${targetUnits}"${isMetric} --output-var ${targetVar}`;
+  }
+
+  function copyCliCommand() {
+    const text = document.getElementById('cli-output').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const label = document.getElementById('copy-label');
+      label.innerText = 'Copied!';
+      setTimeout(() => { label.innerText = 'Copy'; }, 1800);
+    });
+  }
+
+  function evaluateSlice() {
+    const btn = event.currentTarget;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[15px] animate-spin">sync</span><span>Calculating...</span>';
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+    }, 450);
+  }
+
+  function exportDataArray() {
+    alert("Diagnostic field successfully appended to active dataset netcdf4://gfs_20241018_12z.nc");
+  }
+
+  // Initialize live bindings
+  document.getElementById('target-var')?.addEventListener('input', updateCliOutput);
+  document.getElementById('target-units')?.addEventListener('input', updateCliOutput);
+</script></main></div><footer class="fixed bottom-0 left-0 right-0 h-5 bg-surface-container-lowest border-t border-outline-variant z-50 flex items-center justify-between px-space-md font-label-sm text-label-sm text-on-surface-variant"><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-[11px] text-primary">explore</span><span>LAT: <strong class="text-on-surface font-label-sm text-label-sm">42.3601° N</strong>  LON: <strong class="text-on-surface font-label-sm text-label-sm">71.0589° W</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>PROBED: <strong class="text-secondary font-label-sm text-label-sm">284.15 K (T2M)</strong></span></div><div class="pl-space-md"><span>PROJECTION: <strong class="text-on-surface font-label-sm text-label-sm">PlateCarree (EPSG:4326)</strong></span></div></div><div class="flex items-center gap-space-md divide-x divide-outline-variant"><div class="flex items-center gap-space-xs"><span>FPS: <strong class="text-on-surface font-label-sm text-label-sm">59.8</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span>CUDA: <strong class="text-secondary font-label-sm text-label-sm">READY (0.42 ms)</strong></span></div><div class="pl-space-md flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span>MEM: <strong class="text-on-surface font-label-sm text-label-sm">24%</strong></span></div></div></footer></body></html>
