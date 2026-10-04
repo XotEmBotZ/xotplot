@@ -473,16 +473,6 @@ class ProjectionRegionView(QWidget):
 
         panel_layout.addWidget(grat_group)
 
-        # ---------------------------------------------------------------------
-        # Apply / Redraw Button
-        # ---------------------------------------------------------------------
-        btn_box = QHBoxLayout()
-        self.btn_refresh = QPushButton("Redraw Map")
-        self.btn_refresh.setObjectName("primaryAction")
-        self.btn_refresh.clicked.connect(self.apply_projection)
-        btn_box.addWidget(self.btn_refresh)
-        panel_layout.addLayout(btn_box)
-
         scroll.setWidget(panel_container)
         main_layout.addWidget(scroll)
 
