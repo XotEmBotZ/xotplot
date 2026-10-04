@@ -585,15 +585,15 @@ def render_gridded_field(
             except Exception:
                 pass
 
-    # Colorbar
+    # Colorbar at the right of the plot
     if plot_spec.show_colorbar and mesh is not None:
         cbar = figure.colorbar(
             mesh,
             ax=ax,
-            orientation="horizontal",
-            pad=0.06,
+            orientation="vertical",
+            pad=0.03,
             fraction=0.046,
-            aspect=30,
+            aspect=25,
         )
         cbar.ax.tick_params(labelsize=8, colors=fg_color)
         lbl = plot_spec.colorbar_label or da.attrs.get("long_name") or var_name
@@ -602,9 +602,15 @@ def render_gridded_field(
             lbl = f"{lbl} [{unit}]"
         cbar.set_label(lbl, fontsize=8, color=fg_color)
 
-    lvl_info = f" ({slice_cfg.level_value} hPa)" if slice_cfg.level_value is not None else ""
-    title = f"{var_name}{lvl_info} - {reg_spec.projection.crs_id} [{reg_spec.preset_name}]"
-    ax.set_title(title, fontsize=10, color=fg_color, pad=8)
+    if plot_spec.custom_title:
+        title = plot_spec.custom_title
+        if plot_spec.custom_subtitle:
+            title = f"{title}\n{plot_spec.custom_subtitle}"
+        ax.set_title(title, fontsize=10, color=fg_color, pad=8)
+    else:
+        lvl_info = f" ({slice_cfg.level_value} hPa)" if slice_cfg.level_value is not None else ""
+        title = f"{var_name}{lvl_info} - {reg_spec.projection.crs_id} [{reg_spec.preset_name}]"
+        ax.set_title(title, fontsize=10, color=fg_color, pad=8)
     figure.tight_layout()
 
     return figure
@@ -810,6 +816,8 @@ def render_variable_slice_and_histogram(
     barbs_color: str = DEFAULT_WIND_BARBS_COLOR,
     barbs_pivot: str = DEFAULT_WIND_BARBS_PIVOT,
     show_histogram: bool = True,
+    title: Optional[str] = None,
+    subtitle: Optional[str] = None,
 ) -> Figure:
     """Render meteorological Cartopy projection map, optionally stacked with empirical distribution histogram."""
     if figure is None:
@@ -831,8 +839,15 @@ def render_variable_slice_and_histogram(
     crs_proj = build_crs(reg_spec.projection)
 
     if show_histogram:
-        # GridSpec: top (Cartopy projection map, ratio 1.5), bottom (histogram, ratio 0.8)
-        gs = figure.add_gridspec(2, 1, height_ratios=[1.5, 0.8], hspace=0.35)
+        # Subplots: top Cartopy map (ratio 2.0), bottom distribution histogram (ratio 0.8)
+        # Using 2-row x 1-col GridSpec with margins avoiding tight_layout conflict on GeoAxes
+        gs = figure.add_gridspec(
+            2, 1,
+            height_ratios=[2.0, 0.8],
+            left=0.08, right=0.90,
+            bottom=0.08, top=0.92,
+            hspace=0.28,
+        )
         ax_top = figure.add_subplot(gs[0], projection=crs_proj)
         ax_bot = figure.add_subplot(gs[1])
         ax_bot.set_facecolor(bg_color)
@@ -1038,15 +1053,21 @@ def render_variable_slice_and_histogram(
             except Exception:
                 pass
 
-    # Top Colorbar
+    # Color scale rendered at the right of the plot
     if mesh is not None:
-        cbar = figure.colorbar(mesh, ax=ax_top, orientation="horizontal", pad=0.08, fraction=0.046, aspect=30)
+        cbar = figure.colorbar(mesh, ax=ax_top, orientation="vertical", pad=0.03, fraction=0.046, aspect=25)
         cbar.ax.tick_params(labelsize=7, colors=fg_color)
         lbl = f"{var_name} [{unit}]" if unit else var_name
         cbar.set_label(lbl, fontsize=8, color=fg_color)
 
-    lvl_str = f" @ {level_val:.0f} hPa" if level_val is not None else ""
-    ax_top.set_title(f"{long_name}{lvl_str} — {reg_spec.projection.crs_id} [{reg_spec.preset_name}]", fontsize=9, color=fg_color, pad=4)
+    if title:
+        rendered_title = title
+        if subtitle:
+            rendered_title = f"{title}\n{subtitle}"
+        ax_top.set_title(rendered_title, fontsize=9, color=fg_color, pad=4)
+    else:
+        lvl_str = f" @ {level_val:.0f} hPa" if level_val is not None else ""
+        ax_top.set_title(f"{long_name}{lvl_str} — {reg_spec.projection.crs_id} [{reg_spec.preset_name}]", fontsize=9, color=fg_color, pad=4)
 
     # 2. Bottom Subplot: Histogram & Distribution Statistics (if show_histogram requested)
     if ax_bot is not None:
@@ -1075,8 +1096,9 @@ def render_variable_slice_and_histogram(
         ax_bot.set_ylabel("Probability Density", fontsize=8, color=fg_color)
         ax_bot.tick_params(labelsize=7, colors=fg_color)
         ax_bot.grid(True, linestyle=":", alpha=0.5, color="#94a3b8")
+    else:
+        figure.tight_layout()
 
-    figure.tight_layout()
     return figure
 
 
@@ -1388,6 +1410,8 @@ def execute_render_job(
         barbs_color = params.get("barbs_color", "#0f172a")
         barbs_pivot = params.get("barbs_pivot", "middle")
         show_histogram = params.get("show_histogram", True)
+        title = params.get("title")
+        subtitle = params.get("subtitle")
         render_variable_slice_and_histogram(
             var_name=var_name,
             level_val=level_val,
@@ -1405,6 +1429,8 @@ def execute_render_job(
             barbs_color=barbs_color,
             barbs_pivot=barbs_pivot,
             show_histogram=show_histogram,
+            title=title,
+            subtitle=subtitle,
         )
     elif job_type == "synoptic":
         render_synoptic_field(figure=fig)

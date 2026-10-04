@@ -60,11 +60,14 @@ class MainWindow(QMainWindow):
         # Connect signals
         self._nav_list.currentRowChanged.connect(self._on_view_changed)
         self._view_variables.set_region_spec_provider(self._view_projection.get_spec)
+        self._view_variables.set_global_title_provider(self._view_spatial.get_global_title_spec)
+        self._view_spatial.global_title_changed.connect(self._on_global_title_changed)
         self._view_projection.projection_changed.connect(lambda _: self._view_variables._update_profile_plot())
         self._view_variables.plot_requested.connect(self._on_plot_field_requested)
         self._engine_bridge.job_completed.connect(self._on_engine_job_completed)
         self._engine_bridge.job_failed.connect(self._on_engine_job_failed)
         self._current_field_job_id: str | None = None
+        self._current_plot_spec: Any | None = None
 
         # Apply initial theme
         self._apply_theme(self._dark_mode)
@@ -154,10 +157,12 @@ class MainWindow(QMainWindow):
         main_layout.setSpacing(0)
 
         splitter = QSplitter(Qt.Orientation.Horizontal, central_widget)
+        splitter.setHandleWidth(6)
+        splitter.setChildrenCollapsible(False)
 
         # Left Nav Aside
         left_aside = QWidget()
-        left_aside.setMinimumWidth(220)
+        left_aside.setMinimumWidth(200)
         left_aside.setMaximumWidth(280)
         aside_layout = QVBoxLayout(left_aside)
         aside_layout.setContentsMargins(6, 6, 6, 6)
@@ -338,6 +343,8 @@ class MainWindow(QMainWindow):
         # Switch view to Spatial Viewport immediately so the user sees the canvas with loading indicator
         self._nav_list.setCurrentRow(0)
 
+        self._current_plot_spec = plot_spec
+
         job_id = self._engine_bridge.submit(
             job_type="field",
             params={"spec": plot_spec.model_dump()},
@@ -345,6 +352,29 @@ class MainWindow(QMainWindow):
             cancel_previous=True,
         )
         self._current_field_job_id = job_id
+
+    def _on_global_title_changed(self, global_spec: Any) -> None:
+        """Handle global title changes: update variables view preview and re-render current field in viewport."""
+        self._view_variables._on_title_setting_changed()
+
+        if self._current_plot_spec is not None:
+            # Update titles on the active plot specification
+            var_text = self._current_plot_spec.slice_spec.variable
+            if self._current_plot_spec.slice_spec.level_value is not None:
+                var_text = f"{var_text} @ {self._current_plot_spec.slice_spec.level_value:.0f} hPa"
+
+            self._current_plot_spec.custom_title = global_spec.format_title()
+            self._current_plot_spec.custom_subtitle = global_spec.format_subtitle(var_text)
+            self._current_plot_spec.global_title_spec = global_spec
+
+            # Re-render in viewport without switching view
+            job_id = self._engine_bridge.submit(
+                job_type="field",
+                params={"spec": self._current_plot_spec.model_dump()},
+                channel="field",
+                cancel_previous=True,
+            )
+            self._current_field_job_id = job_id
 
     def _on_engine_job_completed(self, job_id: str, image_data: bytes) -> None:
         """Handle completed asynchronous render jobs."""

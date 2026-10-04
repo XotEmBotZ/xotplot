@@ -4,13 +4,17 @@ Single source of truth for serializable configurations adhering to FAIL-FAST,
 SIMPLE-ONLY, and LEAST-CODE principles.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple
+import uuid
 from pydantic import BaseModel, Field
 
 from xotplot.constants import (
     DEFAULT_BORDER_COLOR,
     DEFAULT_COAST_COLOR,
+    DEFAULT_GLOBAL_TITLE,
     DEFAULT_GRID_COLOR,
     DEFAULT_LAKE_COLOR,
     DEFAULT_PLOT_BG_COLOR,
@@ -19,6 +23,10 @@ from xotplot.constants import (
     DEFAULT_RIVER_COLOR,
     DEFAULT_SHP_COLOR,
     DEFAULT_STATE_COLOR,
+    DEFAULT_SUBTITLE_POST,
+    DEFAULT_SUBTITLE_PRE,
+    DEFAULT_SUBTITLE_TEMPLATE,
+    DEFAULT_VAR_TEMPLATE,
     DEFAULT_WIND_BARBS_COLOR,
     DEFAULT_WIND_BARBS_ENABLED,
     DEFAULT_WIND_BARBS_LENGTH,
@@ -255,6 +263,88 @@ class DataSliceSpec(BaseModel):
     time_index: int = 0
 
 
+# =============================================================================
+# Variable & Global Title Formatting Schemas
+# =============================================================================
+class VariableTitleSpec(BaseModel):
+    """Specification for configuring variable-specific text using a single template slot."""
+
+    template: str = DEFAULT_VAR_TEMPLATE
+
+    def format_var_text(
+        self,
+        var_name: str,
+        long_name: Optional[str] = None,
+        level: Optional[float] = None,
+        units: Optional[str] = None,
+    ) -> str:
+        """Format variable text using placeholders ({name}, {long_name}, {level}, {units})."""
+        text = self.template
+        lname = long_name if long_name else var_name
+
+        text = text.replace("{name}", var_name)
+        text = text.replace("{var}", var_name)
+        text = text.replace("{var_name}", var_name)
+        text = text.replace("{long_name}", lname)
+
+        if level is None:
+            text = text.replace("@ {level}", "").replace("@{level}", "").replace("{level}", "")
+        else:
+            text = text.replace("{level}", f"{level:.0f} hPa")
+
+        if not units:
+            text = text.replace("[{units}]", "").replace("{units}", "")
+        else:
+            text = text.replace("{units}", units)
+
+        text = text.replace("[]", "").replace("()", "")
+        return " ".join(text.split()).strip()
+
+
+class GlobalTitleSpec(BaseModel):
+    """Global common title and subtitle specification following (pre - var title - post) format."""
+
+    # Common Global Title (not in variable)
+    title: str = DEFAULT_GLOBAL_TITLE
+
+    # Subtitle with slot for variable text
+    subtitle_enabled: bool = True
+    subtitle_pre: str = DEFAULT_SUBTITLE_PRE
+    subtitle_post: str = DEFAULT_SUBTITLE_POST
+    subtitle_template: str = DEFAULT_SUBTITLE_TEMPLATE
+
+    def format_title(self, var_title: str = "") -> str:
+        """Return the common global title."""
+        return self.title.strip()
+
+    def format_subtitle(self, var_text: str) -> str:
+        """Generate formatted subtitle incorporating the variable text."""
+        if not self.subtitle_enabled:
+            return ""
+
+        pre = self.subtitle_pre.strip()
+        post = self.subtitle_post.strip()
+
+        if "{var_text}" in self.subtitle_template or "{var_title}" in self.subtitle_template:
+            res = self.subtitle_template
+            res = res.replace("{pre}", pre)
+            res = res.replace("{post}", post)
+            res = res.replace("{var_text}", var_text)
+            res = res.replace("{var_title}", var_text)
+            parts = [p.strip() for p in res.split("-") if p.strip()]
+            return " - ".join(parts)
+
+        # Default (pre - var title - post) format
+        parts: List[str] = []
+        if pre:
+            parts.append(pre)
+        if var_text.strip():
+            parts.append(var_text.strip())
+        if post:
+            parts.append(post)
+        return " - ".join(parts)
+
+
 class DataPlotSpec(BaseModel):
     """Complete specification for rendering a 2D meteorological field onto a map."""
 
@@ -269,6 +359,73 @@ class DataPlotSpec(BaseModel):
     colorbar_label: Optional[str] = None
     region_view: RegionViewSpec = Field(default_factory=RegionViewSpec)
     wind_barbs: Optional[WindBarbsSpec] = None
+    custom_title: Optional[str] = None
+    custom_subtitle: Optional[str] = None
+    global_title_spec: Optional[GlobalTitleSpec] = None
+
+
+class PlotConfig(BaseModel):
+    """Configuration for an individual plot layer/variable pushed to centralized plotconfig."""
+
+    id: str = Field(default_factory=lambda: f"cfg_{uuid.uuid4().hex[:6]}")
+    variable: str
+    level: Optional[float] = None
+    level_type: Optional[str] = "surface"
+    plot_type: PlotFieldType = "contourf"
+    colormap: str = "coolwarm"
+    vmin: Optional[float] = None
+    vmax: Optional[float] = None
+    num_levels: int = 15
+    is_wind: bool = False
+    barbs_step: int = 5
+    barbs_length: float = 6.0
+    barbs_pivot: str = "middle"
+    barbs_color: str = "#0f172a"
+    var_text_template: str = DEFAULT_VAR_TEMPLATE
+    computed_var_text: str = ""
+    enabled: bool = True
+    z_index: int = 0
+
+    def to_data_plot_spec(
+        self,
+        dataset_id: Optional[str] = None,
+        region_view: Optional[RegionViewSpec] = None,
+        global_title_spec: Optional[GlobalTitleSpec] = None,
+    ) -> DataPlotSpec:
+        """Convert this plot configuration into a renderable DataPlotSpec."""
+        wind_spec = None
+        if self.is_wind:
+            wind_spec = WindBarbsSpec(
+                enabled=True,
+                step=self.barbs_step,
+                length=self.barbs_length,
+                color=self.barbs_color,
+                pivot=self.barbs_pivot,  # type: ignore[arg-type]
+            )
+
+        title = global_title_spec.format_title() if global_title_spec else None
+        subtitle = global_title_spec.format_subtitle(self.computed_var_text) if global_title_spec else None
+
+        return DataPlotSpec(
+            dataset_id=dataset_id,
+            slice_spec=DataSliceSpec(
+                variable=self.variable,
+                level_type=self.level_type,
+                level_value=self.level,
+            ),
+            plot_type=self.plot_type,
+            colormap=self.colormap,
+            vmin=self.vmin,
+            vmax=self.vmax,
+            num_levels=self.num_levels,
+            region_view=region_view or RegionViewSpec(),
+            wind_barbs=wind_spec,
+            custom_title=title,
+            custom_subtitle=subtitle,
+            global_title_spec=global_title_spec,
+        )
+
+
 
 
 

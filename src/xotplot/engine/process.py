@@ -147,6 +147,7 @@ class EngineProcessPool:
         self._num_workers = max(1, num_workers)
         self._workers: List[WorkerSlot] = []
         self._queue: List[dict] = []
+        self._cancelled_jobs: set[str] = set()
         self._lock = threading.RLock()
         self._running = True
         self._loaded_datasets: List[dict] = []
@@ -161,7 +162,7 @@ class EngineProcessPool:
         return WorkerSlot(process=p, conn=p_conn)
 
     def _terminate_and_respawn(self, slot: WorkerSlot) -> None:
-        """Instantly kill worker running an obsolete job and launch a warm replacement."""
+        """Kill dead worker and launch replacement without blocking caller thread."""
         try:
             slot.process.terminate()
             slot.process.join(timeout=0.05)
@@ -179,27 +180,37 @@ class EngineProcessPool:
         slot.current_channel = None
         slot.is_busy = False
 
-        # Replay dataset ingestion on the new worker so it retains in-memory datasets
-        for ds_req in self._loaded_datasets:
-            try:
-                slot.conn.send({
-                    "command": "io_open",
-                    "job_id": str(uuid.uuid4()),
-                    "request": ds_req,
-                })
-                slot.conn.recv()
-            except Exception:
-                pass
+        # Replay dataset ingestion in a background thread to prevent GUI lockup
+        if self._loaded_datasets:
+            datasets_to_replay = list(self._loaded_datasets)
+            target_conn = slot.conn
+
+            def _replay() -> None:
+                for ds_req in datasets_to_replay:
+                    try:
+                        target_conn.send({
+                            "command": "io_open",
+                            "job_id": str(uuid.uuid4()),
+                            "request": ds_req,
+                        })
+                        target_conn.recv()
+                    except Exception:
+                        pass
+
+            threading.Thread(target=_replay, daemon=True).start()
 
     def cancel_channel(self, channel: str) -> None:
-        """Cancel and drop all pending and active jobs on a given channel immediately."""
+        """Cancel and drop all pending and active jobs on a channel immediately without blocking."""
         with self._lock:
-            # Drop unstarted queued jobs
-            self._queue = [j for j in self._queue if j.get("channel") != channel]
-            # Terminate active workers on this channel
+            # Mark running jobs on this channel as cancelled so their output is discarded
             for slot in self._workers:
-                if slot.is_busy and slot.current_channel == channel:
-                    self._terminate_and_respawn(slot)
+                if slot.is_busy and slot.current_channel == channel and slot.current_job_id:
+                    self._cancelled_jobs.add(slot.current_job_id)
+            # Mark and drop unstarted queued jobs
+            for j in self._queue:
+                if j.get("channel") == channel and j.get("job_id"):
+                    self._cancelled_jobs.add(j["job_id"])
+            self._queue = [j for j in self._queue if j.get("channel") != channel]
 
     def submit_job(
         self,
@@ -241,17 +252,21 @@ class EngineProcessPool:
             self._queue.append(job)
 
     def dispatch_next(self, slot: WorkerSlot) -> None:
-        """Dispatch next pending job to a newly idle worker."""
+        """Dispatch next pending non-cancelled job to a newly idle worker."""
         with self._lock:
             slot.is_busy = False
             slot.current_job_id = None
             slot.current_channel = None
-            if self._queue:
+            while self._queue:
                 next_job = self._queue.pop(0)
+                if next_job.get("job_id") in self._cancelled_jobs:
+                    self._cancelled_jobs.discard(next_job["job_id"])
+                    continue
                 slot.is_busy = True
                 slot.current_job_id = next_job["job_id"]
                 slot.current_channel = next_job.get("channel")
                 slot.conn.send(next_job)
+                break
 
     @property
     def _process(self) -> Optional[mp.Process]:
@@ -429,8 +444,16 @@ try:
                         img_data = resp.get("image_data", b"")
                         err_msg = resp.get("error", "Engine error")
 
+                        was_cancelled = job_id in self._pool._cancelled_jobs
+                        if was_cancelled:
+                            self._pool._cancelled_jobs.discard(job_id)
+
                         self._pool.dispatch_next(slot)
                         active = self._pool.busy_count
+
+                    if was_cancelled:
+                        self.status_changed.emit(active > 0, active)
+                        continue
 
                     # Emit Qt signals outside lock
                     if is_success:

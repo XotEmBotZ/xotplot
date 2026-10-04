@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import QTimer, Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QComboBox,
     QDockWidget,
     QFileDialog,
     QFrame,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPlainTextEdit,
     QPushButton,
     QSlider,
@@ -20,9 +22,16 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from xotplot.constants import ALL_REGIONS
+from xotplot.constants import (
+    ALL_REGIONS,
+    DEFAULT_GLOBAL_TITLE,
+    DEFAULT_SUBTITLE_POST,
+    DEFAULT_SUBTITLE_PRE,
+    DEFAULT_SUBTITLE_TEMPLATE,
+)
 from xotplot.gui.engine_canvas import EngineCanvasWidget
 from xotplot.gui.theme import get_theme_qss
+from xotplot.spec import GlobalTitleSpec
 
 
 class SpatialViewportView(QWidget):
@@ -33,9 +42,17 @@ class SpatialViewportView(QWidget):
     extent_reset_requested = pyqtSignal()
     probe_triggered = pyqtSignal(bool)
 
+    global_title_changed = pyqtSignal(object)  # Emits GlobalTitleSpec
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._dark_mode = True
+
+        self._title_debounce_timer = QTimer(self)
+        self._title_debounce_timer.setSingleShot(True)
+        self._title_debounce_timer.setInterval(400)
+        self._title_debounce_timer.timeout.connect(self._emit_global_title_changed)
+
         self._init_ui()
 
     def _init_ui(self) -> None:
@@ -86,6 +103,42 @@ class SpatialViewportView(QWidget):
         tb_layout.addWidget(self._header_info)
 
         upper_layout.addWidget(self._toolbar_frame)
+
+        # Global Title & Subtitle Configuration Bar (Global settings hosted in Viewport)
+        global_title_frame = QFrame(upper_widget)
+        global_title_frame.setFrameShape(QFrame.Shape.StyledPanel)
+        gt_layout = QHBoxLayout(global_title_frame)
+        gt_layout.setContentsMargins(6, 4, 6, 4)
+        gt_layout.setSpacing(6)
+
+        gt_layout.addWidget(QLabel("Global Title:"))
+        self.edit_global_title = QLineEdit(global_title_frame)
+        self.edit_global_title.setText(DEFAULT_GLOBAL_TITLE)
+        self.edit_global_title.setPlaceholderText("Common global title for all plots...")
+        gt_layout.addWidget(self.edit_global_title, stretch=2)
+
+        gt_layout.addWidget(QLabel("Subtitle Pre:"))
+        self.edit_subtitle_pre = QLineEdit(global_title_frame)
+        self.edit_subtitle_pre.setText(DEFAULT_SUBTITLE_PRE)
+        self.edit_subtitle_pre.setPlaceholderText("Pre (e.g. Analysis 00Z)")
+        gt_layout.addWidget(self.edit_subtitle_pre, stretch=1)
+
+        gt_layout.addWidget(QLabel("Subtitle Post:"))
+        self.edit_subtitle_post = QLineEdit(global_title_frame)
+        self.edit_subtitle_post.setText(DEFAULT_SUBTITLE_POST)
+        self.edit_subtitle_post.setPlaceholderText("Post (e.g. Valid 24h)")
+        gt_layout.addWidget(self.edit_subtitle_post, stretch=1)
+
+        self.chk_subtitle_enabled = QCheckBox("Subtitle", global_title_frame)
+        self.chk_subtitle_enabled.setChecked(True)
+        gt_layout.addWidget(self.chk_subtitle_enabled)
+
+        self.edit_global_title.textChanged.connect(self._on_global_title_control_changed)
+        self.edit_subtitle_pre.textChanged.connect(self._on_global_title_control_changed)
+        self.edit_subtitle_post.textChanged.connect(self._on_global_title_control_changed)
+        self.chk_subtitle_enabled.toggled.connect(self._on_global_title_control_changed)
+
+        upper_layout.addWidget(global_title_frame)
 
         # Canvas Widget
         self.canvas_widget = EngineCanvasWidget(upper_widget)
@@ -226,6 +279,25 @@ class SpatialViewportView(QWidget):
     def set_header_info(self, text: str) -> None:
         """Update top toolbar header label."""
         self._header_info.setText(text)
+
+    def get_global_title_spec(self) -> GlobalTitleSpec:
+        """Construct the canonical GlobalTitleSpec from global viewport controls."""
+        gt_title = self.edit_global_title.text().strip() or DEFAULT_GLOBAL_TITLE
+        return GlobalTitleSpec(
+            title=gt_title,
+            subtitle_enabled=self.chk_subtitle_enabled.isChecked(),
+            subtitle_pre=self.edit_subtitle_pre.text().strip(),
+            subtitle_post=self.edit_subtitle_post.text().strip(),
+            subtitle_template=DEFAULT_SUBTITLE_TEMPLATE,
+        )
+
+    def _on_global_title_control_changed(self) -> None:
+        """Debounce global title and subtitle control changes before emitting."""
+        self._title_debounce_timer.start(350)
+
+    def _emit_global_title_changed(self) -> None:
+        """Emit global_title_changed signal with the evaluated GlobalTitleSpec."""
+        self.global_title_changed.emit(self.get_global_title_spec())
 
     def _on_reset_extent(self) -> None:
         self.extent_reset_requested.emit()

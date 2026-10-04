@@ -239,6 +239,22 @@ QGroupBox::title {
     left: 8px;
     padding: 0 4px;
 }
+
+QSplitter::handle {
+    background-color: #262a34;
+}
+
+QSplitter::handle:hover {
+    background-color: #38bdf8;
+}
+
+QSplitter::handle:horizontal {
+    width: 6px;
+}
+
+QSplitter::handle:vertical {
+    height: 6px;
+}
 """
 
 LIGHT_THEME = """
@@ -478,6 +494,22 @@ QGroupBox::title {
     subcontrol-position: top left;
     left: 8px;
     padding: 0 4px;
+}
+
+QSplitter::handle {
+    background-color: #cbd5e1;
+}
+
+QSplitter::handle:hover {
+    background-color: #0284c7;
+}
+
+QSplitter::handle:horizontal {
+    width: 6px;
+}
+
+QSplitter::handle:vertical {
+    height: 6px;
 }
 """
 

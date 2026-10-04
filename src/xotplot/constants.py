@@ -245,5 +245,15 @@ WIND_BARB_COLORS: list[str] = [
     "#ffffff",  # White
 ]
 
+# =============================================================================
+# Variable & Plot Title Formatting Assumptions
+# =============================================================================
+DEFAULT_GLOBAL_TITLE: str = "xotplot Meteorological Visualization"
+DEFAULT_VAR_TEMPLATE: str = "{long_name} ({name}) @ {level} [{units}]"
+DEFAULT_SUBTITLE_PRE: str = ""
+DEFAULT_SUBTITLE_POST: str = ""
+DEFAULT_SUBTITLE_TEMPLATE: str = "{pre} - {var_text} - {post}"
+
+
 
 
