@@ -1,1 +1,172 @@
-"""Plot specification schema."""
+"""Plot specification and validation schemas for xotplot.
+
+Single source of truth for serializable configurations adhering to FAIL-FAST,
+SIMPLE-ONLY, and LEAST-CODE principles.
+"""
+
+from pathlib import Path
+from typing import Annotated, Any, Dict, List, Literal, Optional, Tuple
+from pydantic import BaseModel, Field
+
+from xotplot.constants import (
+    DEFAULT_BORDER_COLOR,
+    DEFAULT_COAST_COLOR,
+    DEFAULT_GRID_COLOR,
+    DEFAULT_LAKE_COLOR,
+    DEFAULT_PLOT_BG_COLOR,
+    DEFAULT_PLOT_FG_COLOR,
+    DEFAULT_RESOLUTION,
+    DEFAULT_RIVER_COLOR,
+    DEFAULT_SHP_COLOR,
+    DEFAULT_STATE_COLOR,
+)
+
+CrsId = Literal[
+    "LambertConformal",
+    "PlateCarree",
+    "Mercator",
+    "NorthPolarStereo",
+    "Orthographic",
+    "Robinson",
+]
+
+FeatureScale = Literal["110m", "50m", "10m"]
+LineStyle = Literal["-", "--", ":", "-."]
+
+
+class ExtentSpec(BaseModel):
+    """Geographic bounding box specification (West, East, South, North)."""
+
+    west: Annotated[float, Field(ge=-180.0, le=180.0, description="West boundary longitude in degrees")]
+    east: Annotated[float, Field(ge=-180.0, le=180.0, description="East boundary longitude in degrees")]
+    south: Annotated[float, Field(ge=-90.0, le=90.0, description="South boundary latitude in degrees")]
+    north: Annotated[float, Field(ge=-90.0, le=90.0, description="North boundary latitude in degrees")]
+
+    def as_tuple(self) -> Tuple[float, float, float, float]:
+        """Return (west, east, south, north) tuple."""
+        return (self.west, self.east, self.south, self.north)
+
+
+class ProjectionSpec(BaseModel):
+    """Cartopy projection and coordinate reference system specification."""
+
+    crs_id: CrsId = "LambertConformal"
+    central_longitude: Annotated[float, Field(ge=-180.0, le=180.0)] = 82.5
+    central_latitude: Annotated[float, Field(ge=-90.0, le=90.0)] = 22.0
+    standard_parallels: Tuple[
+        Annotated[float, Field(ge=-90.0, le=90.0)],
+        Annotated[float, Field(ge=-90.0, le=90.0)],
+    ] = (12.0, 28.0)
+
+
+class FeatureLayerSpec(BaseModel):
+    """Configuration for an individual Cartopy or shapefile feature layer."""
+
+    enabled: bool = True
+    color: str
+    linewidth: Annotated[float, Field(gt=0.0)] = 1.0
+    linestyle: LineStyle = "-"
+    custom_shapefile: Optional[Path] = None
+
+
+class FeaturesSpec(BaseModel):
+    """Granular Cartopy natural earth and shapefile feature layers specification."""
+
+    scale: FeatureScale = DEFAULT_RESOLUTION
+    coastlines: FeatureLayerSpec = Field(
+        default_factory=lambda: FeatureLayerSpec(
+            enabled=True,
+            color=DEFAULT_COAST_COLOR,
+            linewidth=1.0,
+            linestyle="-",
+        )
+    )
+    borders: FeatureLayerSpec = Field(
+        default_factory=lambda: FeatureLayerSpec(
+            enabled=True,
+            color=DEFAULT_BORDER_COLOR,
+            linewidth=0.8,
+            linestyle="--",
+        )
+    )
+    states: FeatureLayerSpec = Field(
+        default_factory=lambda: FeatureLayerSpec(
+            enabled=False,
+            color=DEFAULT_STATE_COLOR,
+            linewidth=0.5,
+            linestyle=":",
+        )
+    )
+    rivers: FeatureLayerSpec = Field(
+        default_factory=lambda: FeatureLayerSpec(
+            enabled=False,
+            color=DEFAULT_RIVER_COLOR,
+            linewidth=0.6,
+            linestyle="-",
+        )
+    )
+    lakes: FeatureLayerSpec = Field(
+        default_factory=lambda: FeatureLayerSpec(
+            enabled=False,
+            color=DEFAULT_LAKE_COLOR,
+            linewidth=0.6,
+            linestyle="-",
+        )
+    )
+
+
+class CustomShapefileSpec(BaseModel):
+    """Standalone custom shapefile overlay specification."""
+
+    path: Path
+    name: str = ""
+    enabled: bool = True
+    color: str = DEFAULT_SHP_COLOR
+    linewidth: Annotated[float, Field(gt=0.0)] = 1.2
+
+
+class GraticuleSpec(BaseModel):
+    """Coordinate graticules, gridlines and label annotations specification."""
+
+    enabled: bool = True
+    draw_labels: bool = True
+    linestyle: LineStyle = "--"
+    lon_step: Annotated[float, Field(gt=0.0, le=60.0)] = 5.0
+    lat_step: Annotated[float, Field(gt=0.0, le=60.0)] = 5.0
+    color: str = DEFAULT_GRID_COLOR
+    alpha: Annotated[float, Field(ge=0.0, le=1.0)] = 0.6
+
+
+class RegionViewSpec(BaseModel):
+    """Complete serializable specification for the Projection & Region view."""
+
+    category: str = "India & Subcontinent"
+    preset_name: str = "India (National Subcontinent)"
+    extent: ExtentSpec = Field(
+        default_factory=lambda: ExtentSpec(west=68.0, east=97.5, south=6.5, north=37.5)
+    )
+    projection: ProjectionSpec = Field(default_factory=ProjectionSpec)
+    features: FeaturesSpec = Field(default_factory=FeaturesSpec)
+    custom_shapefiles: List[CustomShapefileSpec] = Field(default_factory=list)
+    graticules: GraticuleSpec = Field(default_factory=GraticuleSpec)
+    canvas_bg_color: str = DEFAULT_PLOT_BG_COLOR
+    canvas_fg_color: str = DEFAULT_PLOT_FG_COLOR
+
+
+class PlotSpec(BaseModel):
+    """Root plot specification schema for saving, loading and validating xotplot configs."""
+
+    version: str = "0.1.0"
+    region_view: RegionViewSpec = Field(default_factory=RegionViewSpec)
+
+    def to_json_file(self, path: Path | str) -> None:
+        """Serialize configuration to a JSON file."""
+        p = Path(path)
+        p.write_text(self.model_dump_json(indent=2), encoding="utf-8")
+
+    @classmethod
+    def from_json_file(cls, path: Path | str) -> "PlotSpec":
+        """Load and validate configuration from a JSON file."""
+        p = Path(path)
+        content = p.read_text(encoding="utf-8")
+        return cls.model_validate_json(content)

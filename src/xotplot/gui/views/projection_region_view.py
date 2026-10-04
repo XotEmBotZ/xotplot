@@ -48,6 +48,15 @@ from xotplot.constants import (
 )
 from xotplot.gui.cartopy_features import get_cached_feature, is_feature_cached, load_shapefile_geometries
 from xotplot.gui.preferences_dialog import CartopyPreferencesDialog
+from xotplot.spec import (
+    CustomShapefileSpec,
+    ExtentSpec,
+    FeatureLayerSpec,
+    FeaturesSpec,
+    GraticuleSpec,
+    ProjectionSpec,
+    RegionViewSpec,
+)
 
 
 class ProjectionRegionView(QWidget):
@@ -908,6 +917,197 @@ class ProjectionRegionView(QWidget):
             "extent": (w, e, s, n),
             "custom_shapefiles": [s["path"] for s in self._custom_shapefiles],
         })
+
+    def to_spec(self) -> RegionViewSpec:
+        """Export current view state to a validated RegionViewSpec Pydantic model."""
+        scale_map = {"110m (Coarse)": "110m", "50m (Medium)": "50m", "10m (High-Res)": "10m"}
+        chosen_scale = scale_map.get(self.combo_scale.currentText(), "50m")
+
+        border_style_map = {"Dashed (--)": "--", "Solid (-)": "-", "Dotted (:)": ":"}
+        b_style = border_style_map.get(self.combo_border_style.currentText(), "--")
+        g_style = border_style_map.get(self.combo_linestyle.currentText(), "--")
+
+        features_spec = FeaturesSpec(
+            scale=chosen_scale,
+            coastlines=FeatureLayerSpec(
+                enabled=self.chk_coast.isChecked(),
+                color=self._coast_color,
+                linewidth=self.spin_coast_width.value(),
+                linestyle="-",
+                custom_shapefile=Path(self._custom_shp_coast) if self._custom_shp_coast else None,
+            ),
+            borders=FeatureLayerSpec(
+                enabled=self.chk_borders.isChecked(),
+                color=self._border_color,
+                linewidth=0.8,
+                linestyle=b_style,
+                custom_shapefile=Path(self._custom_shp_borders) if self._custom_shp_borders else None,
+            ),
+            states=FeatureLayerSpec(
+                enabled=self.chk_states.isChecked(),
+                color=self._state_color,
+                linewidth=self.spin_state_width.value(),
+                linestyle=":",
+                custom_shapefile=Path(self._custom_shp_states) if self._custom_shp_states else None,
+            ),
+            rivers=FeatureLayerSpec(
+                enabled=self.chk_rivers.isChecked(),
+                color=self._river_color,
+                linewidth=self.spin_river_width.value(),
+                linestyle="-",
+                custom_shapefile=Path(self._custom_shp_rivers) if self._custom_shp_rivers else None,
+            ),
+            lakes=FeatureLayerSpec(
+                enabled=self.chk_lakes.isChecked(),
+                color=self._lake_color,
+                linewidth=self.spin_lake_width.value(),
+                linestyle="-",
+                custom_shapefile=Path(self._custom_shp_lakes) if self._custom_shp_lakes else None,
+            ),
+        )
+
+        custom_shps = [
+            CustomShapefileSpec(
+                path=Path(s["path"]),
+                name=s.get("name", Path(s["path"]).name),
+                enabled=s.get("enabled", True),
+                color=self._shp_color,
+                linewidth=self.spin_shp_width.value(),
+            )
+            for s in self._custom_shapefiles
+        ]
+
+        graticules_spec = GraticuleSpec(
+            enabled=self.chk_gridlines.isChecked(),
+            draw_labels=self.chk_labels.isChecked(),
+            linestyle=g_style,
+            lon_step=self.spin_lon_step.value(),
+            lat_step=self.spin_lat_step.value(),
+            color=self._grid_color,
+            alpha=self.slider_grid_alpha.value() / 100.0,
+        )
+
+        return RegionViewSpec(
+            category=self.combo_category.currentText(),
+            preset_name=self.combo_preset.currentText(),
+            extent=ExtentSpec(
+                west=self.spin_west.value(),
+                east=self.spin_east.value(),
+                south=self.spin_south.value(),
+                north=self.spin_north.value(),
+            ),
+            projection=ProjectionSpec(
+                crs_id=self._current_crs_id,
+                central_longitude=self.spin_central_lon.value(),
+                central_latitude=self.spin_central_lat.value(),
+                standard_parallels=(self.spin_sp1.value(), self.spin_sp2.value()),
+            ),
+            features=features_spec,
+            custom_shapefiles=custom_shps,
+            graticules=graticules_spec,
+        )
+
+    def apply_spec(self, spec: RegionViewSpec) -> None:
+        """Apply a validated RegionViewSpec to configure UI widgets and redraw."""
+        # 1. Category & Preset
+        cat_idx = self.combo_category.findText(spec.category)
+        if cat_idx >= 0:
+            self.combo_category.blockSignals(True)
+            self.combo_category.setCurrentIndex(cat_idx)
+            self._populate_region_combo()
+            self.combo_category.blockSignals(False)
+
+        preset_idx = self.combo_preset.findText(spec.preset_name)
+        if preset_idx >= 0:
+            self.combo_preset.blockSignals(True)
+            self.combo_preset.setCurrentIndex(preset_idx)
+            self.combo_preset.blockSignals(False)
+
+        # 2. Extent
+        self.spin_west.blockSignals(True)
+        self.spin_east.blockSignals(True)
+        self.spin_south.blockSignals(True)
+        self.spin_north.blockSignals(True)
+        self.spin_west.setValue(spec.extent.west)
+        self.spin_east.setValue(spec.extent.east)
+        self.spin_south.setValue(spec.extent.south)
+        self.spin_north.setValue(spec.extent.north)
+        self.spin_west.blockSignals(False)
+        self.spin_east.blockSignals(False)
+        self.spin_south.blockSignals(False)
+        self.spin_north.blockSignals(False)
+
+        # 3. Projection
+        self._current_crs_id = spec.projection.crs_id
+        for cid, btn in self._card_buttons.items():
+            is_active = (cid == self._current_crs_id)
+            btn.setChecked(is_active)
+            btn.setProperty("activeCard", is_active)
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
+
+        self.spin_central_lon.blockSignals(True)
+        self.spin_central_lat.blockSignals(True)
+        self.spin_sp1.blockSignals(True)
+        self.spin_sp2.blockSignals(True)
+        self.spin_central_lon.setValue(spec.projection.central_longitude)
+        self.spin_central_lat.setValue(spec.projection.central_latitude)
+        self.spin_sp1.setValue(spec.projection.standard_parallels[0])
+        self.spin_sp2.setValue(spec.projection.standard_parallels[1])
+        self.spin_central_lon.blockSignals(False)
+        self.spin_central_lat.blockSignals(False)
+        self.spin_sp1.blockSignals(False)
+        self.spin_sp2.blockSignals(False)
+
+        # 4. Features
+        scale_rev_map = {"110m": 0, "50m": 1, "10m": 2}
+        self.combo_scale.setCurrentIndex(scale_rev_map.get(spec.features.scale, 1))
+
+        self.chk_coast.setChecked(spec.features.coastlines.enabled)
+        self.spin_coast_width.setValue(spec.features.coastlines.linewidth)
+        self._coast_color = spec.features.coastlines.color
+        self._custom_shp_coast = str(spec.features.coastlines.custom_shapefile) if spec.features.coastlines.custom_shapefile else None
+
+        self.chk_borders.setChecked(spec.features.borders.enabled)
+        self._border_color = spec.features.borders.color
+        self._custom_shp_borders = str(spec.features.borders.custom_shapefile) if spec.features.borders.custom_shapefile else None
+
+        self.chk_states.setChecked(spec.features.states.enabled)
+        self.spin_state_width.setValue(spec.features.states.linewidth)
+        self._state_color = spec.features.states.color
+        self._custom_shp_states = str(spec.features.states.custom_shapefile) if spec.features.states.custom_shapefile else None
+
+        self.chk_rivers.setChecked(spec.features.rivers.enabled)
+        self.spin_river_width.setValue(spec.features.rivers.linewidth)
+        self._river_color = spec.features.rivers.color
+        self._custom_shp_rivers = str(spec.features.rivers.custom_shapefile) if spec.features.rivers.custom_shapefile else None
+
+        self.chk_lakes.setChecked(spec.features.lakes.enabled)
+        self.spin_lake_width.setValue(spec.features.lakes.linewidth)
+        self._lake_color = spec.features.lakes.color
+        self._custom_shp_lakes = str(spec.features.lakes.custom_shapefile) if spec.features.lakes.custom_shapefile else None
+
+        # 5. Custom shapefiles
+        self.list_shapefiles.clear()
+        self._custom_shapefiles = []
+        for s in spec.custom_shapefiles:
+            p_str = str(s.path)
+            self._custom_shapefiles.append({"path": p_str, "name": s.name or Path(p_str).name, "enabled": s.enabled})
+            item = QListWidgetItem(f"✓ {s.name or Path(p_str).name}")
+            item.setData(Qt.ItemDataRole.UserRole, p_str)
+            self.list_shapefiles.addItem(item)
+            self._shp_color = s.color
+            self.spin_shp_width.setValue(s.linewidth)
+
+        # 6. Graticules
+        self.chk_gridlines.setChecked(spec.graticules.enabled)
+        self.chk_labels.setChecked(spec.graticules.draw_labels)
+        self.spin_lon_step.setValue(spec.graticules.lon_step)
+        self.spin_lat_step.setValue(spec.graticules.lat_step)
+        self._grid_color = spec.graticules.color
+        self.slider_grid_alpha.setValue(int(spec.graticules.alpha * 100))
+
+        self.apply_projection()
 
 
 # Backward compatibility alias
