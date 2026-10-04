@@ -1,21 +1,18 @@
-"""Stateless execution engine for xotplot, subdivided into plotting and io subsystems."""
+"""Plotting subsystem of the headless execution engine."""
 
-from xotplot.engine.io import (
-    DatasetRegistry,
-    extract_metadata,
-    load_grib2_dataset,
-    open_dataset,
-)
-from xotplot.engine.plotting import (
-    build_crs,
+from xotplot.engine.plotting.cartopy_features import (
     clear_cartopy_cache,
     download_feature,
-    execute_render_job,
-    figure_to_png_bytes,
     get_cached_feature,
     get_cartopy_data_dir,
     is_feature_cached,
     load_shapefile_geometries,
+    set_cartopy_data_dir,
+)
+from xotplot.engine.plotting.renderer import (
+    build_crs,
+    execute_render_job,
+    figure_to_png_bytes,
     render_colormap_transfer_plot,
     render_diagnostic_plot,
     render_layer_composite,
@@ -23,18 +20,9 @@ from xotplot.engine.plotting import (
     render_synoptic_field,
     render_variable_cross_section,
     render_variable_profile,
-    set_cartopy_data_dir,
-)
-from xotplot.engine.process import (
-    EngineClient,
-    EngineProcessPool,
-    get_engine_client,
-    get_engine_pool,
-    get_qt_engine_bridge,
 )
 
 __all__ = [
-    # Cartopy & shapefile cache
     "clear_cartopy_cache",
     "download_feature",
     "get_cached_feature",
@@ -42,13 +30,6 @@ __all__ = [
     "is_feature_cached",
     "load_shapefile_geometries",
     "set_cartopy_data_dir",
-    # Process Pool & Bridge
-    "EngineClient",
-    "EngineProcessPool",
-    "get_engine_client",
-    "get_engine_pool",
-    "get_qt_engine_bridge",
-    # Plotting routines
     "build_crs",
     "execute_render_job",
     "figure_to_png_bytes",
@@ -59,9 +40,4 @@ __all__ = [
     "render_variable_cross_section",
     "render_diagnostic_plot",
     "render_colormap_transfer_plot",
-    # IO routines
-    "DatasetRegistry",
-    "extract_metadata",
-    "load_grib2_dataset",
-    "open_dataset",
 ]

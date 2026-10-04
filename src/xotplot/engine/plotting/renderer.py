@@ -28,7 +28,7 @@ from xotplot.constants import (
     DEFAULT_PLOT_BG_COLOR,
     DEFAULT_PLOT_FG_COLOR,
 )
-from xotplot.engine.cartopy_features import (
+from xotplot.engine.plotting.cartopy_features import (
     get_cached_feature,
     load_shapefile_geometries,
 )

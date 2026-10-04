@@ -170,3 +170,54 @@ class PlotSpec(BaseModel):
         p = Path(path)
         content = p.read_text(encoding="utf-8")
         return cls.model_validate_json(content)
+
+
+# =============================================================================
+# Unified Dataset & IO Ingestion Schemas
+# =============================================================================
+SupportedFormat = Literal["auto", "grib2", "netcdf4", "zarr"]
+
+
+class OpenDatasetRequest(BaseModel):
+    """Request sent across IPC to open and ingest a dataset inside the Engine."""
+
+    file_path: str
+    format_override: SupportedFormat = "auto"
+    dataset_id: Optional[str] = None
+
+
+class VariableInfo(BaseModel):
+    """Metadata descriptor for a single data variable."""
+
+    name: str
+    dimensions: List[str]
+    shape: List[int]
+    dtype: str
+    units: Optional[str] = None
+    long_name: Optional[str] = None
+    standard_name: Optional[str] = None
+    level_type: Optional[str] = None
+
+
+class CoordinateInfo(BaseModel):
+    """Metadata descriptor for a canonical coordinate axis."""
+
+    name: str  # 'lat', 'lon', 'time', 'level'
+    dimensions: List[str]
+    size: int
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
+    units: Optional[str] = None
+    discrete_values: Optional[List[float]] = None
+
+
+class DatasetMetadata(BaseModel):
+    """Complete serialized metadata returned by Engine to GUI/TUI/CLI."""
+
+    dataset_id: str
+    file_path: str
+    detected_format: str
+    variables: Dict[str, VariableInfo]
+    coordinates: Dict[str, CoordinateInfo]
+    global_attrs: Dict[str, Any] = Field(default_factory=dict)
+

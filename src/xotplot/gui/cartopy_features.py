@@ -1,6 +1,6 @@
 """Backward-compatible re-export of Cartopy features from xotplot.engine.cartopy_features."""
 
-from xotplot.engine.cartopy_features import (
+from xotplot.engine.plotting.cartopy_features import (
     clear_cartopy_cache,
     download_feature,
     get_cached_feature,

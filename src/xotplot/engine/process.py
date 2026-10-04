@@ -18,10 +18,15 @@ from xotplot.constants import DEFAULT_ENGINE_WORKERS
 
 
 def _engine_worker_main(conn: Connection) -> None:
-    """Entry point for isolated plotting engine child process."""
+    """Entry point for isolated plotting & IO engine child process."""
     import matplotlib
     matplotlib.use("Agg")
-    from xotplot.engine.renderer import execute_render_job
+    from xotplot.engine.plotting.renderer import execute_render_job
+    from xotplot.engine.io.registry import DatasetRegistry
+    from xotplot.engine.io import open_dataset
+    from xotplot.spec import OpenDatasetRequest
+
+    registry = DatasetRegistry()
 
     while True:
         try:
@@ -34,9 +39,46 @@ def _engine_worker_main(conn: Connection) -> None:
 
         cmd = msg.get("command")
         if cmd == "shutdown":
+            registry.close_all()
             break
 
         job_id = msg.get("job_id", "")
+
+        # Handle IO commands
+        if cmd == "io_open":
+            try:
+                raw_req = msg.get("request", {})
+                req = OpenDatasetRequest.model_validate(raw_req)
+                _, metadata = open_dataset(req, registry=registry)
+                conn.send({
+                    "job_id": job_id,
+                    "success": True,
+                    "metadata": metadata.model_dump(),
+                })
+            except Exception as exc:
+                conn.send({
+                    "job_id": job_id,
+                    "success": False,
+                    "error": str(exc),
+                })
+            continue
+
+        if cmd == "io_close":
+            ds_id = msg.get("dataset_id", "")
+            registry.close(ds_id)
+            conn.send({"job_id": job_id, "success": True})
+            continue
+
+        if cmd == "io_set_active":
+            ds_id = msg.get("dataset_id", "")
+            try:
+                registry.set_active(ds_id)
+                conn.send({"job_id": job_id, "success": True})
+            except Exception as exc:
+                conn.send({"job_id": job_id, "success": False, "error": str(exc)})
+            continue
+
+        # Handle Rendering commands
         job_type = msg.get("job_type", "")
         params = msg.get("params", {})
         width = msg.get("width", 8.0)
@@ -221,6 +263,43 @@ class EngineProcessPool:
         if resp.get("success"):
             return resp["image_data"]
         raise RuntimeError(resp.get("error", "Plot engine render failed"))
+
+    def open_dataset_sync(
+        self,
+        file_path: str,
+        format_override: str = "auto",
+        dataset_id: Optional[str] = None,
+    ) -> Any:
+        """Synchronously open and ingest a dataset across the engine workers.
+
+        Returns:
+            DatasetMetadata instance describing loaded dataset.
+        """
+        from xotplot.spec import DatasetMetadata, OpenDatasetRequest
+
+        req = OpenDatasetRequest(
+            file_path=file_path,
+            format_override=format_override,  # type: ignore[arg-type]
+            dataset_id=dataset_id,
+        )
+        job_id = str(uuid.uuid4())
+        msg = {
+            "command": "io_open",
+            "job_id": job_id,
+            "request": req.model_dump(),
+        }
+
+        # Dispatch open to all workers so each process in pool has dataset registered
+        with self._lock:
+            meta = None
+            for slot in self._workers:
+                slot.conn.send(msg)
+                resp = slot.conn.recv()
+                if not resp.get("success"):
+                    raise RuntimeError(resp.get("error", "Failed to open dataset in engine worker"))
+                if meta is None:
+                    meta = DatasetMetadata.model_validate(resp["metadata"])
+            return meta
 
     @property
     def busy_count(self) -> int:

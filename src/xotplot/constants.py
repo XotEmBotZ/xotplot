@@ -213,3 +213,17 @@ VIEWPORT_DEBOUNCE_MS: int = 35
 PROJECTION_ACTIVE_BG: str = "#0284c7"
 PROJECTION_ACTIVE_FG: str = "#ffffff"
 PROJECTION_ACTIVE_BORDER: str = "#38bdf8"
+
+# =============================================================================
+# Unified IO & Canonical Coordinate Constants
+# =============================================================================
+CANONICAL_LAT_NAME: str = "lat"
+CANONICAL_LON_NAME: str = "lon"
+CANONICAL_TIME_NAME: str = "time"
+CANONICAL_LEVEL_NAME: str = "level"
+
+KNOWN_LAT_NAMES: tuple[str, ...] = ("latitude", "lat", "nav_lat", "y", "lat_0")
+KNOWN_LON_NAMES: tuple[str, ...] = ("longitude", "lon", "nav_lon", "x", "lon_0")
+KNOWN_TIME_NAMES: tuple[str, ...] = ("valid_time", "time", "forecast_time", "step")
+KNOWN_LEVEL_NAMES: tuple[str, ...] = ("isobaricInhPa", "level", "pressure", "plev", "isobaric")
+
