@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import numpy as np
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QButtonGroup,
     QCheckBox,
@@ -26,10 +26,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-import cartopy.crs as ccrs
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-
 from xotplot.constants import (
     ALL_REGIONS,
     CRS_CARDS,
@@ -43,9 +39,10 @@ from xotplot.constants import (
     DEFAULT_SHP_COLOR,
     DEFAULT_STATE_COLOR,
     REGION_CATEGORIES,
+    VIEWPORT_DEBOUNCE_MS,
 )
-from xotplot.engine import build_crs, render_region_plot
-from xotplot.gui.cartopy_features import is_feature_cached
+from xotplot.engine import get_qt_engine_bridge, is_feature_cached
+from xotplot.gui.engine_canvas import EngineCanvasWidget
 from xotplot.gui.preferences_dialog import CartopyPreferencesDialog
 from xotplot.spec import (
     CustomShapefileSpec,
@@ -89,6 +86,14 @@ class ProjectionRegionView(QWidget):
         self._custom_shp_rivers: Optional[str] = None
         self._custom_shp_lakes: Optional[str] = None
 
+        self._current_job_id: Optional[str] = None
+        self._debounce_timer = QTimer(self)
+        self._debounce_timer.setSingleShot(True)
+        self._debounce_timer.setInterval(VIEWPORT_DEBOUNCE_MS)
+        self._debounce_timer.timeout.connect(self.apply_projection)
+
+        self.engine_bridge = get_qt_engine_bridge()
+        self.engine_bridge.job_completed.connect(self._on_render_completed)
 
         self._init_ui()
         self._sync_feature_checkboxes_with_cache()
@@ -146,28 +151,28 @@ class ProjectionRegionView(QWidget):
         self.spin_west = QDoubleSpinBox()
         self.spin_west.setRange(-180.0, 180.0)
         self.spin_west.setValue(init_w)
-        self.spin_west.valueChanged.connect(self.apply_projection)
+        self.spin_west.valueChanged.connect(self.request_projection_update)
         bbox_grid.addWidget(self.spin_west, 0, 1)
 
         bbox_grid.addWidget(QLabel("East (Lon):"), 0, 2)
         self.spin_east = QDoubleSpinBox()
         self.spin_east.setRange(-180.0, 180.0)
         self.spin_east.setValue(init_e)
-        self.spin_east.valueChanged.connect(self.apply_projection)
+        self.spin_east.valueChanged.connect(self.request_projection_update)
         bbox_grid.addWidget(self.spin_east, 0, 3)
 
         bbox_grid.addWidget(QLabel("South (Lat):"), 1, 0)
         self.spin_south = QDoubleSpinBox()
         self.spin_south.setRange(-90.0, 90.0)
         self.spin_south.setValue(init_s)
-        self.spin_south.valueChanged.connect(self.apply_projection)
+        self.spin_south.valueChanged.connect(self.request_projection_update)
         bbox_grid.addWidget(self.spin_south, 1, 1)
 
         bbox_grid.addWidget(QLabel("North (Lat):"), 1, 2)
         self.spin_north = QDoubleSpinBox()
         self.spin_north.setRange(-90.0, 90.0)
         self.spin_north.setValue(init_n)
-        self.spin_north.valueChanged.connect(self.apply_projection)
+        self.spin_north.valueChanged.connect(self.request_projection_update)
         bbox_grid.addWidget(self.spin_north, 1, 3)
 
         extent_layout.addLayout(bbox_grid)
@@ -214,7 +219,7 @@ class ProjectionRegionView(QWidget):
         self.spin_central_lon.setRange(-180.0, 180.0)
         self.spin_central_lon.setSingleStep(5.0)
         self.spin_central_lon.setValue(82.5)
-        self.spin_central_lon.valueChanged.connect(self.apply_projection)
+        self.spin_central_lon.valueChanged.connect(self.request_projection_update)
         param_layout.addWidget(self.spin_central_lon, 0, 1)
 
         param_layout.addWidget(QLabel("Central Latitude:"), 1, 0)
@@ -222,7 +227,7 @@ class ProjectionRegionView(QWidget):
         self.spin_central_lat.setRange(-90.0, 90.0)
         self.spin_central_lat.setSingleStep(5.0)
         self.spin_central_lat.setValue(22.0)
-        self.spin_central_lat.valueChanged.connect(self.apply_projection)
+        self.spin_central_lat.valueChanged.connect(self.request_projection_update)
         param_layout.addWidget(self.spin_central_lat, 1, 1)
 
         self.lbl_sp1 = QLabel("Std Parallel 1:")
@@ -230,7 +235,7 @@ class ProjectionRegionView(QWidget):
         self.spin_sp1.setRange(-90.0, 90.0)
         self.spin_sp1.setSingleStep(1.0)
         self.spin_sp1.setValue(12.0)
-        self.spin_sp1.valueChanged.connect(self.apply_projection)
+        self.spin_sp1.valueChanged.connect(self.request_projection_update)
         param_layout.addWidget(self.lbl_sp1, 2, 0)
         param_layout.addWidget(self.spin_sp1, 2, 1)
 
@@ -239,7 +244,7 @@ class ProjectionRegionView(QWidget):
         self.spin_sp2.setRange(-90.0, 90.0)
         self.spin_sp2.setSingleStep(1.0)
         self.spin_sp2.setValue(28.0)
-        self.spin_sp2.valueChanged.connect(self.apply_projection)
+        self.spin_sp2.valueChanged.connect(self.request_projection_update)
         param_layout.addWidget(self.lbl_sp2, 3, 0)
         param_layout.addWidget(self.spin_sp2, 3, 1)
 
@@ -275,7 +280,7 @@ class ProjectionRegionView(QWidget):
         self.spin_coast_width.setRange(0.2, 5.0)
         self.spin_coast_width.setSingleStep(0.2)
         self.spin_coast_width.setValue(1.0)
-        self.spin_coast_width.valueChanged.connect(self.apply_projection)
+        self.spin_coast_width.valueChanged.connect(self.request_projection_update)
         feat_layout.addWidget(self.spin_coast_width, 2, 1)
 
         coast_btn_layout = QHBoxLayout()
@@ -319,7 +324,7 @@ class ProjectionRegionView(QWidget):
         self.spin_state_width = QDoubleSpinBox()
         self.spin_state_width.setRange(0.2, 3.0)
         self.spin_state_width.setValue(0.5)
-        self.spin_state_width.valueChanged.connect(self.apply_projection)
+        self.spin_state_width.valueChanged.connect(self.request_projection_update)
         feat_layout.addWidget(self.spin_state_width, 4, 1)
 
         state_btn_layout = QHBoxLayout()
@@ -342,7 +347,7 @@ class ProjectionRegionView(QWidget):
         self.spin_river_width = QDoubleSpinBox()
         self.spin_river_width.setRange(0.2, 3.0)
         self.spin_river_width.setValue(0.6)
-        self.spin_river_width.valueChanged.connect(self.apply_projection)
+        self.spin_river_width.valueChanged.connect(self.request_projection_update)
         feat_layout.addWidget(self.spin_river_width, 5, 1)
 
         river_btn_layout = QHBoxLayout()
@@ -365,7 +370,7 @@ class ProjectionRegionView(QWidget):
         self.spin_lake_width = QDoubleSpinBox()
         self.spin_lake_width.setRange(0.2, 3.0)
         self.spin_lake_width.setValue(0.6)
-        self.spin_lake_width.valueChanged.connect(self.apply_projection)
+        self.spin_lake_width.valueChanged.connect(self.request_projection_update)
         feat_layout.addWidget(self.spin_lake_width, 6, 1)
 
         lake_btn_layout = QHBoxLayout()
@@ -409,7 +414,7 @@ class ProjectionRegionView(QWidget):
         self.spin_shp_width = QDoubleSpinBox()
         self.spin_shp_width.setRange(0.2, 6.0)
         self.spin_shp_width.setValue(1.2)
-        self.spin_shp_width.valueChanged.connect(self.apply_projection)
+        self.spin_shp_width.valueChanged.connect(self.request_projection_update)
         shp_opts.addWidget(self.spin_shp_width)
 
         self.btn_shp_color = QPushButton("Pick Color")
@@ -447,14 +452,14 @@ class ProjectionRegionView(QWidget):
         self.spin_lon_step = QDoubleSpinBox()
         self.spin_lon_step.setRange(0.5, 60.0)
         self.spin_lon_step.setValue(5.0)
-        self.spin_lon_step.valueChanged.connect(self.apply_projection)
+        self.spin_lon_step.valueChanged.connect(self.request_projection_update)
         grat_layout.addWidget(self.spin_lon_step, 3, 1)
 
         grat_layout.addWidget(QLabel("Lat Step (°):"), 4, 0)
         self.spin_lat_step = QDoubleSpinBox()
         self.spin_lat_step.setRange(0.5, 60.0)
         self.spin_lat_step.setValue(5.0)
-        self.spin_lat_step.valueChanged.connect(self.apply_projection)
+        self.spin_lat_step.valueChanged.connect(self.request_projection_update)
         grat_layout.addWidget(self.spin_lat_step, 4, 1)
 
         grat_layout.addWidget(QLabel("Grid Color & Alpha:"), 5, 0)
@@ -466,7 +471,7 @@ class ProjectionRegionView(QWidget):
         self.slider_grid_alpha = QSlider(Qt.Orientation.Horizontal)
         self.slider_grid_alpha.setRange(10, 100)
         self.slider_grid_alpha.setValue(60)
-        self.slider_grid_alpha.valueChanged.connect(self.apply_projection)
+        self.slider_grid_alpha.valueChanged.connect(self.request_projection_update)
         grat_tools.addWidget(self.slider_grid_alpha)
         grat_layout.addLayout(grat_tools, 5, 1)
 
@@ -481,9 +486,9 @@ class ProjectionRegionView(QWidget):
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(4)
 
-        self.figure = Figure(figsize=(8.0, 6.0), dpi=100)
-        self.canvas = FigureCanvasQTAgg(self.figure)
-        right_layout.addWidget(self.canvas)
+        self.canvas_widget = EngineCanvasWidget(right_container, width=8.0, height=6.0, dpi=100)
+        self.canvas = self.canvas_widget
+        right_layout.addWidget(self.canvas_widget)
 
         self.lbl_info = QLabel("Cartopy Projection Mesh Ready")
         self.lbl_info.setStyleSheet("color: #87929a; font-size: 10px; padding: 2px 4px;")
@@ -678,11 +683,23 @@ class ProjectionRegionView(QWidget):
         self.dark_mode = False
         self.apply_projection()
 
+    def request_projection_update(self) -> None:
+        """Debounce rapid spinbox and slider updates before dispatching render to engine."""
+        self._debounce_timer.start()
+
     def apply_projection(self) -> None:
-        """Render the map projection canvas by passing validated Pydantic spec to the engine."""
+        """Render the map projection canvas by delegating to the separate engine process."""
+        self._debounce_timer.stop()
         spec = self.to_spec()
-        render_region_plot(spec, figure=self.figure)
-        self.canvas.draw_idle()
+        self._current_job_id = self.engine_bridge.submit(
+            "region",
+            spec.model_dump(mode="json"),
+            channel="region",
+            width=8.0,
+            height=6.0,
+            dpi=100,
+            cancel_previous=True,
+        )
 
         w, e, s, n = spec.extent.as_tuple()
         self.lbl_info.setText(
@@ -698,6 +715,10 @@ class ProjectionRegionView(QWidget):
             "extent": (w, e, s, n),
             "custom_shapefiles": [str(s.path) for s in spec.custom_shapefiles],
         })
+
+    def _on_render_completed(self, job_id: str, image_data: bytes) -> None:
+        if job_id == self._current_job_id:
+            self.canvas_widget.set_image_bytes(image_data)
 
     def to_spec(self) -> RegionViewSpec:
         """Export current view state to a validated RegionViewSpec Pydantic model."""

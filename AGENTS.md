@@ -9,3 +9,6 @@ The coding / style guide of this project is FAIL-FAST, SIMPLE-ONLY, LEAST-CODE-F
 
 All default styling colors, assumptions, parameters, and constants must be placed in `src/xotplot/constants.py` rather than hardcoded in individual widget files. All plot canvases must strictly remain in light theme (`#ffffff` canvas background).
 
+All plot related code must be in engine module, gui/tui/cli will just communicate with this engine module to get the things done. Engine must be a different process itself and must not interfear with execution of the GUI/TUI/CLI so that all stays resposnsive irrespective of what engine is doing.
+
+NEVER COMMIT UNLESS I EXPECITLY STATE TO.

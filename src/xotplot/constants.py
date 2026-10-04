@@ -195,3 +195,14 @@ DEFAULT_SHP_COLOR: str = "#e11d48"
 
 # Default Path Assumptions
 DEFAULT_CARTOPY_CACHE_DIR: Path = Path.home() / ".local/share/cartopy"
+
+# =============================================================================
+# Engine Process & Concurrency Assumptions
+# =============================================================================
+import os
+DEFAULT_ENGINE_WORKERS: int = min(4, max(2, os.cpu_count() or 2))
+STATUS_IDLE_TEXT: str = "● IDLE"
+STATUS_IDLE_COLOR: str = "#10b981"
+STATUS_BUSY_TEXT: str = "● BUSY"
+STATUS_BUSY_COLOR: str = "#f59e0b"
+VIEWPORT_DEBOUNCE_MS: int = 35

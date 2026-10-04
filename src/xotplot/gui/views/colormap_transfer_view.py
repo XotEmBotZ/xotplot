@@ -37,6 +37,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from xotplot.engine import render_colormap_transfer_plot
 from xotplot.gui.mpl_canvas import MplCanvasWidget
 from xotplot.gui.theme import get_theme_qss
 
@@ -519,100 +520,25 @@ class ColormapTransferView(QWidget):
         vmin = self.spin_min.value()
         vmax = self.spin_max.value()
 
-        # Canvas drawing
-        fig = self.canvas_widget.figure
-        fig.clear()
-
-        # Create two subplots: Top = Histogram + Transfer Curve, Bottom = 2D Sample Swatch + Colorbar
-        gs = fig.add_gridspec(2, 1, height_ratios=[1.6, 1.0], hspace=0.35)
-        ax_hist = fig.add_subplot(gs[0])
-        ax_swatch = fig.add_subplot(gs[1])
-
-        # 1. Histogram of data distribution
-        counts, bin_edges = np.histogram(self._data_sample, bins=45)
-        bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
-        norm_counts = counts / (np.max(counts) if np.max(counts) > 0 else 1)
-
-        bar_color = "#38bdf8" if self._dark_mode else "#0284c7"
-        ax_hist.bar(
-            bin_centers,
-            norm_counts,
-            width=(bin_edges[1] - bin_edges[0]) * 0.9,
-            alpha=0.35,
-            color=bar_color,
-            label="Data Frequency",
-        )
-
-        # 2. Transfer function curve
-        x_norm = np.linspace(0.0, 1.0, 200)
-        x_data = vmin + x_norm * (vmax - vmin)
-
-        if "Sigmoid" in curve_type:
-            k = 10.0 * gamma
-            x_shifted = x_norm - 0.5 - bias
-            y_transfer = 1.0 / (1.0 + np.exp(-k * x_shifted))
-            y_transfer = (y_transfer - y_transfer.min()) / (y_transfer.max() - y_transfer.min() + 1e-9)
-        elif "Step" in curve_type:
-            n_steps = max(3, int(np.round((vmax - vmin) / max(0.1, self.spin_step.value()))))
-            y_transfer = np.floor(x_norm * n_steps) / n_steps
-        else:
-            # Linear / Gamma power-law with center bias
-            x_adj = np.clip(x_norm + bias, 0.0, 1.0)
-            y_transfer = np.power(x_adj, gamma)
-
-        ax_hist.plot(
-            x_data,
-            y_transfer,
-            color="#f59e0b" if self._dark_mode else "#d97706",
-            linewidth=2.2,
-            label="Transfer Function T(x)",
-        )
-
-        # Vertical guide lines for vmin, vmax
-        ax_hist.axvline(vmin, color="#ef4444", linestyle=":", alpha=0.7, label=f"vmin ({vmin:g})")
-        ax_hist.axvline(vmax, color="#10b981", linestyle=":", alpha=0.7, label=f"vmax ({vmax:g})")
-        if "TwoSlopeNorm" in self.combo_norm.currentText():
-            ax_hist.axvline(self.spin_center.value(), color="#a855f7", linestyle="--", alpha=0.7, label="vcenter")
-
-        ax_hist.set_title(
-            f"Histogram & Transfer Curve [{self.combo_curve.currentText()} γ={gamma:.2f}]",
-            fontsize=10,
-            pad=6,
-        )
-        ax_hist.set_ylabel("Normalized Response / Density", fontsize=8)
-        ax_hist.set_ylim(-0.05, 1.1)
-        ax_hist.set_xlim(min(vmin - 5, float(self._data_sample.min())), max(vmax + 5, float(self._data_sample.max())))
-        ax_hist.legend(loc="upper left", fontsize=7, framealpha=0.4)
-
-        # 3. 2D Synthetic Sample Swatch mapped with colormap & norm
-        x_grid = np.linspace(vmin, vmax, 120)
-        y_grid = np.linspace(-1, 1, 30)
-        X, Y = np.meshgrid(x_grid, y_grid)
-        Z = X + 0.15 * (vmax - vmin) * np.sin(Y * np.pi)
-
-        im = ax_swatch.pcolormesh(X, Y, Z, cmap=cmap, norm=norm, shading="auto")
-        ax_swatch.set_yticks([])
-        ax_swatch.set_xlabel("Physical Variable Domain", fontsize=8)
-
-        # 4. Colorbar customization options
+        # Delegate rendering to engine
         orientation = "horizontal" if self.radio_horiz.isChecked() else "vertical"
-        shrink_val = self.spin_shrink.value()
-        aspect_val = self.spin_aspect.value()
-        cbar_lbl = self.txt_cbar_label.text()
-
-        fg_color = "#dfe2ef" if self._dark_mode else "#0f172a"
-
-        cbar = fig.colorbar(
-            im,
-            ax=ax_swatch,
+        render_colormap_transfer_plot(
+            vmin=vmin,
+            vmax=vmax,
+            vcenter=self.spin_center.value(),
+            curve_type=curve_type,
+            gamma=gamma,
+            bias=bias,
+            step=self.spin_step.value(),
+            cmap_name=cmap_name,
+            norm_name=self.combo_norm.currentText(),
             orientation=orientation,
-            shrink=shrink_val,
-            aspect=aspect_val,
-            pad=0.25 if orientation == "horizontal" else 0.05,
+            shrink=self.spin_shrink.value(),
+            aspect=self.spin_aspect.value(),
+            cbar_label=self.txt_cbar_label.text(),
+            data_sample=self._data_sample,
+            figure=self.canvas_widget.figure,
         )
-        cbar.set_label(cbar_lbl, fontsize=8, color=fg_color)
-        cbar.ax.tick_params(colors=fg_color, labelsize=7)
-
         self.canvas_widget.apply_theme(self._dark_mode)
         self.canvas_widget.canvas.draw_idle()
 

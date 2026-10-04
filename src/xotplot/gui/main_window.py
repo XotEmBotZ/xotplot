@@ -17,7 +17,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from xotplot.constants import VIEW_NAMES
+from xotplot.constants import (
+    STATUS_BUSY_COLOR,
+    STATUS_BUSY_TEXT,
+    STATUS_IDLE_COLOR,
+    STATUS_IDLE_TEXT,
+    VIEW_NAMES,
+)
+from xotplot.engine import get_qt_engine_bridge
 from xotplot.gui.theme import get_theme_qss
 from xotplot.gui.views import (
     CliBatchEngineView,
@@ -220,14 +227,26 @@ class MainWindow(QMainWindow):
         self._lbl_val = QLabel("VALUE: 998.42 hPa [MSLP]")
         self._lbl_proj = QLabel("PROJECTION: LambertConformal")
         self._lbl_fps = QLabel("FPS: 59.8 | MEM: 1842 MB")
-        self._lbl_idle = QLabel("● IDLE")
-        self._lbl_idle.setStyleSheet("color: #10b981; font-weight: bold;")
+        self._lbl_idle = QLabel(STATUS_IDLE_TEXT)
+        self._lbl_idle.setStyleSheet(f"color: {STATUS_IDLE_COLOR}; font-weight: bold;")
 
         self._status_bar.addWidget(self._lbl_cursor)
         self._status_bar.addWidget(self._lbl_val)
         self._status_bar.addWidget(self._lbl_proj)
         self._status_bar.addPermanentWidget(self._lbl_fps)
         self._status_bar.addPermanentWidget(self._lbl_idle)
+
+        self._engine_bridge = get_qt_engine_bridge()
+        self._engine_bridge.status_changed.connect(self._on_engine_status_changed)
+
+    def _on_engine_status_changed(self, is_busy: bool, active_jobs: int) -> None:
+        if is_busy:
+            text = f"{STATUS_BUSY_TEXT} ({active_jobs} active)"
+            self._lbl_idle.setText(text)
+            self._lbl_idle.setStyleSheet(f"color: {STATUS_BUSY_COLOR}; font-weight: bold;")
+        else:
+            self._lbl_idle.setText(STATUS_IDLE_TEXT)
+            self._lbl_idle.setStyleSheet(f"color: {STATUS_IDLE_COLOR}; font-weight: bold;")
 
     def _on_view_changed(self, index: int) -> None:
         if 0 <= index < len(self._views_list):

@@ -26,9 +26,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-from matplotlib.patches import Polygon
+from xotplot.engine import get_qt_engine_bridge
+from xotplot.gui.engine_canvas import EngineCanvasWidget
 
 
 class LayerStackView(QWidget):
@@ -39,6 +38,9 @@ class LayerStackView(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.dark_mode = True
+        self._current_job_id: Optional[str] = None
+        self.engine_bridge = get_qt_engine_bridge()
+        self.engine_bridge.job_completed.connect(self._on_render_completed)
 
         # Layer definition schema:
         # id, name, visible, locked, type ('vector', 'contour', 'raster'), fill_mode, color, alpha, stroke_width, contour_intervals
@@ -279,9 +281,9 @@ class LayerStackView(QWidget):
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(4)
 
-        self.figure = Figure(figsize=(8.0, 6.0), dpi=100)
-        self.canvas = FigureCanvasQTAgg(self.figure)
-        right_layout.addWidget(self.canvas)
+        self.canvas_widget = EngineCanvasWidget(right_container, width=8.0, height=6.0, dpi=100)
+        self.canvas = self.canvas_widget
+        right_layout.addWidget(self.canvas_widget)
 
         self.lbl_status = QLabel("Composite Layer Stack Ready")
         self.lbl_status.setStyleSheet("color: #87929a; font-size: 10px; padding: 2px 4px;")
@@ -500,107 +502,22 @@ class LayerStackView(QWidget):
         self.render_composite()
 
     def render_composite(self) -> None:
-        """Render multi-layer composite overlay in Matplotlib according to stack order."""
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)
-
-        bg_color = "#ffffff"
-        fg_color = "#0f172a"
-        grid_color = "#cbd5e1"
-
-        self.figure.patch.set_facecolor(bg_color)
-        ax.set_facecolor(bg_color)
-        ax.tick_params(colors=fg_color, which="both")
-        for spine in ax.spines.values():
-            spine.set_color(fg_color)
-        ax.xaxis.label.set_color(fg_color)
-        ax.yaxis.label.set_color(fg_color)
-        ax.title.set_color(fg_color)
-        ax.grid(True, color=grid_color, linestyle="--", alpha=0.3)
-
-        # Base coordinate space: CONUS domain (-125 to -65 Lon, 24 to 50 Lat)
-        x = np.linspace(-125, -65, 100)
-        y = np.linspace(24, 50, 75)
-        X, Y = np.meshgrid(x, y)
-
-        # Draw layers from bottom (reversed list) to top
-        # Layers in table: row 0 is top of stack! So draw reversed(self._layers)
-        active_layers_count = 0
-        for z_idx, layer in enumerate(reversed(self._layers)):
-            if not layer.get("visible", True):
-                continue
-            active_layers_count += 1
-            zorder = z_idx + 1
-
-            l_type = layer.get("type", "vector")
-            color = layer.get("color", "#38bdf8")
-            alpha = layer.get("alpha", 0.7)
-            stroke_w = layer.get("stroke_width", 1.5)
-            fill_mode = layer.get("fill_mode", "Solid")
-            intervals = layer.get("contour_intervals", 5)
-
-            if "radar" in layer["id"] or l_type == "raster":
-                # Composite Radar Reflectivity mesh (dBZ)
-                R = 35.0 * np.exp(-((X + 95)**2 + (Y - 35)**2) / 30.0) + \
-                    48.0 * np.exp(-((X + 88)**2 + (Y - 38)**2) / 20.0) + \
-                    25.0 * np.exp(-((X + 102)**2 + (Y - 31)**2) / 45.0)
-                R = np.clip(R, 0, 75)
-                ax.contourf(X, Y, R, levels=np.linspace(15, 65, intervals + 1), cmap="gist_ncar", alpha=alpha, zorder=zorder)
-
-            elif "height" in layer["id"] or l_type == "contour":
-                # Geopotential Height Contours (dam)
-                Z = 570 - 0.7 * (Y - 24) + 10 * np.sin(np.radians(X * 3))
-                cs = ax.contour(X, Y, Z, levels=intervals, colors=color, linewidths=stroke_w, alpha=alpha, zorder=zorder)
-                ax.clabel(cs, inline=True, fontsize=8, fmt="%d dam")
-
-            elif "us_states" in layer["id"] or "state" in layer["name"].lower():
-                # US State Boundaries simplified polyline grid
-                state_lines = [
-                    [(-124, 42), (-117, 42), (-117, 32), (-114, 32)],  # West
-                    [(-104, 49), (-104, 41), (-96, 41), (-96, 49)],    # Northern Plains
-                    [(-100, 37), (-94, 37), (-94, 33), (-100, 33)],    # South Plains
-                    [(-88, 42), (-82, 42), (-82, 36), (-88, 36)],      # Midwest/East
-                    [(-80, 32), (-80, 25), (-82, 25), (-84, 30)],      # Florida/SE
-                ]
-                for line in state_lines:
-                    l_x, l_y = zip(*line)
-                    ax.plot(l_x, l_y, color=color, linewidth=stroke_w, alpha=alpha, linestyle="-", zorder=zorder)
-
-            elif "severe" in layer["id"] or "outlook" in layer["name"].lower():
-                # Severe Outlook polygonal risk swath
-                risk_poly = np.array([
-                    [-98, 32], [-93, 31], [-89, 34], [-91, 38], [-96, 40], [-100, 37]
-                ])
-                if fill_mode == "Solid":
-                    poly_patch = Polygon(risk_poly, closed=True, facecolor=color, edgecolor=color, alpha=alpha, linewidth=stroke_w, zorder=zorder)
-                elif fill_mode == "Hatched":
-                    poly_patch = Polygon(risk_poly, closed=True, facecolor="none", edgecolor=color, hatch="//", alpha=alpha, linewidth=stroke_w, zorder=zorder)
-                else:  # Outline Only
-                    poly_patch = Polygon(risk_poly, closed=True, facecolor="none", edgecolor=color, alpha=alpha, linewidth=stroke_w, zorder=zorder)
-                ax.add_patch(poly_patch)
-                ax.text(-95, 35, "SPC ENH", color=color, fontweight="bold", fontsize=9, zorder=zorder + 0.1)
-
-            elif "river" in layer["id"] or "river" in layer["name"].lower():
-                # Major Rivers (e.g. Mississippi river curve)
-                riv_y = np.linspace(29, 47, 40)
-                riv_x = -90 - 3 * np.sin((riv_y - 29) * 0.4) + 1.2 * np.cos((riv_y - 29) * 0.8)
-                ax.plot(riv_x, riv_y, color=color, linewidth=stroke_w, alpha=alpha, zorder=zorder)
-
-            else:
-                # Custom imported shapefile / vector feature
-                box_x = [-115, -105, -105, -115, -115]
-                box_y = [35, 35, 43, 43, 35]
-                if fill_mode == "Solid":
-                    ax.fill(box_x, box_y, color=color, alpha=alpha, zorder=zorder)
-                ax.plot(box_x, box_y, color=color, linewidth=stroke_w, alpha=alpha, zorder=zorder)
-
-        ax.set_xlim(-125, -65)
-        ax.set_ylim(24, 50)
-        ax.set_xlabel("Longitude (°W)", fontsize=9)
-        ax.set_ylabel("Latitude (°N)", fontsize=9)
-        ax.set_title(f"Composite Multi-Layer Overlay ({active_layers_count}/{len(self._layers)} visible)", fontsize=11)
-
-        self.lbl_status.setText(f"Rendered {active_layers_count} layers | Z-Stack Depth: {len(self._layers)}")
-        self.figure.tight_layout()
-        self.canvas.draw_idle()
+        """Render multi-layer composite overlay by delegating to engine process."""
+        self._current_job_id = self.engine_bridge.submit(
+            "composite",
+            {"layers": self._layers},
+            channel="composite",
+            width=8.0,
+            height=6.0,
+            dpi=100,
+            cancel_previous=True,
+        )
+        active_count = sum(1 for lyr in self._layers if lyr.get("visible", True))
+        self.lbl_status.setText(f"Rendering {active_count} layers | Z-Stack Depth: {len(self._layers)}")
         self.layer_changed.emit()
+
+    def _on_render_completed(self, job_id: str, image_data: bytes) -> None:
+        if job_id == self._current_job_id:
+            self.canvas_widget.set_image_bytes(image_data)
+            active_count = sum(1 for lyr in self._layers if lyr.get("visible", True))
+            self.lbl_status.setText(f"Rendered {active_count} layers | Z-Stack Depth: {len(self._layers)}")

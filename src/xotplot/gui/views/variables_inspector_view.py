@@ -26,6 +26,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from xotplot.engine import (
+    render_variable_cross_section,
+    render_variable_profile,
+)
 from xotplot.gui.mpl_canvas import MplCanvasWidget
 from xotplot.gui.theme import get_theme_qss
 
@@ -279,78 +283,22 @@ class VariablesInspectorView(QWidget):
         self.coordinate_changed.emit(coords)
 
     def _update_plot(self) -> None:
-        """Plot either a 1D vertical profile or 2D zonal cross-section based on reduction mode."""
-        self.canvas_widget.figure.clear()
-        ax = self.canvas_widget.figure.add_subplot(111)
-
-        pressure_levels = np.array([1000, 925, 850, 700, 600, 500, 400, 300, 250, 200, 150, 100])
-
+        """Plot either a 1D vertical profile or 2D zonal cross-section by delegating to engine."""
         if self._current_slice_mode in ["Direct Slice", "Vertical Integral"]:
-            # 1D Vertical Profile (Log-pressure axis)
-            if self._current_var == "gh":
-                values = 500.0 - 450.0 * np.log10(pressure_levels / 1000.0) + np.random.normal(0, 1.5, len(pressure_levels))
-                unit_label = "Geopotential Height [dam]"
-            elif self._current_var == "t":
-                values = 288.15 - 6.5 * (1000 - pressure_levels) / 100.0 + np.random.normal(0, 1.0, len(pressure_levels))
-                unit_label = "Temperature [K]"
-            elif self._current_var in ["u", "v"]:
-                values = 5.0 + 35.0 * np.sin((1000 - pressure_levels) / 700 * np.pi) + np.random.normal(0, 1.2, len(pressure_levels))
-                unit_label = f"{self._current_var.upper()}-Wind Component [m/s]"
-            else:
-                values = 14.0 * np.exp(-(1000 - pressure_levels) / 250.0) + np.random.normal(0, 0.2, len(pressure_levels))
-                unit_label = "Specific Humidity [g/kg]"
-
-            color = "#38bdf8" if self._dark_mode else "#0284c7"
-            ax.plot(values, pressure_levels, marker="o", linewidth=2.0, color=color, label=f"{self._current_var.upper()} Profile")
-            ax.set_yscale("log")
-            ax.set_ylim(1050, 90)
-            ax.set_yticks([1000, 850, 700, 500, 300, 200, 100])
-            ax.get_yaxis().set_major_formatter(lambda x, pos: f"{int(x)}")
-            ax.set_ylabel("Pressure [hPa]")
-            ax.set_xlabel(unit_label)
-            ax.set_title(f"1D Vertical Profile: {self._current_var.upper()} @ T+{self.time_spin.value()}h")
-            ax.legend(loc="upper right", framealpha=0.3)
-
+            render_variable_profile(
+                var=self._current_var,
+                time_step=self.time_spin.value(),
+                figure=self.canvas_widget.figure,
+            )
         else:
-            # 2D Zonal Cross-Section (Latitude vs Pressure)
-            lats = np.linspace(self.lat_min.value(), self.lat_max.value(), 30)
-            LAT, P = np.meshgrid(lats, pressure_levels)
-
-            if self._current_var == "gh":
-                Z = 500 - 400 * np.log10(P / 1000.0) - 0.4 * (LAT - 20)
-                label = "Geopotential Height [dam]"
-                cmap = "turbo"
-            elif self._current_var == "t":
-                Z = 288 - 0.05 * (1000 - P) - 0.5 * (LAT - 20)
-                label = "Temperature [K]"
-                cmap = "coolwarm"
-            elif self._current_var in ["u", "v"]:
-                Z = 45.0 * np.exp(-((LAT - 35) ** 2) / 150.0) * np.sin((1000 - P) / 800.0 * np.pi)
-                label = f"{self._current_var.upper()}-Wind [m/s]"
-                cmap = "plasma"
-            else:
-                Z = 12.0 * np.exp(-((LAT - 25) ** 2) / 250.0) * (P / 1000.0) ** 2
-                label = "Specific Humidity [g/kg]"
-                cmap = "viridis"
-
-            cf = ax.contourf(LAT, P, Z, levels=12, cmap=cmap)
-            cs = ax.contour(LAT, P, Z, levels=12, colors="#ffffff" if self._dark_mode else "#000000", linewidths=0.6, alpha=0.5)
-            ax.clabel(cs, inline=True, fontsize=7)
-
-            ax.set_yscale("log")
-            ax.set_ylim(1050, 90)
-            ax.set_yticks([1000, 850, 700, 500, 300, 200, 100])
-            ax.get_yaxis().set_major_formatter(lambda x, pos: f"{int(x)}")
-            ax.set_ylabel("Pressure [hPa]")
-            ax.set_xlabel("Latitude (°N)")
-            ax.set_title(f"2D Zonal Mean Cross-Section: {self._current_var.upper()} (T+{self.time_spin.value()}h)")
-
-            cbar = self.canvas_widget.figure.colorbar(cf, ax=ax, orientation="horizontal", pad=0.16, shrink=0.85)
-            cbar.set_label(label, fontsize=8, color="#dfe2ef" if self._dark_mode else "#0f172a")
-            cbar.ax.tick_params(colors="#dfe2ef" if self._dark_mode else "#0f172a", labelsize=8)
-
+            render_variable_cross_section(
+                var=self._current_var,
+                time_step=self.time_spin.value(),
+                lat_min=self.lat_min.value(),
+                lat_max=self.lat_max.value(),
+                figure=self.canvas_widget.figure,
+            )
         self.canvas_widget.apply_theme(self._dark_mode)
-        self.canvas_widget.figure.tight_layout()
         self.canvas_widget.canvas.draw_idle()
 
     def set_theme(self, dark_mode: bool) -> None:

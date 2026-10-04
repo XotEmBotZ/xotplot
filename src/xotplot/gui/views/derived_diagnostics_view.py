@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from xotplot.engine import render_diagnostic_plot
 from xotplot.gui.mpl_canvas import MplCanvasWidget
 
 
@@ -310,26 +311,13 @@ class DerivedDiagnosticsView(QWidget):
         f_min, f_max, f_mean = float(np.min(field)), float(np.max(field)), float(np.mean(field))
         self.stats_badge.setText(f"Min: {f_min:+.2f} | Max: {f_max:+.2f} | Mean: {f_mean:+.2f} {unit_str}")
 
-        fig = self.canvas_widget.figure
-        fig.clear()
-        ax = fig.add_subplot(111)
-
-        cf = ax.contourf(X, Y, field, levels=22, cmap=cmap, alpha=0.92)
-        contour_color = "#ffffff" if self._dark_mode else "#1e293b"
-        cs = ax.contour(X, Y, field, levels=11, colors=contour_color, linewidths=0.6, alpha=0.6)
-        ax.clabel(cs, inline=True, fontsize=7, fmt="%.1f")
-
-        ax.set_title(title, fontsize=10, pad=8)
-        ax.set_xlabel("Longitude (°W / °E)", fontsize=8)
-        ax.set_ylabel("Latitude (°N)", fontsize=8)
-
-        fg_color = "#dfe2ef" if self._dark_mode else "#0f172a"
-        cbar = fig.colorbar(cf, ax=ax, orientation="horizontal", pad=0.15, shrink=0.75)
-        cbar.set_label(f"{var_name} [{unit_str}]", fontsize=8, color=fg_color)
-        cbar.ax.tick_params(colors=fg_color, labelsize=7)
-
+        render_diagnostic_plot(
+            var_name=var_name,
+            unit_str=unit_str,
+            preset_name=preset_name,
+            figure=self.canvas_widget.figure,
+        )
         self.canvas_widget.apply_theme(self._dark_mode)
-        fig.tight_layout()
         self.canvas_widget.canvas.draw_idle()
 
         self.diagnostic_evaluated.emit(preset_name, f"Calculated {var_name} successfully")
